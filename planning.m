@@ -11,9 +11,8 @@ patients to do a between-patient analysis.
 
 Storage requirements:
 - number of bytes = 
-(N_spikes*3) * N_ch * N_ch * N_bands * precision * N_patients * 2 time
-definitions
-= 1e3 * 3 * 100 * 100 * 6 * 8 * 30 * 2 = 86 GB
+(N_spikes*2) * N_ch * N_s * N_freq * precision * N_patients 
+= 1e3 * 2 * 100 * 10* 512 * 8 * 30 = 245 GB
 
 
 Specific steps:
@@ -28,7 +27,7 @@ Specific steps:
     - I will randomly take N spikes and N not-a-spikes, where N = 1,000
 2) Download chunks of ieeg data
     - for the T seconds surrounding each spike and "not a spike", I will
-    download the data. T = 5 seconds, centered around the spike or 
+    download the data. T = 10 seconds, centered around the spike or 
     not-a-spike.
 3) Identify times that are before the spike and after the spike
     - Get the first spike in the sequence, find the peak, and then decide
