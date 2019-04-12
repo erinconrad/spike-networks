@@ -33,7 +33,7 @@ while n == 0
         n = 1;
         
     catch
-        fprintf('Failed to retrieve ieeg.org data, trying again...\n'); 
+        error('Failed to retrieve ieeg.org data, trying again...\n'); 
       
         n = 0; 
     end
