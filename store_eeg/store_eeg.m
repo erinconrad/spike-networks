@@ -120,7 +120,7 @@ for whichPt = 1:length(times)
                 fprintf('Did %d spikes of %s...\n',t,name);
                 count = 0;
                 f_index = f_index + 1;
-                save([pt_folder,fname,'_',f_index,'.mat'],'spike');
+                save([pt_folder,fname,'_',sprintf('%d',f_index),'.mat'],'spike');
             end
             
         end
