@@ -15,9 +15,9 @@ n = 0;
 % usually crash the program
 
 
-while n == 0
+%while n == 0
 
-    try
+   % try
         
         session = IEEGSession(dataName, loginname, pwname);
         
@@ -29,18 +29,18 @@ while n == 0
             values = session.data.getvalues(indices,':');
         end
     
-        
+       %{ 
         n = 1;
         
     catch
-        error('Failed to retrieve ieeg.org data, trying again...\n'); 
+        fprintf('Failed to retrieve ieeg.org data, trying again...\n'); 
       
         n = 0; 
     end
 
 
 end
-
+%}
 
 %% Create struct
 if just_chs == 1
