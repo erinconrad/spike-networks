@@ -89,6 +89,7 @@ for whichPt = 1:length(times)
             f_index = length(listing)-1;
         else
             n_spikes_done = 0;
+            f_index = 0;
         end
         
         % start with first we haven't done
