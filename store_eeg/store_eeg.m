@@ -43,7 +43,7 @@ for whichPt = 1:length(times)
     n_files = floor(n_spikes/100)+1;
     
     % See what files are already present, skip if all done
-    listing = dir(pt_folder);
+    listing = dir([pt_folder,'*.mat']);
     if length(listing) == n_files + 1 % 1 extra for the info file
         fprintf('Already did %s, skipping...\n',name);
         continue
