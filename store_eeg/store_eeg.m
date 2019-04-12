@@ -11,6 +11,10 @@ main_folder = locations.main_folder;
 pwname = locations.pwfile;
 addpath(genpath(script_folder));
 
+if isempty(locations.ieeg_folder) == 0
+    addpath(genpath(locations.ieeg_folder));
+end
+
 results_folder =  [main_folder,'results/'];
 if exist(results_folder,'dir') == 0
     mkdir(results_folder);
