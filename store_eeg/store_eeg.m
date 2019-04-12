@@ -33,6 +33,18 @@ for whichPt = 1:length(times)
         mkdir(pt_folder);
     end
     
+    
+    % How many spikes does this patient have
+    n_spikes = sum(~isnan(times(12).spike_times));
+    n_files = floor(n_spikes/100)+1;
+    
+    % See what files are already present, skip if all done
+    listing = dir(pt_folder);
+    if length(listing) == n_files + 1 % 1 extra for the info file
+        fprintf('Already did %s, skipping...\n',name);
+        continue
+    end
+    
     % ensure it is the same patient as in pt
     if strcmp(name,pt(whichPt).name) == 0
         error('what\n');
@@ -50,23 +62,39 @@ for whichPt = 1:length(times)
     chs = pt(whichPt).new_elecs.ch_order;
     
     %% Do a test download to make sure the channels line up perfectly
-    data = download_eeg(ieeg_name,[],pwname,1);
-    if data.fs ~= fs, error('what\n'); end
-    % Save basic info about the patient
-    save([pt_folder,'basic_info.mat'],'data');
+    if isempty(listing) == 1
+        data = download_eeg(ieeg_name,[],pwname,1);
+        if data.fs ~= fs, error('what\n'); end
+        % Save basic info about the patient
+        save([pt_folder,'basic_info.mat'],'data');
+    end
     
     %% Loop through spike times
     for do_spike = [1] % hold off on not-a-spike times
         
         if do_spike == 1
             s_times = times(whichPt).spike_times;
-            fname = 'spikes.mat';
+            fname = 'spikes';
         elseif do_spike == 2
             s_times = times(whichPt).not_spike_times;
-            fname = 'not_spikes.mat';
+            fname = 'not_spikes';
         end
         
-        for t = 1:length(s_times)
+        if length(listing) > 1
+            n_spikes_done = 100*(length(listing)-1);
+            f_index = length(listing)-1;
+        else
+            n_spikes_done = 0;
+        end
+        
+        % start with first we haven't done
+        count = 0;
+        for t = n_spikes_done+1:length(s_times) 
+            
+            count = count + 1;
+            
+            if isnan(s_times(t)) == 1, continue; end
+           
                          
             % which times
             which_times = [s_times(t)-surround_time,s_times(t)+surround_time];
@@ -77,17 +105,23 @@ for whichPt = 1:length(times)
             % Get the data
             data = download_eeg(ieeg_name,indices,pwname,0); 
             
-            spike(t).values = data.values;
-            spike(t).time = s_times(t);
-            spike(t).label = times(whichPt).spike_labels{t};
+            spike(count).values = data.values;
+            spike(count).time = s_times(t);
+            spike(count).label = times(whichPt).spike_labels{t};
+            spike(count).which = t;
+            
+            % save when we get to 100 and restart the count
+            if count == 100
+                fprintf('Did %d spikes of %s...\n',t,name);
+                count = 0;
+                f_index = f_index + 1;
+                save([pt_folder,fname,'_',f_index,'.mat'],'spike');
+            end
             
         end
         
     end
 
-    % Save the data in a .mat file
-    save([pt_folder,fname],'spike');
-    
     
     
 end
