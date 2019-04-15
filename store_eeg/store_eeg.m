@@ -98,22 +98,24 @@ for whichPt = 1:length(times)
             
             count = count + 1;
             
-            if isnan(s_times(t)) == 1, continue; end
+            if isnan(s_times(t)) == 0
            
                          
-            % which times
-            which_times = [s_times(t)-surround_time,s_times(t)+surround_time];
-            
-            % get indices
-            indices = round(which_times(1)*fs):round(which_times(2)*fs);
+                % which times
+                which_times = [s_times(t)-surround_time,s_times(t)+surround_time];
 
-            % Get the data
-            data = download_eeg(ieeg_name,indices,pwname,0); 
-            
-            spike(count).values = data.values;
-            spike(count).time = s_times(t);
-            spike(count).label = times(whichPt).spike_labels{t};
-            spike(count).which = t;
+                % get indices
+                indices = round(which_times(1)*fs):round(which_times(2)*fs);
+
+                % Get the data
+                data = download_eeg(ieeg_name,indices,pwname,0); 
+
+                spike(count).values = data.values;
+                spike(count).time = s_times(t);
+                spike(count).label = times(whichPt).spike_labels{t};
+                spike(count).which = t;
+                
+            end
             
             % save when we get to 100 and restart the count
             if count == 100
