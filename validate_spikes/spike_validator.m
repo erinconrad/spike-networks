@@ -163,6 +163,7 @@ for whichPt = whichPts
         dev(i,:) = t;
     end
     avg_dev = mean(dev,1);
+    error('what\n');
     figure
     set(gcf,'position',[72 21 1300 100]);
     plot(avg_dev,'k','linewidth',2)
