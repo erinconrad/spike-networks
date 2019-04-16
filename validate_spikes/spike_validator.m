@@ -162,12 +162,12 @@ for whichPt = whichPts
         end
         dev(i,:) = t;
     end
-    avg_dev = mean(dev,1);
-    error('what\n');
+    avg_dev = nanmean(dev,1);
     figure
     set(gcf,'position',[72 21 1300 100]);
     plot(avg_dev,'k','linewidth',2)
     print([val_folder,'avg_dev'],'-depsc');
+    pause(0.5)
     close(gcf);
     
 end
