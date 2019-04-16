@@ -1,4 +1,4 @@
-function spike_validator
+function spike_validator(whichPts)
 
 %{
 This function takes a bunch of downloaded eeg data and spike times,
@@ -29,8 +29,12 @@ times = times.times;
 pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
+if isempty(whichPts) == 1
+    whichPts = 1:length(times);
+end
+
 %% Loop through patients
-for whichPt = 1:length(times)
+for whichPt = whichPts
     
     % Skip it if name is empty
     if isempty(times(whichPt).name) == 1, continue; end
