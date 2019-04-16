@@ -136,10 +136,22 @@ for whichPt = 1:length(times)
         end
         
         fig_file_name = sprintf('Fig%d',i);
-        print(fig_file_name,'-depsc');
+        print([val_folder,fig_file_name],'-depsc');
         close(gcf);
         count = count + 10;
     end
+    
+    % Make an additional plot showing the average deviation over time
+    dev = zeros(n_spikes,size(out(1).data,1));
+    for i = 1:length(out)
+        dev(i,:) = sqrt((out(i).data(:,1)-median(out(i).data(:,1))).^2)';      
+    end
+    avg_dev = mean(dev,1);
+    figure
+    set(gcf,'position',[72 21 1300 100]);
+    plot(avg_dev,'k','linewidth',2)
+    print([val_folder,'avg_dev'],'-depsc');
+    close(gcf);
     
 end
 
