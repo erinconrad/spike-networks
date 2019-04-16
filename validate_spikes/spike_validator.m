@@ -46,6 +46,7 @@ for whichPt = 1:length(times)
         listing = dir([val_folder,'*.eps']);
         if length(listing) == 6
             fprintf('Already did %s, skipping...\n',name);
+            continue;
         end
     end
     
