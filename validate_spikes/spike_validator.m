@@ -152,7 +152,11 @@ for whichPt = 1:length(times)
     % Make an additional plot showing the average deviation over time
     dev = zeros(n_spikes,size(out(1).data,1));
     for i = 1:length(out)
-        dev(i,:) = sqrt((out(i).data(:,1)-median(out(i).data(:,1))).^2)';      
+        t = sqrt((out(i).data(:,1)-median(out(i).data(:,1))).^2)';   
+        if size(t,2) > size(dev,2) %sometimes it's 5001 points instead of 5000
+            t = t(1:size(dev,2));
+        end
+        dev(i,:) = t;
     end
     avg_dev = mean(dev,1);
     figure
