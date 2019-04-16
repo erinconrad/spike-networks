@@ -9,7 +9,7 @@ like
 %}
 
 %% Parameters
-redo = 0; % 1 if we want to re-do the ones already done
+redo = 1; % 1 if we want to re-do the ones already done
 n_spikes = 50; % number of spikes to plot
 n_channels = 3; % number of channels besides spike channel to plot
 n_chunks = 5; % How many plots per patient
