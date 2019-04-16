@@ -9,7 +9,7 @@ like
 %}
 
 %% Parameters
-
+redo = 0; % 1 if we want to re-do the ones already done
 n_spikes = 50; % number of spikes to plot
 n_channels = 3; % number of channels besides spike channel to plot
 n_chunks = 5; % How many plots per patient
@@ -41,6 +41,13 @@ for whichPt = 1:length(times)
     pt_folder = [results_folder,name,'/'];
     val_folder = [pt_folder,'validation/'];
     if exist(val_folder,'dir') == 0, mkdir(val_folder); end
+    
+    if redo == 0
+        listing = dir([val_folder,'*.eps']);
+        if length(listing) == 6
+            fprintf('Already did %s, skipping...\n',name);
+        end
+    end
     
     % Select 50 random spikes
     n_spikes_total = sum(~isnan(times(whichPt).spike_times));
