@@ -4,6 +4,9 @@ function spike_networks(whichPts)
 do_car = 1;
 pre_whiten = 0;
 time_window = 1; %1 second time window
+
+% The time prior to the spike peak that will start the 
+pre_spike_time = 0.05;
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
     30 40;... % low gamma
@@ -126,7 +129,7 @@ for whichPt = whichPts
             end
 
             t = toc;
-            fprintf('Spike %d took %1.1f minutes\n\n.',s,t/60);
+            fprintf('Spike %d took %1.1f minutes.\n\n',s,t/60);
             
             if 1
                 figure

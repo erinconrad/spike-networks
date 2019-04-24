@@ -1,7 +1,7 @@
 function store_eeg(times,pt)
 
 %% Parameters
-surround_time = 5;
+surround_time = 6;
 
 
 %% Get locations
