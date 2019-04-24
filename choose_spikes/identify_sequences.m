@@ -31,6 +31,8 @@ for whichPt = whichPts
     spike_times = nan(n_spikes,1);
     spike_chs = nan(n_spikes,1);
     spike_labels = cell(n_spikes,1);
+    seq_chs = nan(n_spikes,50);
+    seq_labels = cell(n_spikes,50);
     not_spike_times = nan(n_spikes,1);
     
     name = pt(whichPt).name;
@@ -151,7 +153,8 @@ for whichPt = whichPts
             ix = randi(length(first_time));
             t = first_time(ix);
             ch = first_ch(ix);
-            
+            all_chs = find(~isnan(seq_matrix(:,ix)));
+          
             % don't allow it if it's an ignored channel per the json file
             label = pt(whichPt).electrodeData.electrodes(ch).name;
             if ismember(label,pt(whichPt).ignore.names) == 1
@@ -182,6 +185,7 @@ for whichPt = whichPts
 
                     spike_times(i) = t;
                     spike_chs(i) = ch;
+                    seq_chs(i,1:length(all_chs)) = all_chs;
                     break
                 end
             end
@@ -250,6 +254,7 @@ for whichPt = whichPts
     [out(whichPt).spike_times,I] = sort(spike_times);
     out(whichPt).not_spike_times = sort(not_spike_times);
     spike_chs = spike_chs(I);
+    seq_chs = seq_chs(I,:);
     
     % Convert spike chs to labels
     for i = 1:length(spike_chs)
@@ -266,9 +271,27 @@ for whichPt = whichPts
             fprintf('Could not find %s in new labels for %s\n',label_temp,...
                 pt(whichPt).name);
         end
+        
+        % Add seq labels
+        for j = 1:length(seq_chs(i,:))
+            if isnan(seq_chs(i,j)), continue; end
+            label_temp = pt(whichPt).electrodeData.electrodes(seq_chs(i,j)).name;
+            seq_labels{i,j} = label_temp;
+            found_it = 0;
+            for k = 1:length(pt(whichPt).new_elecs.names)
+                if strcmp(pt(whichPt).new_elecs.names{k},label_temp) == 1
+                    found_it = 1;
+                end
+                
+            end
+            if found_it == 0
+                fprintf('Could not find %s in new labels for %s\n',label_temp,...
+                    pt(whichPt).name);
+            end
+        end
     end
     out(whichPt).spike_labels = spike_labels;
-    
+    out(whichPt).seq_labels = seq_labels;
     
     %% Show some summary plots for patient
     figure

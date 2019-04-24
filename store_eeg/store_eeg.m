@@ -114,6 +114,7 @@ for whichPt = 1:length(times)
                 spike(count).time = s_times(t);
                 spike(count).label = times(whichPt).spike_labels{t};
                 spike(count).which = t;
+                spike(count).seq_labels = times(whichPt).seq_labels(t,:);
                 
             end
             
