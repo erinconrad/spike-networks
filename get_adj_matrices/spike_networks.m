@@ -4,9 +4,10 @@ function spike_networks(whichPts)
 do_car = 1;
 pre_whiten = 0;
 time_window = 1; %1 second time window
+n_chunks = 10;
 
-% The time prior to the spike peak that will start the 
-pre_spike_time = 0.05;
+% The time surrounding the spike peak that I will call the spike window
+spike_window = [-0.1 0.9];
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
     30 40;... % low gamma
@@ -88,11 +89,15 @@ for whichPt = whichPts
                 % Get spike ch
                 is_sp_ch = strcmp(ch_labels,spike(s).label);
                 sp_data = spike(s).values(:,is_sp_ch);
+                is_seq_ch = ismember(ch_labels,spike(s).seq_labels);
                 figure
                 plot(sp_data);
                 pause
                 close(gcf)
             end
+            
+            %% Confirm spike peak time
+            
             
             %% Pre-processing
             % Parameters 2 and 3 indicate whether to do CAR and pre-whiten,
@@ -103,7 +108,7 @@ for whichPt = whichPts
             
             %% Get adjacency matrices
             %fprintf('Calculating functional networks...\n');
-            % Break the data up into chunks
+            % Break the data up into time chunks
             tick_window = time_window*data.fs;
             n_chunks = floor(size(values,1)/tick_window);
             

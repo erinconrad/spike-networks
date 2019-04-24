@@ -13,6 +13,7 @@ redo = 1; % 1 if we want to re-do the ones already done
 n_spikes = 50; % number of spikes to plot
 n_channels = 3; % number of channels besides spike channel to plot
 n_chunks = 5; % How many plots per patient
+thresh_std_mult = 3; % How many std above median to say it's deviated
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -24,8 +25,8 @@ addpath(genpath(script_folder));
 spike_times_file = [data_folder,'spike_times/times.mat'];
 pt_file = [data_folder,'spike_structures/pt.mat'];
 
-times = load(spike_times_file); % will result in a structure called "times"
-times = times.times;
+times = load(spike_times_file); % will result in a structure called "out"
+times = times.out;
 pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
@@ -40,6 +41,7 @@ for whichPt = whichPts
     if isempty(times(whichPt).name) == 1, continue; end
     name = times(whichPt).name;
     fprintf('Doing %s\n',name);
+    fs = pt(whichPt).fs;
     
     % Make validation folder within pt folder
     pt_folder = [results_folder,name,'/'];
@@ -88,7 +90,7 @@ for whichPt = whichPts
     % Loop through the files (doing 1 file at a time since they're big so
     % they take a little while to load. They will be cleared each time I 
     % load a new one)
-    for f = 1:length(unique_files)
+    for f = 1%:length(unique_files)
         file_temp = sprintf('spikes_%d.mat',unique_files(f));
         spike = load([pt_folder,file_temp]); % this will create a structure called "spike"
         spike = spike.spike;
@@ -163,10 +165,26 @@ for whichPt = whichPts
         dev(i,:) = t;
     end
     avg_dev = nanmean(dev,1);
+    baseline = median(avg_dev);
+    [~,peak] = max(avg_dev);
+    thresh = baseline + thresh_std_mult*std(avg_dev);
+    above_thresh = avg_dev > thresh;
+    first_above_thresh = min(find(above_thresh));
+    last_above_thresh = max(find(above_thresh));
+    
     figure
     set(gcf,'position',[72 21 1300 100]);
     plot(avg_dev,'k','linewidth',2)
+    hold on
+    plot(get(gca,'xlim'),[baseline baseline],'b--');
+    plot(get(gca,'xlim'),[thresh thresh],'r--');
+    plot([first_above_thresh first_above_thresh],get(gca,'ylim'),'k--');
+    plot([last_above_thresh last_above_thresh],get(gca,'ylim'),'k--');
     print([val_folder,'avg_dev'],'-depsc');
+    fprintf('Time from first about thresh to last above thresh: %1.3fs\n',...
+        (last_above_thresh-first_above_thresh)/fs);
+    fprintf('Time from first above thresh to peak: %1.3fs\n',...
+        (peak - first_above_thresh)/fs);
     pause(0.5)
     close(gcf);
     
