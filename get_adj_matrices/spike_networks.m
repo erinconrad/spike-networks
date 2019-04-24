@@ -9,6 +9,8 @@ n_chunks = 11;
 
 % The time surrounding the spike peak that I will call the spike window
 spike_window_times = [-0.2 0.8];
+% NEED TO ADJUST THIS!
+
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
     30 40;... % low gamma
@@ -40,7 +42,7 @@ if isempty(whichPts) == 1
 end
 
 % Loop through patients
-for whichPt = whichPts
+for whichPt = 4%whichPts
     
     %% Prep patient
     
