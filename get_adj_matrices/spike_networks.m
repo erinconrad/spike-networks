@@ -42,7 +42,7 @@ if isempty(whichPts) == 1
 end
 
 % Loop through patients
-for whichPt = 4%whichPts
+for whichPt = whichPts
     
     %% Prep patient
     
@@ -102,6 +102,7 @@ for whichPt = 4%whichPts
             
             % Find first unfinished spike
             start_spike = length(meta.spike) + 1;
+                
         else
             start_spike = 1;
             meta.name = name;
