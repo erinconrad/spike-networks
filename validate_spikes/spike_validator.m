@@ -90,7 +90,7 @@ for whichPt = whichPts
     % Loop through the files (doing 1 file at a time since they're big so
     % they take a little while to load. They will be cleared each time I 
     % load a new one)
-    for f = 1%:length(unique_files)
+    for f = 1:length(unique_files)
         file_temp = sprintf('spikes_%d.mat',unique_files(f));
         spike = load([pt_folder,file_temp]); % this will create a structure called "spike"
         spike = spike.spike;
