@@ -2,8 +2,7 @@ function calc_network_metrics(whichPts)
 
 %% Parameters
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
-freq_text = {'alpha/theta'};
-%freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
+freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 n_f = length(freq_text);
 n_times = 11;
 spike_window_times = [-0.2 0.8];
