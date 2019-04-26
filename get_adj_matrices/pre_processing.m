@@ -32,7 +32,7 @@ if pre_whiten == 1
            close gcf
         end
         if length(E) < length(vals)
-            E = [E;length(vals)-length(E)];
+            E = [E;nan(length(vals)-length(E),1)];
         end
         data(:,j) = E;
     end
