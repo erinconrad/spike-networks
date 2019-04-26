@@ -123,11 +123,13 @@ for whichPt = whichPts
             
             % readjust size
             if length(values) < size(dev,2)
-                values = [values;nan(size(dev,2)-length(values),1)];
                 fprintf('Padding values by %d\n',size(dev,2)-length(values));
+                values = [values;nan(size(dev,2)-length(values),1)];
+                
             elseif length(values) > size(dev,2)
-                values = values(1:end-(length(values)-size(dev,2)));
                 fprintf('Shortening values by %d\n',size(dev,2)-length(values));
+                values = values(1:end-(length(values)-size(dev,2)));
+                
             end
             
             dev_t = sqrt((values-nanmedian(values)).^2);
