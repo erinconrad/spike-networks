@@ -61,6 +61,7 @@ for whichPt = whichPts
     ec_seq = nan(n_f,n_spikes,n_times);
     dev = nan(n_spikes,fs*(n_times+1));
     bin_dev = nan(n_spikes,n_times);
+    bin_dev_median = nan(n_spikes,n_times);
     
     % Initialize spike count
     s_count = 0;
@@ -136,8 +137,9 @@ for whichPt = whichPts
             dev(s_count,:) = dev_t;
             
             for i = 1:size(index_windows,1)
-                new_dev = sqrt((values-nanmedian(values)).^2);
-                bin_dev(s_count,i) = nanmean(new_dev(round(index_windows(i,1)):...
+                bin_dev(s_count,i) = nanmean(dev_t(round(index_windows(i,1)):...
+                    round(index_windows(i,2))));
+                bin_dev_median(s_count,i) = nanmedian(dev_t(round(index_windows(i,1)):...
                     round(index_windows(i,2))));
             end
             
@@ -189,6 +191,7 @@ for whichPt = whichPts
     %% Get avg deviation of signal
     avg_dev = nanmean(dev,1);
     avg_bin_dev = nanmean(bin_dev,1);
+    avg_bin_dev_median = nanmean(bin_dev_median,1);
     
     %% Plot aggregated metrics
     figure
@@ -235,6 +238,8 @@ for whichPt = whichPts
     
     axes(ha2(2))
     plot(avg_bin_dev,'ks-','linewidth',2)
+    hold on
+    plot(avg_bin_dev_median,'ks--','linewidth',2);
     title('Average binned signal deviation from baseline')
     yticklabels([])
     xlabel('Time (s)')
