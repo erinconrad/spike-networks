@@ -3,6 +3,7 @@ function calc_network_metrics(whichPts)
 %% Parameters
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
+%freq_text = {'alpha/theta'};
 n_f = length(freq_text);
 n_times = 11;
 spike_window_times = [-0.2 0.8];
@@ -61,7 +62,8 @@ for whichPt = whichPts
     ec_seq = nan(n_f,n_spikes,n_times);
     dev = nan(n_spikes,fs*(n_times+1));
     bin_dev = nan(n_spikes,n_times);
-    bin_dev_median = nan(n_spikes,n_times);
+    z_dev = nan(n_spikes,fs*(n_times+1));
+    z_bin_dev = nan(n_spikes,n_times);
     
     % Initialize spike count
     s_count = 0;
@@ -136,10 +138,13 @@ for whichPt = whichPts
             dev_t = sqrt((values-nanmedian(values)).^2);
             dev(s_count,:) = dev_t;
             
+            z_dev_t = (values-nanmean(values))./std(values);
+            z_dev(s_count,:) = z_dev_t;
+            
             for i = 1:size(index_windows,1)
                 bin_dev(s_count,i) = nanmean(dev_t(round(index_windows(i,1)):...
                     round(index_windows(i,2))));
-                bin_dev_median(s_count,i) = nanmedian(dev_t(round(index_windows(i,1)):...
+                z_bin_dev(s_count,i) = nanmean(z_dev_t(round(index_windows(i,1)):...
                     round(index_windows(i,2))));
             end
             
@@ -173,15 +178,27 @@ for whichPt = whichPts
     end
     
     %% Aggregate metrics
+    %{
     avg_ns_seq = nanmean(ns_seq-median(ns_seq,3),2);
     avg_ge = nanmean(ge - median(ge,3),2);
     avg_sync = nanmean(sync - median(sync,3),2);
     avg_ec_seq = nanmean(ec_seq - median(ec_seq,3),2);
+    %}
     
-    plot_thing(1,:,:) = avg_ns_seq;
-    plot_thing(2,:,:) = avg_ec_seq;
-    plot_thing(3,:,:) = avg_ge;
-    plot_thing(4,:,:) = avg_sync;
+    z_ns = (((ns_seq-mean(ns_seq,3))./std(ns_seq,0,3)));
+    z_ec = (((ec_seq-mean(ec_seq,3))./std(ec_seq,0,3)));
+    z_sync = (((sync-mean(sync,3))./std(sync,0,3)));
+    z_ge = (((ge-mean(ge,3))./std(ge,0,3)));
+    
+    avg_z_ns = nanmean(z_ns,2);
+    avg_z_ec = nanmean(z_ec,2);
+    avg_z_sync = nanmean(z_sync,2);
+    avg_z_ge = nanmean(z_ge,2);
+    
+    plot_thing(1,:,:) = avg_z_ns;
+    plot_thing(2,:,:) = avg_z_ec;
+    plot_thing(3,:,:) = avg_z_sync;
+    plot_thing(4,:,:) = avg_z_ge;
     
     plot_title{1} = 'Node strength\nof spike sequence chs';
     plot_title{2} = 'Eigenvector centrality\nof spike sequence chs';
@@ -189,9 +206,14 @@ for whichPt = whichPts
     plot_title{4} = 'Synchronizability';
     
     %% Get avg deviation of signal
+    %{
     avg_dev = nanmean(dev,1);
     avg_bin_dev = nanmean(bin_dev,1);
     avg_bin_dev_median = nanmean(bin_dev_median,1);
+    %}
+    
+    avg_z_dev = nanmean(z_dev,1);
+    avg_z_bin_dev = nanmean(z_bin_dev,1);
     
     %% Plot aggregated metrics
     figure
@@ -223,24 +245,23 @@ for whichPt = whichPts
     set(gcf,'position',[26 0 1100 400])
     [ha2, pos] = tight_subplot(1, 2, [0.01 0.02], [0.14 0.08], [0.01 0.01]);
     axes(ha2(1))
-    plot((1:length(avg_dev))/fs,avg_dev,'k-')
+    plot((1:length(avg_z_dev))/fs,avg_z_dev,'k-')
     hold on
     for tt = 1:size(index_windows,1)
         plot([index_windows(tt,1) index_windows(tt,1)]/fs,get(gca,'ylim'),'k--')
         plot([index_windows(tt,2) index_windows(tt,2)]/fs,get(gca,'ylim'),'k--')
-        text((index_windows(tt,1)+index_windows(tt,2))/2/fs-0.25,max(avg_dev),...
+        text((index_windows(tt,1)+index_windows(tt,2))/2/fs-0.25,max(avg_z_dev),...
             sprintf('%d',tt),'fontsize',20);
     end
     yticklabels([])
     xlabel('Time (s)')
-    title('Average signal deviation from baseline')
+    title('Signal z score')
     set(gca,'fontsize',20)
     
     axes(ha2(2))
-    plot(avg_bin_dev,'ks-','linewidth',2)
+    plot(avg_z_bin_dev,'ks-','linewidth',2)
     hold on
-    plot(avg_bin_dev_median,'ks--','linewidth',2);
-    title('Average binned signal deviation from baseline')
+    title('Binned signal z-score')
     yticklabels([])
     xlabel('Time (s)')
     set(gca,'fontsize',20)
