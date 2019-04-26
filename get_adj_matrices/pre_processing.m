@@ -31,7 +31,9 @@ if pre_whiten == 1
            pause
            close gcf
         end
-        
+        if length(E) < length(vals)
+            E = [E;length(vals)-length(E)];
+        end
         data(:,j) = E;
     end
 end
