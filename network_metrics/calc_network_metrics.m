@@ -45,6 +45,11 @@ for whichPt = whichPts
     adj_folder = [results_folder,name,'/adj/'];
     fs = pt(whichPt).fs;
     
+    stats_folder = [pt_folder,'stats/'];
+    if exist(stats_folder,'dir') == 0
+        mkdir(stats_folder);
+    end
+    
     %% Load adjacency matrices and calculate metrics
     listing = dir([adj_folder,'adj*.mat']);
     if length(listing) == 0
@@ -184,6 +189,20 @@ for whichPt = whichPts
     avg_sync = nanmean(sync - median(sync,3),2);
     avg_ec_seq = nanmean(ec_seq - median(ec_seq,3),2);
     %}
+    
+    %% Save stuff to structure
+    out = [];
+    out.signal.dev = dev;
+    out.signal.bin_dev = bin_dev;
+    out.signal.z = z_dev;
+    out.signal.bin_z = z_bin_dev;
+    
+    out.network.ns = ns_seq;
+    out.network.ec = ec_seq;
+    out.network.ge = ge;
+    out.network.sync = sync;
+
+    save([stats_folder,'stats.mat'],'out');
     
     z_ns = (((ns_seq-mean(ns_seq,3))./std(ns_seq,0,3)));
     z_ec = (((ec_seq-mean(ec_seq,3))./std(ec_seq,0,3)));
