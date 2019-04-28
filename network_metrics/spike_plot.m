@@ -17,6 +17,11 @@ script_folder = locations.script_folder;
 addpath(genpath(script_folder));
 spike_times_file = [data_folder,'spike_times/times.mat'];
 pt_file = [data_folder,'spike_structures/pt.mat'];
+plot_folder = [results_folder,'plots/network_dev/'];
+if exist(plot_folder,'dir') == 0
+    mkdir(plot_folder);
+end
+
 
 times = load(spike_times_file); % will result in a structure called "out"
 times = times.out;
@@ -44,20 +49,114 @@ for whichPt = whichPts
     stats = out.out;
     
     % Get variables
-    z = stats.signal.z;
+    z_dev = stats.signal.z;
     dev = stats.signal.dev;
-    bin_z = stats.signal.bin_z;
+    z_bin_dev = stats.signal.bin_z;
     bin_dev = stats.signal.bin_dev;
     ec = stats.network.ec;
     ge = stats.network.ge;
     ns = stats.network.ns;
     sync = stats.network.sync;
     
-    % Just look at alpha/theta
+    z_ns = (((ns-mean(ns,3))./std(ns,0,3)));
     z_ec = (((ec-mean(ec,3))./std(ec,0,3)));
-    z_ec_at = squeeze(z_ec(1,:,:));
+    z_sync = (((sync-mean(sync,3))./std(sync,0,3)));
+    z_ge = (((ge-mean(ge,3))./std(ge,0,3)));
+    
+    avg_z_ns = nanmean(z_ns,2);
+    avg_z_ec = nanmean(z_ec,2);
+    avg_z_sync = nanmean(z_sync,2);
+    avg_z_ge = nanmean(z_ge,2);
+    
+    avg_z_dev = nanmean(z_dev,1);
+    avg_z_bin_dev = nanmean(z_bin_dev,1);
+    avg_bin_dev = nanmean(bin_dev,1);
+    
+    plot_thing(1,:,:) = avg_z_ns;
+    plot_thing(2,:,:) = avg_z_ec;
+    plot_thing(3,:,:) = avg_z_ge;
+    plot_thing(4,:,:) = avg_z_sync;
+    
+    orig_thing(1,:,:,:) = z_ns;
+    orig_thing(2,:,:,:) = z_ec;
+    orig_thing(3,:,:,:) = z_ge;
+    orig_thing(4,:,:,:) = z_sync;
     
     
+    plot_title{1} = 'Node strength\nof spike sequence chs';
+    plot_title{2} = 'Eigenvector centrality\nof spike sequence chs';
+    plot_title{3} = 'Global efficiency';
+    plot_title{4} = 'Synchronizability';
+    
+    %% Plot aggregated metrics
+    figure
+    set(gcf,'position',[26 0 1242 900])
+    [ha, pos] = tight_subplot(n_f-2, 4, [0.04 0.02], [0.08 0.08], [0.05 0.01]);
+    for f = 1:n_f-2
+        for i = 1:size(plot_thing,1)
+            axes(ha((f-1)*4+i))
+            plot(squeeze(plot_thing(i,f,:)),'ks-','linewidth',2)
+            hold on
+            for j = 2:size(plot_thing,3)
+                h = ttest(squeeze(orig_thing(i,f,:,1)),...
+                    squeeze(orig_thing(i,f,:,j)));
+                if h == 1
+                    scatter(j,squeeze(plot_thing(i,f,j)),100,'r','filled')
+                end
+            end
+            
+            if f == 1
+                title(sprintf(plot_title{i}));
+            end
+            if f == n_f-2
+               xlabel('Time (s)') 
+            end
+            yticklabels([])
+            
+            if i == 1
+                ylabel(sprintf(freq_text{f}));
+            end
+            set(gca,'fontsize',20)
+        end
+    end
+    filename = [name,'_network_dev'];
+    print([plot_folder,filename],'-depsc');
+    
+    figure
+    set(gcf,'position',[26 0 600 700])
+    [ha2, pos] = tight_subplot(2,1, [0.07 0.02], [0.09 0.06], [0.01 0.01]);
+    axes(ha2(1))
+    plot(avg_z_bin_dev,'ks-','linewidth',2)
+    hold on
+    for j = 2:length(avg_z_bin_dev)
+        h = ttest(z_bin_dev(:,1),z_bin_dev(:,j));
+        if h == 1
+            scatter(j,avg_z_bin_dev(j),100,'r','filled');
+        end
+    end
+    title('Binned signal z-score')
+    yticklabels([])
+    %xlabel('Time (s)')
+    xticklabels([])
+    set(gca,'fontsize',20)
+    
+    axes(ha2(2))
+    plot(avg_bin_dev,'ks-','linewidth',2)
+    hold on
+    for j = 2:length(avg_bin_dev)
+        h = ttest(bin_dev(:,1),bin_dev(:,j));
+        if h == 1
+            scatter(j,avg_bin_dev(j),100,'r','filled');
+        end
+    end
+    title('Binned signal deviation')
+    yticklabels([])
+    xlabel('Time (s)')
+    set(gca,'fontsize',20)
+    
+    filename = [name,'_signal_dev_2'];
+    print([plot_folder,filename],'-depsc');
+   
 end
 
 end

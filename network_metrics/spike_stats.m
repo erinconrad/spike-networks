@@ -44,6 +44,7 @@ for whichPt = whichPts
     stats = out.out;
     
     % Get variables
+    is_seq_ch = stats.basic.is_seq_ch;
     z = stats.signal.z;
     dev = stats.signal.dev;
     bin_z = stats.signal.bin_z;
@@ -55,7 +56,9 @@ for whichPt = whichPts
     z_ec = (((ec-mean(ec,3))./std(ec,0,3)));
     z_ec_at = squeeze(z_ec(1,:,:));
     
-    %% Do stats
+    
+    %% Compare EC at spike time between spike chs and non spike chs
+    
     
     %% Signal deviation, z score
     % Do a repeated measures ANOVA for signal deviation
@@ -65,7 +68,7 @@ for whichPt = whichPts
         c{i} = bin_z(:,i);
     end
     t_dev = table(s_num',c{[1:5,7:11]},...
-        'VariableNames',{'spike',t_text{[]}});
+        'VariableNames',{'spike',t_text{[1:5,7:11]}});
     
     rm_dev = fitrm(t_dev,'t1-t10 ~ spike');
     ranovatbl = ranova(rm_dev)
@@ -80,7 +83,7 @@ for whichPt = whichPts
         c{i} = z_ec_at(:,i);
     end
     t_ec = table(s_num',c{[1:5,7:11]},...
-        'VariableNames',{'spike',t_text{:}});
+        'VariableNames',{'spike',t_text{[1:5,7:11]}});
     rm_ec = fitrm(t_ec,'t1-t10 ~ spike');
     ranovatbl = ranova(rm_ec)
     
