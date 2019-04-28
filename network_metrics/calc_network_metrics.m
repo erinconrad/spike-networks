@@ -161,7 +161,10 @@ for whichPt = whichPts
 
                     % Get adj matrix of interest
                     adj = squeeze(adj_all_t(tt,:,:));
-
+                    
+                    if sum(sum(isnan(adj))) > 0
+                        continue
+                    end
                     %% Calculate metrics
                     ge(which_freq,s_count,tt) = efficiency_wei(adj,0); % global efficiency
                     sync(which_freq,s_count,tt) = synchronizability_sp(adj);
