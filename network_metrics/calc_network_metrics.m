@@ -60,6 +60,12 @@ for whichPt = whichPts
     % Number of spikes expected
     n_spikes = sum(~isnan(times(whichPt).spike_times));
     
+    % Load the first adjacency matrix to get the size in order to
+    % initialize one of the arrays
+    meta = load([adj_folder,listing(1).name]); 
+    meta = meta.meta;
+    nchs = length(meta.spike(1).is_seq_ch);
+    
     % Prep network matrices
     ge = nan(n_f,n_spikes,n_times);
     ns_seq = nan(n_f,n_spikes,n_times);
@@ -69,6 +75,7 @@ for whichPt = whichPts
     bin_dev = nan(n_spikes,n_times);
     z_dev = nan(n_spikes,fs*(n_times+1));
     z_bin_dev = nan(n_spikes,n_times);
+    is_seq = nan(n_spikes,nchs);
     
     % Initialize spike count
     s_count = 0;
@@ -94,6 +101,7 @@ for whichPt = whichPts
             
             seq_chs = meta.spike(s).is_seq_ch; % binary array
             sp_ch = meta.spike(s).is_sp_ch; % binary array
+            is_seq(s,:) = seq_chs;
             
             %% Get spike signal
             data = load([pt_folder,'basic_info.mat']); % returns a structure called data
@@ -219,8 +227,8 @@ for whichPt = whichPts
     
     plot_thing(1,:,:) = avg_z_ns;
     plot_thing(2,:,:) = avg_z_ec;
-    plot_thing(3,:,:) = avg_z_sync;
-    plot_thing(4,:,:) = avg_z_ge;
+    plot_thing(3,:,:) = avg_z_ge;
+    plot_thing(4,:,:) = avg_z_sync;
     
     plot_title{1} = 'Node strength\nof spike sequence chs';
     plot_title{2} = 'Eigenvector centrality\nof spike sequence chs';

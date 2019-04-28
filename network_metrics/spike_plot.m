@@ -1,4 +1,4 @@
-function spike_stats(whichPts)
+function spike_plot(whichPts)
 
 %% Parameters
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
@@ -49,48 +49,14 @@ for whichPt = whichPts
     bin_z = stats.signal.bin_z;
     bin_dev = stats.signal.bin_dev;
     ec = stats.network.ec;
-    
+    ge = stats.network.ge;
+    ns = stats.network.ns;
+    sync = stats.network.sync;
     
     % Just look at alpha/theta
     z_ec = (((ec-mean(ec,3))./std(ec,0,3)));
     z_ec_at = squeeze(z_ec(1,:,:));
     
-    %% Do stats
-    
-    %% Signal deviation, z score
-    % Do a repeated measures ANOVA for signal deviation
-    s_num = 1:size(bin_z,1);
-    c = {};
-    for i = 1:size(bin_z,2)
-        c{i} = bin_z(:,i);
-    end
-    t_dev = table(s_num',c{[1:5,7:11]},...
-        'VariableNames',{'spike',t_text{[]}});
-    
-    rm_dev = fitrm(t_dev,'t1-t10 ~ spike');
-    ranovatbl = ranova(rm_dev)
-    
-    % Try a friedman test instead
-    [p,tbl,stats] = friedman(bin_z(:,[1:5,7:11]),1,'off');
-    
-    %% Eigenvector centrality
-    % Do a repeated measures ANOVA for ec
-    c = {};
-    for i = 1:size(z_ec_at,2)
-        c{i} = z_ec_at(:,i);
-    end
-    t_ec = table(s_num',c{[1:5,7:11]},...
-        'VariableNames',{'spike',t_text{:}});
-    rm_ec = fitrm(t_ec,'t1-t10 ~ spike');
-    ranovatbl = ranova(rm_ec)
-    
-    % Friedman
-    [p,tbl,stats] = friedman(z_ec_at(:,[1:5,7:11]),1,'off');
-    
-    % Paired T-tests to compare
-    [h,p,ci,stats] = ttest(z_ec_at(:,1),z_ec_at(:,5))
-    [h,p,ci,stats] = ttest(z_ec_at(:,1),z_ec_at(:,4))
-    [h,p,ci,stats] = ttest(z_ec_at(:,1),z_ec_at(:,3))
     
 end
 
