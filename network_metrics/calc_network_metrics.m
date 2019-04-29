@@ -181,14 +181,14 @@ for whichPt = whichPts
 
                     % node strength of all ch in seq
                     ns_temp = strengths_und(adj); 
-                    ns_seq(which_freq,s_count,tt) = sum(ns_temp(seq_chs));
-                    ns_not_seq(which_freq,s_count,tt) = sum(ns_temp(~seq_chs));
+                    ns_seq(which_freq,s_count,tt) = mean(ns_temp(seq_chs));
+                    ns_not_seq(which_freq,s_count,tt) = mean(ns_temp(~seq_chs));
 
                     % eigenvector centrality of all ch in seq
                     ec_temp = eigenvector_centrality_und(adj);
-                    ec_seq(which_freq,s_count,tt) = sum(ec_temp(seq_chs));
+                    ec_seq(which_freq,s_count,tt) = mean(ec_temp(seq_chs));
                     
-                    ec_not_seq(which_freq,s_count,tt) = sum(ec_temp(~seq_chs));
+                    ec_not_seq(which_freq,s_count,tt) = mean(ec_temp(~seq_chs));
 
                 end
                 
@@ -216,7 +216,7 @@ for whichPt = whichPts
     out.network.ns = ns_seq;
     out.network.ec = ec_seq;
     out.network.ns_notseq = ns_not_seq;
-    out.network_ec_notseq = ec_not_seq;
+    out.network.ec_notseq = ec_not_seq;
     out.network.ge = ge;
     out.network.sync = sync;
 

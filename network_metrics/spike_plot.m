@@ -88,6 +88,10 @@ for whichPt = whichPts
     plot_title{3} = 'Global efficiency';
     plot_title{4} = 'Synchronizability';
     
+    %% Compare ec spikes to ec not spikes
+    ranksum(squeeze(stats.network_ec_notseq(1,:,6)),...
+        squeeze(stats.network.ec(1,:,6)))
+    
     %% Plot aggregated metrics
     figure
     set(gcf,'position',[26 0 1242 900])
