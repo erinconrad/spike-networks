@@ -84,23 +84,18 @@ for whichPt = whichPts
         % Loop through spikes
         for s = 1:length(meta.spike)
 
-            s_count = s_count + 1;
+            if sum(isnan(meta.spike(s).adj(1).adj)) > 0
+                continue
+            end
             
-            seq_chs = meta.spike(s).is_seq_ch; % binary array
-            % Just take first five
-            non_zero = find(seq_chs);
-            if length(non_zero) < 5, continue; end
-            non_zero = non_zero(1:5);
-            
-            seq_chs_5 = ismember(1:length(seq_chs),non_zero);
-            
+       
             
             for which_freq = 1:length(meta.spike(s).adj)
                 adj_all_t= meta.spike(s).adj(which_freq).adj;  
                 adj_avg(which_freq).adj = adj_avg(which_freq).adj + adj_all_t;
-                adj_avg_tiny(which_freq).adj = adj_avg_tiny(which_freq).adj + ...
-                    adj_all_t(:,seq_chs_5,seq_chs_5);
             end
+            
+            s_count = s_count + 1;
             
         end
         
@@ -110,19 +105,15 @@ for whichPt = whichPts
     ge = zeros(nfreq,n_times);
     sync = zeros(nfreq,n_times);
     
-    ge_tiny = zeros(nfreq,n_times);
-    sync_tiny = zeros(nfreq,n_times);
+   
     
     for which_freq = 1:length(adj_avg)
         adj_avg(which_freq).adj = adj_avg(which_freq).adj/s_count;
-        adj_avg_tiny(which_freq).adj = adj_avg_tiny(which_freq).adj/s_count;
         
         for tt = 1:size(adj_avg(which_freq).adj,1)
             ge(which_freq,tt) = efficiency_wei(squeeze(adj_avg(which_freq).adj(tt,:,:)),0);
             sync(which_freq,tt) = synchronizability_sp(squeeze(adj_avg(which_freq).adj(tt,:,:)));
             
-            ge_tiny(which_freq,tt) = efficiency_wei(squeeze(adj_avg_tiny(which_freq).adj(tt,:,:)),0);
-            sync_tiny(which_freq,tt) = synchronizability_sp(squeeze(adj_avg_tiny(which_freq).adj(tt,:,:)));
         end
     end
     
