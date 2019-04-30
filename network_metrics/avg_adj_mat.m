@@ -84,7 +84,7 @@ for whichPt = whichPts
         % Loop through spikes
         for s = 1:length(meta.spike)
 
-            if sum(isnan(meta.spike(s).adj(1).adj)) > 0
+            if sum(sum(sum(isnan(meta.spike(s).adj(1).adj)))) > 0
                 continue
             end
             
