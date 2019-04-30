@@ -67,7 +67,6 @@ for whichPt = whichPts
     
     for i = 1:nfreq
         adj_avg(i).adj = zeros(n_times,nchs,nchs);
-        adj_avg_tiny(i).adj = zeros(n_times,5,5);
     end
     
     % Initialize spike count
@@ -102,13 +101,17 @@ for whichPt = whichPts
     end
     
     %% Divide by number of spikes to get average and calculate global metrics
-    ge = zeros(nfreq,n_times);
-    sync = zeros(nfreq,n_times);
+    ge = nan(nfreq,n_times);
+    sync = nan(nfreq,n_times);
     
    
     
     for which_freq = 1:length(adj_avg)
         adj_avg(which_freq).adj = adj_avg(which_freq).adj/s_count;
+        
+        if sum(sum(sum(isnan(adj_avg(which_freq).adj)))) > 0
+            continue
+        end
         
         for tt = 1:size(adj_avg(which_freq).adj,1)
             ge(which_freq,tt) = efficiency_wei(squeeze(adj_avg(which_freq).adj(tt,:,:)),0);
