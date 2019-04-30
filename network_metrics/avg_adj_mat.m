@@ -135,12 +135,12 @@ for whichPt = whichPts
     for f = 1:n_f-2
         
         % get cmap range within that frequency band
-        c_max = max(max(max(adj_avg(f).adj)));
-        c_min = min(min(min(adj_avg(f).adj)));
+        c_max = max(max(max(adj_avg(f).adj-adj_avg(f).adj(1,:,:))));
+        c_min = min(min(min(adj_avg(f).adj-adj_avg(f).adj(1,:,:))));
         
         for i = 1:n_times
             axes(ha((f-1)*n_times+i))
-            imagesc(squeeze(adj_avg(f).adj(i,:,:)))
+            imagesc(squeeze(adj_avg(f).adj(i,:,:)-adj_avg(f).adj(1,:,:)))
             caxis([c_min c_max])
             if i == 1
                 ylabel(sprintf(freq_text{f}));
@@ -158,6 +158,8 @@ for whichPt = whichPts
     filename = [name,'_avg_adj'];
     print([plot_folder,filename],'-depsc');
     
+    
+    if 0
     figure
     set(gcf,'position',[26 0 1242 900])
     [ha, pos] = tight_subplot(n_f-2, size(plot_thing,1), [0.04 0.04], [0.08 0.08], [0.05 0.01]);
@@ -181,6 +183,7 @@ for whichPt = whichPts
     end
     filename = [name,'_avg_adj_metrics'];
     print([plot_folder,filename],'-depsc');
+    end
     
     
 end

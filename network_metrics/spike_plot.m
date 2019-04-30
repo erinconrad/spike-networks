@@ -134,7 +134,7 @@ for whichPt = whichPts
     %% Plot aggregated metrics
     figure
     set(gcf,'position',[26 0 1242 900])
-    [ha, pos] = tight_subplot(n_f-2, 4, [0.04 0.02], [0.08 0.08], [0.05 0.01]);
+    [ha, pos] = tight_subplot(n_f-2, 4, [0.04 0.04], [0.08 0.08], [0.05 0.01]);
     for f = 1:n_f-2
         for i = 1:size(plot_thing,1)
             axes(ha((f-1)*4+i))
@@ -154,7 +154,7 @@ for whichPt = whichPts
             if f == n_f-2
                xlabel('Time (s)') 
             end
-            yticklabels([])
+           % yticklabels([])
             
             if i == 1
                 ylabel(sprintf(freq_text{f}));
@@ -167,7 +167,7 @@ for whichPt = whichPts
     
     figure
     set(gcf,'position',[26 0 600 700])
-    [ha2, pos] = tight_subplot(2,1, [0.07 0.02], [0.09 0.06], [0.01 0.01]);
+    [ha2, pos] = tight_subplot(2,1, [0.07 0.04], [0.09 0.06], [0.09 0.01]);
     axes(ha2(1))
     plot(avg_z_bin_dev,'ks-','linewidth',2)
     hold on
@@ -178,7 +178,7 @@ for whichPt = whichPts
         end
     end
     title('Binned signal z-score')
-    yticklabels([])
+   % yticklabels([])
     %xlabel('Time (s)')
     xticklabels([])
     set(gca,'fontsize',20)
@@ -193,7 +193,7 @@ for whichPt = whichPts
         end
     end
     title('Binned signal deviation')
-    yticklabels([])
+   % yticklabels([])
     xlabel('Time (s)')
     set(gca,'fontsize',20)
     
