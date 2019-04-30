@@ -8,6 +8,8 @@ t_text = {'t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11'};
 n_f = length(freq_text);
 n_times = 11;
 
+what_to_plot = 1; %1 if main network measure, 2 if z score
+
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;
@@ -72,25 +74,62 @@ for whichPt = whichPts
     avg_z_bin_dev = nanmean(z_bin_dev,1);
     avg_bin_dev = nanmean(bin_dev,1);
     
-    plot_thing(1,:,:) = avg_z_ns;
-    plot_thing(2,:,:) = avg_z_ec;
-    plot_thing(3,:,:) = avg_z_ge;
-    plot_thing(4,:,:) = avg_z_sync;
+    if what_to_plot == 1
+        plot_thing(1,:,:) = nanmean(ns,2);
+        plot_thing(2,:,:) = nanmean(ec,2);
+        plot_thing(3,:,:) = nanmean(ge,2);
+        plot_thing(4,:,:) = nanmean(sync,2);
+
+        orig_thing(1,:,:,:) = ns;
+        orig_thing(2,:,:,:) = ec;
+        orig_thing(3,:,:,:) = ge;
+        orig_thing(4,:,:,:) = sync;
+        
+        plot_title{1} = 'Node strength\nof spike sequence chs';
+        plot_title{2} = 'Eigenvector centrality\nof spike sequence chs';
+        plot_title{3} = 'Global efficiency';
+        plot_title{4} = 'Synchronizability';
+    elseif what_to_plot == 2
+        plot_thing(1,:,:) = avg_z_ns;
+        plot_thing(2,:,:) = avg_z_ec;
+        plot_thing(3,:,:) = avg_z_ge;
+        plot_thing(4,:,:) = avg_z_sync;
+
+        orig_thing(1,:,:,:) = z_ns;
+        orig_thing(2,:,:,:) = z_ec;
+        orig_thing(3,:,:,:) = z_ge;
+        orig_thing(4,:,:,:) = z_sync;
+        
+        plot_title{1} = 'Node strength\nof spike sequence chs';
+        plot_title{2} = 'Eigenvector centrality\nof spike sequence chs';
+        plot_title{3} = 'Global efficiency';
+        plot_title{4} = 'Synchronizability';
+    end
     
-    orig_thing(1,:,:,:) = z_ns;
-    orig_thing(2,:,:,:) = z_ec;
-    orig_thing(3,:,:,:) = z_ge;
-    orig_thing(4,:,:,:) = z_sync;
     
     
-    plot_title{1} = 'Node strength\nof spike sequence chs';
-    plot_title{2} = 'Eigenvector centrality\nof spike sequence chs';
-    plot_title{3} = 'Global efficiency';
-    plot_title{4} = 'Synchronizability';
     
-    %% Compare ec spikes to ec not spikes
-    ranksum(squeeze(stats.network_ec_notseq(1,:,6)),...
-        squeeze(stats.network.ec(1,:,6)))
+    %% Compare ec spikes to ec not spikes (sanity check)
+    if isfield(stats.network,'ec_notseq') == 1
+        p = ranksum(squeeze(stats.network.ec_notseq(1,:,6)),...
+            squeeze(stats.network.ec(1,:,6)));
+        figure
+        boxplot([squeeze(stats.network.ec_notseq(1,:,6))',squeeze(stats.network.ec(1,:,6))']);
+        hold on
+        plot([1 2],[0.2 0.2],'k-','linewidth',2)
+        if p < 0.001
+            text(1.5,0.2+0.01,sprintf('p < 0.001'),'fontsize',20,'horizontalalignment','center');
+        else
+            text(1.5,0.2+0.01,sprintf('p = %1.3f',p),'fontsize',20,'horizontalalignment','center');
+        end
+        xticklabels({'Non-spike electrodes','Spike electrodes'})
+        ylabel('Mean eigenvector centrality');
+        title('Eigenvector centrality during spike')
+        set(gca,'fontsize',20);
+        pause
+        print([plot_folder,'ec_check'],'-depsc');
+        close(gcf)
+    end
     
     %% Plot aggregated metrics
     figure
