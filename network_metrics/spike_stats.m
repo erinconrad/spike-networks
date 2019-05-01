@@ -44,7 +44,6 @@ for whichPt = whichPts
     stats = out.out;
     
     % Get variables
-    is_seq_ch = stats.basic.is_seq_ch;
     z = stats.signal.z;
     dev = stats.signal.dev;
     bin_z = stats.signal.bin_z;
