@@ -73,7 +73,7 @@ for whichPt = whichPts
     fs = data.fs;
     
      % output folder
-    out_folder = [pt_folder,'adj_tight/'];
+    out_folder = [pt_folder,'adj/'];
     if exist(out_folder,'dir') == 0
         mkdir(out_folder);
     end
@@ -245,7 +245,7 @@ for whichPt = whichPts
             end
             
             % Show the windows
-            if 1
+            if 0
                 sp_data = values(:,is_sp_ch);
                 figure
                 plot(linspace(0,12,length(sp_data)),sp_data);
