@@ -6,7 +6,7 @@ freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma'
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
 n_times = 23;
-%spike_window_times = [-0.2 0.8];
+
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -127,17 +127,7 @@ for whichPt = whichPts
             
             % Divide it up into windows
             peak = round(size(values,1)/2);
-            index_windows = zeros(n_times,2); %6 is the spike window
-            tick_window = 1*fs;
-            spike_window = peak + spike_window_times*fs;
-            
-            for i = 1:size(index_windows,1)
-                
-                % if we're at the spike window (6), then the index window
-                % is the spike window. If i is 1, then it's 5 seconds
-                % before. If i is 11, it's 5 seconds after
-                index_windows(i,:) = spike_window + tick_window*(i-6);
-            end
+            index_windows = meta.spike(s).index_windows;
             
             % readjust size
             if length(values) < size(dev,2)
