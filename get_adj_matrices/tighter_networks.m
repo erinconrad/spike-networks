@@ -251,7 +251,7 @@ for whichPt = whichPts
             end
             
             % Show the windows
-            if 0
+            if 1
                 sp_data = values(:,is_sp_ch);
                 figure
                 plot(linspace(0,14,length(sp_data)),sp_data);
