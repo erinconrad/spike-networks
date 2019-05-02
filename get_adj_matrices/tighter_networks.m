@@ -272,7 +272,7 @@ for whichPt = whichPts
                 adj(ff).adj = zeros(n_chunks,nchs,nchs);
             end
             
-            for tt = 1:n_chunks
+            for tt = 1:n_chunks*2+1
                 
                 % get appropriate points
                 temp_values = values(round(index_windows(tt,1)):round(index_windows(tt,2)),:); 
