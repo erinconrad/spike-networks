@@ -146,11 +146,17 @@ for whichPt = whichPts
             meta.spike(s).is_sp_ch = is_sp_ch;
             meta.spike(s).is_seq_ch = is_seq_ch;
  
+            %% Find nans
+            value_nan = isnan(values(:,is_sp_ch));
+            values(value_nan,:) = 0;
+            
+            
             %% Pre-processing
             % Parameters 2 and 3 indicate whether to do CAR and pre-whiten,
             % respectively
             %fprintf('Doing pre-processing...\n');
-            values = pre_processing(values,do_car,pre_whiten);
+            values = pre_processing(values,do_car,pre_whiten);      
+            values(value_nan,:) = nan;
             nchs = size(values,2);
             
             
@@ -160,9 +166,9 @@ for whichPt = whichPts
             peak = round(size(values,1)/2);
             
             values_seq_ch = values(:,is_sp_ch);
-            baseline = median(values_seq_ch,1);
+            baseline = nanmedian(values_seq_ch,1);
             dev = abs(values_seq_ch-baseline); % deviation
-            max_dev = baseline + std(values_seq_ch,0,1)*std_allowed;
+            max_dev = baseline + nanstd(values_seq_ch,0,1)*std_allowed;
             
             % Find the first point in the spike window: move to the left of
             % the spike, a point at a time, until I've reached a point
@@ -248,7 +254,7 @@ for whichPt = whichPts
             if 0
                 sp_data = values(:,is_sp_ch);
                 figure
-                plot(linspace(0,12,length(sp_data)),sp_data);
+                plot(linspace(0,14,length(sp_data)),sp_data);
                 hold on
                 for j = 1:size(index_windows,1)
                     plot([index_windows(j,1) index_windows(j,1)]/fs,get(gca,'ylim'),'k--')
