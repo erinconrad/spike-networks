@@ -5,8 +5,8 @@ function calc_network_metrics(whichPts)
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
-n_times = 11;
-spike_window_times = [-0.2 0.8];
+n_times = 23;
+%spike_window_times = [-0.2 0.8];
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
