@@ -216,6 +216,11 @@ for whichPt = whichPts
             
             windows = [non_spike;spikey;slow];
             
+            if spikey(2)-spikey(1) < 100
+                fprintf('Skipping as spike less than 100 points long\n');
+                continue;
+            end
+            
             if 0
                 figure
                 set(gcf,'position',[169 548 1272 250])
