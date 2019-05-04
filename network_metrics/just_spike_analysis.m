@@ -17,7 +17,7 @@ spike_times_file = [data_folder,'spike_times/times.mat'];
 pt_file = [data_folder,'spike_structures/pt.mat'];
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
-
+plot_folder = [results_folder,'plots/just_spike/'];
 
 times = load(spike_times_file); % will result in a structure called "out"
 times = times.out;
@@ -210,6 +210,8 @@ for whichPt = whichPts
     avg_dev = nanmean(dev,1);
     avg_bin_dev = nanmean(bin_dev,1);
     
+    save([stats_folder,'spike_stats.mat'],'out');
+    
     plot_thing(1,:,:) = avg_ns;
     plot_thing(2,:,:) = avg_ec;
     plot_thing(3,:,:) = avg_ge;
@@ -244,6 +246,8 @@ for whichPt = whichPts
             
         end
     end
+    filename = [name,'_spike'];
+    print([plot_folder,filename],'-depsc');
     
     figure
     set(gcf,'position',[26 0 1242 900])
@@ -266,6 +270,8 @@ for whichPt = whichPts
             set(gca,'fontsize',20)
         end
     end
+    filename = [name,'_spike_network'];
+    print([plot_folder,filename],'-depsc');
     
     
     figure
@@ -293,6 +299,9 @@ for whichPt = whichPts
     yticklabels([])
     xlabel('Window')
     set(gca,'fontsize',20)
+    
+    filename = [name,'_spike_dev'];
+    print([plot_folder,filename],'-depsc');
     
 end
 
