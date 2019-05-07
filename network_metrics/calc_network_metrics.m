@@ -263,7 +263,7 @@ for whichPt = whichPts
     axes(ha2(1))
     plot((1:length(avg_dev))/fs,avg_dev,'k-')
     hold on
-    %{
+    
     for tt = 1:size(index_windows,1)
         plot([index_windows(tt,1) index_windows(tt,1)]/fs,get(gca,'ylim'),'k--')
         plot([index_windows(tt,2) index_windows(tt,2)]/fs,get(gca,'ylim'),'k--')
