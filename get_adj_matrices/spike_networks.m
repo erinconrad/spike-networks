@@ -199,6 +199,7 @@ for whichPt = whichPts
             end
             
             meta.spike(s).adj = adj;
+            meta.spike(s).index_windows = index_windows;
             
             % Save the meta file after each spike run
             save(meta_file,'meta');
