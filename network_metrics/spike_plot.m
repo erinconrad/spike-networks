@@ -111,7 +111,7 @@ for whichPt = whichPts
             hold on
             for j = 2:size(plot_thing,3)
                 h = ttest(squeeze(orig_thing(i,f,:,1)),...
-                    squeeze(orig_thing(i,f,:,j)));
+                    squeeze(orig_thing(i,f,:,j)),'alpha',0.05/(length(avg_bin_dev)-1));
                 if h == 1
                     scatter(j,squeeze(plot_thing(i,f,j)),100,'r','filled')
                 end
@@ -141,7 +141,7 @@ for whichPt = whichPts
     plot(avg_bin_dev,'ks-','linewidth',2)
     hold on
     for j = 2:length(avg_bin_dev)
-        h = ttest(bin_dev(:,1),bin_dev(:,j));
+        h = ttest(bin_dev(:,1),bin_dev(:,j),'alpha',0.05/(length(avg_bin_dev)-1));
         if h == 1
             scatter(j,avg_bin_dev(j),100,'r','filled');
         end
@@ -156,7 +156,7 @@ for whichPt = whichPts
     plot(avg_bin_dev,'ks-','linewidth',2)
     hold on
     for j = 2:length(avg_bin_dev)
-        h = ttest(bin_dev(:,1),bin_dev(:,j));
+        h = ttest(bin_dev(:,1),bin_dev(:,j),'alpha',0.05/(length(avg_bin_dev)-1));
         if h == 1
             scatter(j,avg_bin_dev(j),100,'r','filled');
         end

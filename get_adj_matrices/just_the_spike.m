@@ -221,12 +221,13 @@ for whichPt = whichPts
                 continue;
             end
             
-            if 0
+            if 1
                 figure
                 set(gcf,'position',[169 548 1272 250])
                 plot(values_sp,'linewidth',2)
                 hold on
-               % plot(hp_lp)
+                plot(hp)
+                plot(hp_lp)
                 %plot(above_baseline*max(values_sp))
                 for i = 1:size(windows,1)
                     plot([windows(i,1) windows(i,1)],get(gca,'ylim'),...
@@ -236,6 +237,7 @@ for whichPt = whichPts
                 end
                 pause
                 close(gcf)
+                continue
             end
             
    

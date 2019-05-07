@@ -8,7 +8,7 @@ time_window = 1; %1 second time window
 n_chunks = 11;
 
 % The time surrounding the spike peak that I will call the spike window
-spike_window_times = [-0.2 0.8];
+spike_window_times = [-1 1];
 % NEED TO ADJUST THIS!
 
 freq_bands = [5 15;... %alpha/theta
@@ -58,7 +58,7 @@ for whichPt = whichPts
     data = data.data;
     
      % output folder
-    out_folder = [pt_folder,'adj/'];
+    out_folder = [pt_folder,'broad_adj/'];
     if exist(out_folder,'dir') == 0
         mkdir(out_folder);
     end
@@ -144,7 +144,7 @@ for whichPt = whichPts
             peak = round(size(values,1)/2);
             
             % Get index windows
-            index_windows = zeros(n_chunks,2); %6 is the spike window
+            index_windows = zeros(n_chunks,2);
             tick_window = time_window*data.fs;
             
             % Get the time that I will call my spike window (that I will
@@ -164,11 +164,12 @@ for whichPt = whichPts
                 beep
                 pause
                 close(gcf)
+                continue
             end
             
             for i = 1:size(index_windows,1)
                 
-                % if we're at the spike window (6), then the index window
+                % if we're at the spike window, then the index window
                 % is the spike window. If i is 1, then it's 5 seconds
                 % before. If i is 11, it's 5 seconds after
                 index_windows(i,:) = spike_window + tick_window*(i-6);
