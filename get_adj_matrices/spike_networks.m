@@ -167,12 +167,16 @@ for whichPt = whichPts
                 continue
             end
             
-            for i = 1:size(index_windows,1)
-                
-                % if we're at the spike window, then the index window
-                % is the spike window. If i is 1, then it's 5 seconds
-                % before. If i is 11, it's 5 seconds after
-                index_windows(i,:) = spike_window + tick_window*(i-6);
+            index_windows(ceil(n_chunks/2),:) = spike_window;
+            
+            for i = 1:ceil(n_chunks/2)-1
+                index_windows(i,1) = spike_window(1) - tick_window*(6-i);
+                index_windows(i,2) = index_windows(i,1) + tick_window;
+            end
+            
+            for i = ceil(n_chunks/2)+1:n_chunks
+                index_windows(i,1) = spike_window(2) + tick_window*(i-7);
+                index_windows(i,2) = index_windows(i,1) + tick_window;
             end
             
             %% Get adjacency matrices
