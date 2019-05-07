@@ -5,7 +5,7 @@ function calc_network_metrics(whichPts)
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
-n_times = 23;
+n_times = 11;
 n_seconds = 14;
 
 
