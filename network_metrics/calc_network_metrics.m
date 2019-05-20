@@ -43,7 +43,7 @@ for whichPt = whichPts
     name = times(whichPt).name;
     fprintf('\nDoing %s\n',name);
     pt_folder = [results_folder,name,'/'];
-    adj_folder = [results_folder,name,'/broad_adj/'];
+    adj_folder = [results_folder,name,'/adj/'];
     fs = pt(whichPt).fs;
     
     stats_folder = [pt_folder,'stats/'];
