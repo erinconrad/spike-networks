@@ -21,7 +21,8 @@ freq_names = {'alpha_theta','beta','low_gamma',...
 flow = 4; % low pass for slow wave
 fhigh = 40; % high pass for spikey bit
 butter_order = 6; % butterworth order
-min_slow = 100; % how many points long does slow wave need to be
+min_slow = 50; % how many points long does slow wave need to be
+post_spike_buffer = 50; % define slow wave to start 50 points after spikey part ends
 
 
 %% Get file locations, load spike times and pt structure
@@ -182,7 +183,7 @@ for whichPt = whichPts
             %% Find slow wave
             
             % Define start of slow wave to be spikey end
-            slow_start = spikey_end + 1;
+            slow_start = spikey_end + post_spike_buffer;
             
             % Find end of slow wave
             % Low pass filter to get the slow wave
@@ -196,8 +197,8 @@ for whichPt = whichPts
             % Only take times after the spikey part
             after_spikey = diff_sign_dev_lp(slow_start+min_slow:end);
             
-            % Find the indices with a sign change
-            sign_change = find(after_spikey ~= 0);
+            % Find the indices with a NEGATVIE sign change
+            sign_change = find(after_spikey < 0);
             slow_end = slow_start + min_slow+ sign_change(1);
             
              % The indices of the start and end index of the spikey bit and
@@ -221,13 +222,16 @@ for whichPt = whichPts
                 continue;
             end
             
-            if 1
+            if 0
                 figure
                 set(gcf,'position',[169 548 1272 250])
                 plot(values_sp,'linewidth',2)
                 hold on
-                plot(hp)
-                plot(hp_lp)
+                plot(lp)
+                plot(get(gca,'xlim'),[lp_bl lp_bl],'k--')
+                
+                %plot(hp)
+                %plot(hp_lp)
                 %plot(above_baseline*max(values_sp))
                 for i = 1:size(windows,1)
                     plot([windows(i,1) windows(i,1)],get(gca,'ylim'),...
@@ -290,6 +294,7 @@ for whichPt = whichPts
                     colorbar
                     title(sprintf('%d s',tt))
                 end
+                
                 beep
                 pause
                 close(gcf)
