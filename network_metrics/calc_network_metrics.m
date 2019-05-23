@@ -77,6 +77,9 @@ for whichPt = whichPts
     dev = nan(n_spikes,fs*n_seconds);
     bin_dev = nan(n_spikes,n_times);
     is_seq = nan(n_spikes,nchs);
+    ge_sp_net = nan(n_f,n_spikes,n_times);
+    sync_sp_net = nan(n_f,n_spikes,n_times);
+    ns_sp_net = nan(n_f,n_spikes,n_times);
     
     % Initialize spike count
     s_count = 0;
@@ -159,6 +162,23 @@ for whichPt = whichPts
                     if sum(sum(isnan(adj))) > 0
                         continue
                     end
+                    
+                    % also get the adjacency matrix for the network made up
+                    % of only the spike sequence channels
+                    adj_sp = adj(seq_chs,seq_chs);
+                    
+                    if 0
+                       % Side by side plot
+                       figure
+                       subplot(1,2,1)
+                       imagesc(adj)
+                       
+                       subplot(1,2,2)
+                       imagesc(adj_sp)
+                       pause
+                       close(gcf)
+                    end
+                    
                     %% Calculate metrics
                     ge(which_freq,s_count,tt) = efficiency_wei(adj,0); % global efficiency
                     sync(which_freq,s_count,tt) = synchronizability_sp(adj);
@@ -173,6 +193,13 @@ for whichPt = whichPts
                     ec_seq(which_freq,s_count,tt) = mean(ec_temp(seq_chs));
                     
                     ec_not_seq(which_freq,s_count,tt) = mean(ec_temp(~seq_chs));
+                    
+                    %% Calculate metrics for network of just spike channels
+                    ge_sp_net(which_freq,s_count,tt) = efficiency_wei(adj_sp,0);
+                    sync_sp_net(which_freq,s_count,tt) = synchronizability_sp(adj_sp);
+                    
+                    % mean node strength of all channels in spike network
+                    ns_sp_net(which_freq,s_count,tt) = mean(strengths_und(adj_sp));
 
                 end
                 
