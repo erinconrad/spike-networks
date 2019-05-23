@@ -195,11 +195,13 @@ for whichPt = whichPts
                     ec_not_seq(which_freq,s_count,tt) = mean(ec_temp(~seq_chs));
                     
                     %% Calculate metrics for network of just spike channels
-                    ge_sp_net(which_freq,s_count,tt) = efficiency_wei(adj_sp,0);
-                    sync_sp_net(which_freq,s_count,tt) = synchronizability_sp(adj_sp);
-                    
-                    % mean node strength of all channels in spike network
-                    ns_sp_net(which_freq,s_count,tt) = mean(strengths_und(adj_sp));
+                    if sum(seq_chs) > 4
+                        ge_sp_net(which_freq,s_count,tt) = efficiency_wei(adj_sp,0);
+                        sync_sp_net(which_freq,s_count,tt) = synchronizability_sp(adj_sp);
+
+                        % mean node strength of all channels in spike network
+                        ns_sp_net(which_freq,s_count,tt) = mean(strengths_und(adj_sp));
+                    end
 
                 end
                 
