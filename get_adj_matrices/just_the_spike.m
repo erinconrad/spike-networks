@@ -127,7 +127,7 @@ for whichPt = whichPts
         
         
         % Loop through spikes
-        for s =55% start_spike:length(spike)
+        for s =start_spike:length(spike)
             fprintf('Doing spike %d of %d...\n',s,length(spike));
             tic
             if isempty(spike(s).time) == 1, continue; end
