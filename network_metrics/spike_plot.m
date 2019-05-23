@@ -1,6 +1,8 @@
 function spike_plot(whichPts)
 
 %% Parameters
+sp_net = 1;
+
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
@@ -52,9 +54,15 @@ for whichPt = whichPts
     dev = stats.signal.dev;
     bin_dev = stats.signal.bin_dev;
     ec = stats.network.ec;
-    ge = stats.network.ge;
-    ns = stats.network.ns;
-    sync = stats.network.sync;
+    if sp_net == 0
+        ge = stats.network.ge;
+        ns = stats.network.ns;
+        sync = stats.network.sync;
+    elseif sp_net == 1
+        ge = stats.network.ge_sp;
+        ns = stats.network.ns_sp;
+        sync = stats.network.sync;
+    end
     
     
     avg_bin_dev = nanmean(bin_dev,1);

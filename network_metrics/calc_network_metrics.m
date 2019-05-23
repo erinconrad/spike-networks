@@ -230,6 +230,9 @@ for whichPt = whichPts
     out.network.ec_notseq = ec_not_seq;
     out.network.ge = ge;
     out.network.sync = sync;
+    out.network.ns_sp = ns_sp_net;
+    out.network.ge_sp = ge_sp_net;
+    out.network.sync_sp = sync_sp_net;
 
     save([stats_folder,'stats.mat'],'out');
     
