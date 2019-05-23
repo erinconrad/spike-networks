@@ -23,7 +23,7 @@ fhigh = 40; % high pass for spikey bit
 butter_order = 6; % butterworth order
 min_slow = 50; % how many points long does slow wave need to be
 post_spike_buffer = 50; % define slow wave to start 50 points after spikey part ends
-
+max_slow = 500; % max number of points for the slow wave
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -127,7 +127,7 @@ for whichPt = whichPts
         
         
         % Loop through spikes
-        for s = start_spike:length(spike)
+        for s =55% start_spike:length(spike)
             fprintf('Doing spike %d of %d...\n',s,length(spike));
             tic
             if isempty(spike(s).time) == 1, continue; end
@@ -160,6 +160,7 @@ for whichPt = whichPts
             %% Find spikey bit     
             % Isolate the first spike channel
             values_sp = values(:,is_sp_ch);
+            values_sp(isnan(values_sp)) = 0;
             
             % High pass filter to get the spikey bit, take abs
             hp = abs(filtfilt(B_high,A_high,values_sp));
