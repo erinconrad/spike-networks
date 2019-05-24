@@ -2,9 +2,9 @@ function spike_networks(whichPts)
 
 %% Parameters
 merge = 1; % merge with existing?
-do_car = 1;
-pre_whiten = 1;
-time_window = 0.2; %1 second time window
+do_car = 0;
+pre_whiten = 0;
+time_window = 0.1; %1 second time window
 n_chunks = 23;
 
 freq_bands = [5 15;... %alpha/theta
