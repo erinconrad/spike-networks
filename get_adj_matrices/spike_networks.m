@@ -54,7 +54,7 @@ for whichPt = whichPts
     data = data.data;
     
      % output folder
-    out_folder = [pt_folder,'broad_adj/'];
+    out_folder = [pt_folder,'adj_small/'];
     if exist(out_folder,'dir') == 0
         mkdir(out_folder);
     end
