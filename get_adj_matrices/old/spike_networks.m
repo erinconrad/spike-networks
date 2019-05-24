@@ -2,10 +2,14 @@ function spike_networks(whichPts)
 
 %% Parameters
 merge = 1; % merge with existing?
-do_car = 1;
-pre_whiten = 1;
-time_window = 0.2; %1 second time window
-n_chunks = 23;
+do_car = 0;
+pre_whiten = 0;
+time_window = 1; %1 second time window
+n_chunks = 11;
+
+% The time surrounding the spike peak that I will call the spike window
+spike_window_times = [-1 1];
+% NEED TO ADJUST THIS!
 
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
@@ -89,7 +93,7 @@ for whichPt = whichPts
         spike = spike.spike;
         
         % Initialize output data
-        meta_file = [out_folder,sprintf('adj_small_%d.mat',f)];
+        meta_file = [out_folder,sprintf('adj_%d.mat',f)];
         
         % Load it if it exists to see how much we've already done
         if exist(meta_file,'file') ~= 0
@@ -145,7 +149,7 @@ for whichPt = whichPts
             
             % Get the time that I will call my spike window (that I will
             % remove when doing analysis)
-            spike_window = peak + [-tick_window/2 tick_window/2];
+            spike_window = peak + spike_window_times*data.fs;
             
             % Show the spike window
             if 0
@@ -166,12 +170,12 @@ for whichPt = whichPts
             index_windows(ceil(n_chunks/2),:) = spike_window;
             
             for i = 1:ceil(n_chunks/2)-1
-                index_windows(i,1) = spike_window(1) - tick_window*(ceil(n_chunks/2)-i);
+                index_windows(i,1) = spike_window(1) - tick_window*(6-i);
                 index_windows(i,2) = index_windows(i,1) + tick_window;
             end
             
             for i = ceil(n_chunks/2)+1:n_chunks
-                index_windows(i,1) = spike_window(2) + tick_window*(i-ceil(n_chunks/2)-1);
+                index_windows(i,1) = spike_window(2) + tick_window*(i-7);
                 index_windows(i,2) = index_windows(i,1) + tick_window;
             end
             
