@@ -11,6 +11,12 @@ n_f = length(freq_text);
 n_times = 11*2+1;
 
 %% Get file locations, load spike times and pt structure
+if sp_net == 1
+    addend_text = '_sp';
+else
+    addend_text = '';
+end
+
 locations = spike_network_files;
 main_folder = locations.main_folder;
 results_folder = [main_folder,'results/'];
@@ -139,8 +145,8 @@ for whichPt = whichPts
             set(gca,'fontsize',20)
         end
     end
-    filename = [name,'_network_dev'];
-    print([plot_folder,filename],'-depsc');
+    filename = [name,'_network_dev',addend_text];
+   % print([plot_folder,filename],'-depsc');
     
     figure
     set(gcf,'position',[26 0 600 700])
@@ -174,8 +180,8 @@ for whichPt = whichPts
     xlabel('Time (s)')
     set(gca,'fontsize',20)
     
-    filename = [name,'_signal_dev_2'];
-    print([plot_folder,filename],'-depsc');
+    filename = [name,'_signal_dev_2',addend_text];
+   % print([plot_folder,filename],'-depsc');
    
 end
 

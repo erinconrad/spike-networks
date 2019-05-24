@@ -1,5 +1,14 @@
 function tighter_networks(whichPts)
 
+%{
+This function calculates adjacency matrices surrounding spikes. It has a
+variably defined spike window, based on return to baseline surrounding the
+spike and with a backup default of 1 s before and 1 s after the spike peak.
+
+Outside the spike, there are 22 500-ms windows, 11 before and 11 after the
+spike.
+%}
+
 %% Parameters
 merge = 1; % merge with existing?
 do_car = 1;
