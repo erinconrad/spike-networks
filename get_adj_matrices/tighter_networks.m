@@ -24,15 +24,11 @@ default_spike_window_times = [-1 1];
 
 % Within How many standard deviations away from median must the pre- and
 % post-spike period be to be considered baseline
-std_allowed = 1;
+std_allowed = 1.5;
 
 % How long must the eeg signal be at that baseline to say it's in the pre-
 % or post- spike window
-time_at_baseline = 0.5; %0.5 seconds
-
-% How long then to move the spike window once I've found this baseline
-% period
-buffer = 0.05;
+time_at_baseline = 0.25; %0.25 seconds
 
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
@@ -149,6 +145,28 @@ for whichPt = whichPts
             % Get spike chs
             is_sp_ch = strcmp(ch_labels(~ignore),spike(s).label);
             is_seq_ch = ismember(ch_labels(~ignore),spike(s).seq_labels);
+            
+            if 0
+                figure
+                seq_chs = find(is_seq_ch);
+                offset = 0;
+                for i = 1:sum(is_seq_ch)
+                    ch = seq_chs(i);
+                    if ch == find(is_sp_ch)
+                        col = 'r';
+                    else
+                        col = 'k';
+                    end
+                    offset = offset - 500;
+                    plot(values(:,ch)-offset,col)
+                    text(7200,nanmedian(values(:,ch)-offset),spike(s).seq_labels(i))
+                    hold on
+                end
+                title(sprintf('%s',spike(s).label))
+                pause
+                close(gcf)
+                continue
+            end
            
             
             meta.spike(s).time =spike(s).time;
@@ -158,19 +176,11 @@ for whichPt = whichPts
             %% Find nans
             value_nan = isnan(values(:,is_sp_ch));
             values(value_nan,:) = 0;
-            
-            
-            %% Pre-processing
-            % Parameters 2 and 3 indicate whether to do CAR and pre-whiten,
-            % respectively
-            %fprintf('Doing pre-processing...\n');
-            values = pre_processing(values,do_car,pre_whiten);      
-            values(value_nan,:) = nan;
-            nchs = size(values,2);
-            
-            
+
             
             %% Decide the spike window
+            nchs = size(values,2);
+            
             % The peak should be the very center of each file
             peak = round(size(values,1)/2);
             
@@ -200,7 +210,11 @@ for whichPt = whichPts
                 % If not outside allowed in any, we found a pre-spike
                 % period
                 if sum(any(outside_dev,2)) == 0
-                    spike_window(1) = peak - t - buffer*fs;
+                    spike_window(1) = peak - t - time_at_baseline*fs;
+                    
+                    if spike_window(1) < peak - abs(default_spike_window_times(1)*fs)
+                        spike_window(1) = peak - abs(default_spike_window_times(1)*fs);
+                    end
                     break
                 end
                 
@@ -229,7 +243,11 @@ for whichPt = whichPts
                 % If not outside allowed in any, we found a post-spike
                 % period
                 if sum(any(outside_dev,2)) == 0
-                    spike_window(2) = peak + t + buffer*fs;
+                    spike_window(2) = peak + t + time_at_baseline*fs;
+                    
+                    if spike_window(2) > peak + abs(default_spike_window_times(2)*fs)
+                        spike_window(2) = peak + abs(default_spike_window_times(2)*fs);
+                    end
                     break
                 end
                 
@@ -263,7 +281,8 @@ for whichPt = whichPts
             if 0
                 sp_data = values(:,is_sp_ch);
                 figure
-                plot(linspace(0,14,length(sp_data)),sp_data);
+                set(gcf,'position',[440 422 1001 376])
+                plot(linspace(0,14,length(sp_data)),sp_data,'linewidth',2);
                 hold on
                 for j = 1:size(index_windows,1)
                     plot([index_windows(j,1) index_windows(j,1)]/fs,get(gca,'ylim'),'k--')
@@ -273,10 +292,34 @@ for whichPt = whichPts
                 plot(get(gca,'xlim'),[baseline baseline],'b--')
                 plot(get(gca,'xlim'),[baseline+max_dev baseline+max_dev],'r--');
                 plot(get(gca,'xlim'),[baseline-max_dev baseline-max_dev],'r--');
-                beep
+                %beep
                 pause
                 close(gcf)
+                continue
             end
+            
+            %% Get signal deviation
+            meta.spike(s).dev = nan(n_chunks*2+1,1);
+            for tt = 1:n_chunks*2+1
+                sp_ch_avg_dev = nanmean(dev(round(index_windows(tt,1)):round(index_windows(tt,2))));
+                meta.spike(s).dev(tt) = sp_ch_avg_dev;
+            end
+            
+            if 0
+                plot((1:length(values_seq_ch))/fs,values_seq_ch)
+                hold on
+                plot(mean(index_windows,2)/fs,meta.spike(s).dev)
+                pause
+                close(gcf)
+                continue
+            end
+            
+            %% Pre-processing
+            % Parameters 2 and 3 indicate whether to do CAR and pre-whiten,
+            % respectively
+            %fprintf('Doing pre-processing...\n');
+            values = pre_processing(values,do_car,pre_whiten);      
+            values(value_nan,:) = nan;
             
             %% Get adjacency matrices
             %fprintf('Calculating functional networks...\n');
@@ -298,7 +341,7 @@ for whichPt = whichPts
                 for ff = 1:size(freq_bands,1)
                     adj(ff).adj(tt,:,:) = t_adj(ff).adj;
                 end
-                
+         
             end
             
             meta.spike(s).adj = adj;

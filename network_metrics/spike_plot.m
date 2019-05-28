@@ -93,6 +93,7 @@ for whichPt = whichPts
     
     
     %% Compare ec spikes to ec not spikes (sanity check)
+    %{
     if isfield(stats.network,'ec_notseq') == 1
         p = ranksum(squeeze(stats.network.ec_notseq(1,:,12)),...
             squeeze(stats.network.ec(1,:,12)));
@@ -113,6 +114,7 @@ for whichPt = whichPts
         print([plot_folder,'ec_check'],'-depsc');
         close(gcf)
     end
+    %}
     
     %% Plot aggregated metrics
     figure
@@ -125,7 +127,7 @@ for whichPt = whichPts
             hold on
             for j = 2:size(plot_thing,3)
                 h = ttest(squeeze(orig_thing(i,f,:,1)),...
-                    squeeze(orig_thing(i,f,:,j)),'alpha',0.05/(length(avg_bin_dev)-1));
+                    squeeze(orig_thing(i,f,:,j)),'alpha',0.05/(length(avg_bin_dev)-1)/(n_f-2)/4);
                 if h == 1
                     scatter(j,squeeze(plot_thing(i,f,j)),100,'r','filled')
                 end
@@ -135,7 +137,7 @@ for whichPt = whichPts
                 title(sprintf(plot_title{i}));
             end
             if f == n_f-2
-               xlabel('Time (s)') 
+               xlabel('Time') 
             end
            % yticklabels([])
             
@@ -146,7 +148,7 @@ for whichPt = whichPts
         end
     end
     filename = [name,'_network_dev',addend_text];
-   % print([plot_folder,filename],'-depsc');
+    print([plot_folder,filename],'-depsc');
     
     figure
     set(gcf,'position',[26 0 600 700])
@@ -177,11 +179,11 @@ for whichPt = whichPts
     end
     title('Binned signal deviation')
    % yticklabels([])
-    xlabel('Time (s)')
+    xlabel('Time')
     set(gca,'fontsize',20)
     
     filename = [name,'_signal_dev_2',addend_text];
-   % print([plot_folder,filename],'-depsc');
+    print([plot_folder,filename],'-depsc');
    
 end
 

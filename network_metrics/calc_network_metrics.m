@@ -177,6 +177,7 @@ for whichPt = whichPts
                        imagesc(adj_sp)
                        pause
                        close(gcf)
+                       
                     end
                     
                     %% Calculate metrics
