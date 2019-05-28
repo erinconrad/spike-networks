@@ -1,4 +1,4 @@
-function calc_network_metrics(whichPts)
+function calc_network_metrics(whichPts,small)
 
 %% Parameters
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
@@ -43,7 +43,11 @@ for whichPt = whichPts
     name = times(whichPt).name;
     fprintf('\nDoing %s\n',name);
     pt_folder = [results_folder,name,'/'];
-    adj_folder = [results_folder,name,'/adj/'];
+    if small == 1
+        adj_folder = [results_folder,name,'/adj_small/'];
+    else
+        adj_folder = [results_folder,name,'/adj/'];
+    end
     fs = pt(whichPt).fs;
     
     stats_folder = [pt_folder,'stats/'];
@@ -222,6 +226,8 @@ for whichPt = whichPts
     
     %% Save stuff to structure
     out = [];
+    out.index_windows = index_windows;
+    out.fs = fs;
     out.signal.dev = dev;
     out.signal.bin_dev = bin_dev;
     

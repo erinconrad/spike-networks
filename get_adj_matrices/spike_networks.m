@@ -2,8 +2,8 @@ function spike_networks(whichPts)
 
 %% Parameters
 merge = 1; % merge with existing?
-do_car = 0;
-pre_whiten = 0;
+do_car = 1;
+pre_whiten = 1;
 time_window = 0.1; %1 second time window
 n_chunks = 23;
 
