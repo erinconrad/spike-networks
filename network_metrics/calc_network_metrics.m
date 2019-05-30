@@ -5,9 +5,7 @@ function calc_network_metrics(whichPts,small)
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
-n_times = 11;
 n_seconds = 14;
-
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -70,6 +68,8 @@ for whichPt = whichPts
     meta = load([adj_folder,listing(1).name]); 
     meta = meta.meta;
     nchs = length(meta.spike(1).is_seq_ch);
+    
+    n_times = size(index_windows,1);
     
     % Prep network matrices
     ge = nan(n_f,n_spikes,n_times);
@@ -241,7 +241,11 @@ for whichPt = whichPts
     out.network.ge_sp = ge_sp_net;
     out.network.sync_sp = sync_sp_net;
 
-    save([stats_folder,'stats.mat'],'out');
+    if small == 1
+        save([stats_folder,'stats_small.mat'],'out');
+    else
+        save([stats_folder,'stats.mat'],'out');
+    end
     
     z_ns = (((ns_seq-mean(ns_seq,3))./std(ns_seq,0,3)));
     z_ec = (((ec_seq-mean(ec_seq,3))./std(ec_seq,0,3)));

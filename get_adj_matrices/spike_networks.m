@@ -4,7 +4,7 @@ function spike_networks(whichPts)
 merge = 1; % merge with existing?
 do_car = 1;
 pre_whiten = 1;
-time_window = 0.1; %1 second time window
+time_window = 0.5; %1 second time window
 n_chunks = 23;
 
 freq_bands = [5 15;... %alpha/theta
@@ -131,7 +131,7 @@ for whichPt = whichPts
             % Parameters 2 and 3 indicate whether to do CAR and pre-whiten,
             % respectively
             %fprintf('Doing pre-processing...\n');
-            old_values = values;
+            %old_values = values;
             values = pre_processing(values,do_car,pre_whiten);
             nchs = size(values,2);
             

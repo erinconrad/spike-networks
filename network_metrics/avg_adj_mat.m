@@ -126,7 +126,7 @@ for whichPt = whichPts
     
     
     %% Plot aggregated metrics
-    
+    fprintf('Spike count is %d\n',s_count);
     
     figure
     set(gcf,'position',[1 200 1440 530]);
@@ -158,7 +158,7 @@ for whichPt = whichPts
     print([plot_folder,filename],'-depsc');
     
     
-    if 0
+    if 1
     figure
     set(gcf,'position',[26 0 1242 900])
     [ha, pos] = tight_subplot(n_f-2, size(plot_thing,1), [0.04 0.04], [0.08 0.08], [0.05 0.01]);

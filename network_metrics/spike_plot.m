@@ -1,4 +1,4 @@
-function spike_plot(whichPts)
+function spike_plot(whichPts,small)
 
 %% Parameters
 sp_net = 1;
@@ -53,7 +53,11 @@ for whichPt = whichPts
     stats_folder = [pt_folder,'stats/'];
     
     % Load the stats file
-    out = load([stats_folder,'stats.mat']);
+    if small == 1
+        out = load([stats_folder,'stats_small.mat']);
+    else
+        out = load([stats_folder,'stats.mat']);
+    end
     stats = out.out;
     
     % Get variables
