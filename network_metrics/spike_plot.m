@@ -1,14 +1,12 @@
 function spike_plot(whichPts,small)
 
 %% Parameters
-sp_net = 1;
+sp_net = 0;
 
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
-t_text = {'t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11'};
 n_f = length(freq_text);
-n_times = 11*2+1;
 
 %% Get file locations, load spike times and pt structure
 if sp_net == 1
