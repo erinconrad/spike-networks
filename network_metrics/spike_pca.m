@@ -84,8 +84,8 @@ for whichPt = whichPts
             
             
             % Get spike time and ch
-            sp_times(s_count) = spike(s_count).time;
-            sp_labels{s_count} = spike(s_count).label;
+            sp_times(s_count) = spike(s).time;
+            sp_labels{s_count} = spike(s).label;
             
             for which_freq = 1:length(meta.spike(s).adj)
                 adj_all_t= meta.spike(s).adj(which_freq).adj;
