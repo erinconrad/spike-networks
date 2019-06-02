@@ -1,6 +1,6 @@
 function pca_2(whichPts)
 
-which_freq = 2; % beta
+which_freq = 4; % beta
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -47,15 +47,7 @@ for whichPt = whichPts
     imagesc(adj')
     end
     
-    % Get number of channels
-    y = size(adj,2);
-    nchs = 0.5 + sqrt(0.25+2*y);
     
-    if nchs-floor(nchs) > 0.01
-        error('what\n');
-    end
-    
-    nchs = round(nchs);
     
     % pca
     [coeff,score,latent] = pca(adj);
@@ -72,36 +64,24 @@ for whichPt = whichPts
         % the flattened adj matrix for the first principal component
         subgraph = coeff(:,i);
         
-        % Reconstruct the full adjancency matrix
-        A = zeros(nchs,nchs);
-        count = 0;
-        for j = 1:size(A,1)
-            for k = 1:j-1
-                count = count + 1;
-                A(j,k) = subgraph(count);
-            end
-        end
-        
-        if count ~= length(subgraph)
-            error('what\n');
-        end
-        
-        A = A + A';
+        % expand to get full adjacency matrix
+        A = flatten_or_expand_adj(subgraph);
         
         % Plot the adjacency matrix for the first principal component
         figure
         subplot(1,2,1)
         imagesc(A)
         
+        
         % Plot the histogram of scores of the first component for the 1000
         % spikes
         subplot(1,2,2)
         histogram(score(:,i))
         
-        % Find the 50 spikes with the highest score
+        % Find the 10 spikes with the highest score
         [~,sorted_score_I] = sort(score(:,i));
-        top_score = sorted_score_I(end-49:end);
-        bottom_score = sorted_score_I(1:50);
+        top_score = sorted_score_I(end-9:end);
+        bottom_score = sorted_score_I(1:10);
         
         fprintf('Top score for component %d:\n',i);
         sp_adj.labels(top_score)
@@ -111,6 +91,13 @@ for whichPt = whichPts
         
         fprintf('\n');
         
+    end
+    
+    % Plot the scores over time
+    figure
+    for i = 1:3
+        plot(sp_adj.time,score(:,i))
+        hold on
     end
     
     

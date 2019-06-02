@@ -1,4 +1,4 @@
-function spike_pca(whichPts)
+function spike_pca_setup(whichPts)
 
 n_f = 6;
 
@@ -60,7 +60,7 @@ for whichPt = whichPts
     % Initialize matrices
     sp_adj = nan(n_f,n_spikes,nchs*(nchs-1)/2);
     sp_times = nan(n_spikes,1);
-    sp_labels = cell(n_spikes,1);
+    sp_labels = struct;
     
     % Initialize spike count
     s_count = 0;
@@ -85,7 +85,7 @@ for whichPt = whichPts
             
             % Get spike time and ch
             sp_times(s_count) = spike(s).time;
-            sp_labels{s_count} = spike(s).label;
+            sp_labels(s_count).labels = spike(s).seq_labels;
             
             for which_freq = 1:length(meta.spike(s).adj)
                 adj_all_t= meta.spike(s).adj(which_freq).adj;

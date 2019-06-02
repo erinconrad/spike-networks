@@ -47,7 +47,7 @@ for whichPt = whichPts
         adj_folder = [results_folder,name,'/adj/'];
     end
     fs = pt(whichPt).fs;
-    error('look\n');
+    %error('look\n');
     
     stats_folder = [pt_folder,'stats/'];
     if exist(stats_folder,'dir') == 0
