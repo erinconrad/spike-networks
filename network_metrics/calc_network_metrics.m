@@ -70,7 +70,8 @@ for whichPt = whichPts
     meta = meta.meta;
     nchs = length(meta.spike(1).is_seq_ch);
     
-    n_times = size(index_windows,1);
+    
+    n_times = size(meta.spike(1).index_windows,1);
     
     % Prep network matrices
     ge = nan(n_f,n_spikes,n_times);
