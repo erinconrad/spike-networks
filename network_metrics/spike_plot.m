@@ -52,7 +52,7 @@ for whichPt = whichPts
     
     % Load the stats file
     if small == 1
-        out = load([stats_folder,'stats_small.mat']);
+        out = load([stats_folder,'stats_small_100.mat']);
     else
         out = load([stats_folder,'stats.mat']);
     end
@@ -75,10 +75,10 @@ for whichPt = whichPts
     
     avg_bin_dev = nanmean(bin_dev,1);
 
-    plot_thing(1,:,:) = nanmean(ns,2);
-    plot_thing(2,:,:) = nanmean(ec,2);
-    plot_thing(3,:,:) = nanmean(ge,2);
-    plot_thing(4,:,:) = nanmean(sync,2);
+    plot_thing(1,:,:) = nanmedian(ns,2);
+    plot_thing(2,:,:) = nanmedian(ec,2);
+    plot_thing(3,:,:) = nanmedian(ge,2);
+    plot_thing(4,:,:) = nanmedian(sync,2);
 
     orig_thing(1,:,:,:) = ns;
     orig_thing(2,:,:,:) = ec;

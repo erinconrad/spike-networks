@@ -43,13 +43,14 @@ for whichPt = whichPts
     pt_folder = [results_folder,name,'/'];
     if small == 1
         adj_folder = [results_folder,name,'/adj_small/'];
+        stats_folder = [pt_folder,'stats_small/'];
     else
         adj_folder = [results_folder,name,'/adj/'];
+        stats_folder = [pt_folder,'stats/'];
     end
     fs = pt(whichPt).fs;
     %error('look\n');
     
-    stats_folder = [pt_folder,'stats/'];
     if exist(stats_folder,'dir') == 0
         mkdir(stats_folder);
     end
