@@ -93,6 +93,7 @@ for whichPt = whichPts
     
     % Initialize spike count
     s_count = 0;
+    out = [];
     
     for f = 1:length(listing)
         fname = listing(f).name;
@@ -233,7 +234,7 @@ for whichPt = whichPts
     %}
     
     %% Save stuff to structure
-    out = [];
+    
     
     out.fs = fs;
     out.signal.dev = dev;
