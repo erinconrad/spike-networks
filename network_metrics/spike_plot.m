@@ -1,7 +1,7 @@
 function spike_plot(whichPts,small)
 
 %% Parameters
-sp_net = 0;
+sp_net = 1;
 
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
@@ -48,12 +48,14 @@ for whichPt = whichPts
     fprintf('\nDoing %s\n',name);
     
     pt_folder = [results_folder,name,'/'];
-    stats_folder = [pt_folder,'stats/'];
+    
     
     % Load the stats file
     if small == 1
-        out = load([stats_folder,'stats_small_100.mat']);
+        stats_folder = [pt_folder,'stats_small/'];
+        out = load([stats_folder,'stats_small.mat']);
     else
+        stats_folder = [pt_folder,'stats/'];
         out = load([stats_folder,'stats.mat']);
     end
     stats = out.out;

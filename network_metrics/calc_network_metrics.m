@@ -44,9 +44,12 @@ for whichPt = whichPts
     if small == 1
         adj_folder = [results_folder,name,'/adj_small/'];
         stats_folder = [pt_folder,'stats_small/'];
-    else
+    elseif small == 0
         adj_folder = [results_folder,name,'/adj/'];
         stats_folder = [pt_folder,'stats/'];
+    elseif small == 1
+        adj_folder = [results_folder,name,'/adj_test/'];
+        stats_folder = [pt_folder,'stats_test/'];
     end
     fs = pt(whichPt).fs;
     %error('look\n');
@@ -246,8 +249,10 @@ for whichPt = whichPts
 
     if small == 1
         save([stats_folder,'stats_small.mat'],'out');
-    else
+    elseif small == 0
         save([stats_folder,'stats.mat'],'out');
+    elseif small == 2
+        save([stats_folder,'stats_test.mat'],'out');
     end
     
     z_ns = (((ns_seq-mean(ns_seq,3))./std(ns_seq,0,3)));

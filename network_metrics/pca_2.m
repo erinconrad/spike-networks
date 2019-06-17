@@ -1,6 +1,6 @@
 function pca_2(whichPts)
 
-which_freq = 3;
+which_freq = 2;
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -44,7 +44,7 @@ for whichPt = whichPts
     adj = squeeze(sp_adj.adj(which_freq,:,:));
     
     % visualize it
-    if 1
+    if 0
     figure
     imagesc(adj')
     end
@@ -70,7 +70,7 @@ for whichPt = whichPts
         A = flatten_or_expand_adj(subgraph);
         nchs = size(A,1);
         
-        if 0
+        if 1
         % Plot the adjacency matrix for the first principal component
         figure
         subplot(1,2,1)
