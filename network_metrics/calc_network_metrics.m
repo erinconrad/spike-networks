@@ -218,6 +218,8 @@ for whichPt = whichPts
                 
             end
             
+            out.index_windows(s).window = index_windows;
+            
         end
         
     end
@@ -232,7 +234,7 @@ for whichPt = whichPts
     
     %% Save stuff to structure
     out = [];
-    out.index_windows = index_windows;
+    
     out.fs = fs;
     out.signal.dev = dev;
     out.signal.bin_dev = bin_dev;
