@@ -219,7 +219,7 @@ for whichPt = whichPts
                 
             end
             
-            out.index_windows(s).window = index_windows;
+            out.index_windows(s_count).window = index_windows;
             
         end
         
