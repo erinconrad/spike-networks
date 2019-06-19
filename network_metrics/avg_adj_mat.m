@@ -1,4 +1,4 @@
-function avg_adj_mat(whichPts)
+function avg_adj_mat(whichPts,small)
 
 %% Parameters
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
@@ -6,6 +6,7 @@ freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma'
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
 n_times = 11*2+1;
+do_plot = 0;
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -44,7 +45,18 @@ for whichPt = whichPts
     adj_folder = [results_folder,name,'/adj/'];
     fs = pt(whichPt).fs;
     
-    stats_folder = [pt_folder,'stats/'];
+    if small == 1
+        adj_folder = [results_folder,name,'/adj_small/'];
+        stats_folder = [pt_folder,'stats_small/'];
+    elseif small == 0
+        adj_folder = [results_folder,name,'/adj/'];
+        stats_folder = [pt_folder,'stats/'];
+    elseif small == 2
+        adj_folder = [results_folder,name,'/adj_test/'];
+        stats_folder = [pt_folder,'stats_test/'];
+    end
+    
+    
     if exist(stats_folder,'dir') == 0
         mkdir(stats_folder);
     end
@@ -119,6 +131,15 @@ for whichPt = whichPts
         end
     end
     
+    %% Save the avg adjacency matrix
+    if small == 0
+        save([stats_folder,'/avg_adj.mat'],'adj_avg');
+    elseif small == 1
+        save([stats_folder,'/avg_adj_small.mat'],'adj_avg');
+    elseif small == 2
+        save([stats_folder,'/avg_adj_test.mat'],'adj_avg');
+    end
+    
     plot_thing(1,:,:) = ge;
     plot_thing(2,:,:) = sync;
     
@@ -127,6 +148,9 @@ for whichPt = whichPts
     
     %% Plot aggregated metrics
     fprintf('Spike count is %d\n',s_count);
+    
+    if do_plot == 1
+
     
     figure
     set(gcf,'position',[1 200 1440 530]);
@@ -182,6 +206,8 @@ for whichPt = whichPts
     end
     filename = [name,'_avg_adj_metrics'];
     print([plot_folder,filename],'-depsc');
+    end
+    
     end
     
     
