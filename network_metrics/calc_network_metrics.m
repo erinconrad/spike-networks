@@ -47,7 +47,7 @@ for whichPt = whichPts
     elseif small == 0
         adj_folder = [results_folder,name,'/adj/'];
         stats_folder = [pt_folder,'stats/'];
-    elseif small == 1
+    elseif small == 2
         adj_folder = [results_folder,name,'/adj_test/'];
         stats_folder = [pt_folder,'stats_test/'];
     end
