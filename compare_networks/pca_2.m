@@ -1,4 +1,4 @@
-function pca_2(whichPts)
+function [ns,locs] = pca_2(whichPts)
 
 which_freq = 2;
 
@@ -34,6 +34,7 @@ for whichPt = whichPts
     pt_folder = [results_folder,name,'/'];
     adj_folder = [results_folder,name,'/just_spike/'];
     fs = pt(whichPt).fs;
+    locs = pt(whichPt).new_elecs.locs;
     sz_times = pt(whichPt).newSzTimes;
     
     % Load thing
@@ -52,8 +53,9 @@ for whichPt = whichPts
     % Get avg adjacency matrix
     avg_adj = nanmean(squeeze(sp_adj.adj(which_freq,:,:)),1);
     avg_adj = flatten_or_expand_adj(avg_adj);
+    ns = sum(avg_adj,1);
     
-    if 1
+    if 0
         % plot the adjacency matrix
         figure
         subplot(1,2,1)
@@ -66,6 +68,8 @@ for whichPt = whichPts
         scatter3(locs(:,1),locs(:,2),locs(:,3),100,sum(avg_adj,1),'filled')
         
     end
+    
+    
     
     % pca
     [coeff,score,latent] = pca(adj);
@@ -95,7 +99,7 @@ for whichPt = whichPts
         histogram(score(:,i))
         end
         
-        locs = pt(whichPt).new_elecs.locs;
+        
         if 0
         % Show the adj and score for each electrode
         

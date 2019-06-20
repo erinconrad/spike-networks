@@ -1,12 +1,18 @@
-function spike_coactivation(whichPts)
+function [ns,locs] = spike_coactivation(whichPts)
 
 %% File path
 locations = spike_network_files;
+main_folder = locations.main_folder;
+data_folder = [main_folder,'data/'];
 spike_struct_folder = locations.spike_struct_folder;
+pt_new_locs_file = [data_folder,'spike_structures/pt.mat'];
 
 %% Load files
 pt = load([spike_struct_folder,'long_seq']);
 pt = pt.pt;
+
+pt_new_locs = load(pt_new_locs_file);
+pt_new_locs = pt_new_locs.pt;
 
 cluster = load([spike_struct_folder,'cluster']);
 cluster = cluster.cluster;
@@ -142,7 +148,30 @@ for whichPt = whichPts
     avg_adj = nanmean(coA,1);
     avg_adj = flatten_or_expand_adj(avg_adj);
     
-    if 1 
+    %% Remove the rows and columns corresponding to channels that don't exist in the functional network
+    new_elecs = pt_new_locs(whichPt).new_elecs;
+    old_elecs = pt(whichPt).electrodeData;
+    
+    to_keep = zeros(nchs,1);
+    for i = 1:nchs
+        old_label = old_elecs.electrodes(i).name;
+        for j = 1:length(new_elecs.electrodes)
+            if strcmp(old_label,new_elecs.electrodes(j).name) == 1
+                to_keep(i) = 1;
+            end
+        end
+    end
+    
+    if sum(to_keep) ~= length(new_elecs.electrodes)
+        error('what\n');
+    end
+    
+    avg_adj(~to_keep,:) = [];
+    avg_adj(:,~to_keep) = [];
+    locs(~to_keep,:) = [];
+    
+    ns = sum(avg_adj,1);
+    if 0
        figure
        subplot(1,2,1)
        imagesc(avg_adj)

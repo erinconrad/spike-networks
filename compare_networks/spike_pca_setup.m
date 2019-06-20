@@ -90,8 +90,8 @@ for whichPt = whichPts
             for which_freq = 1:length(meta.spike(s).adj)
                 adj_all_t= meta.spike(s).adj(which_freq).adj;
                 
-                % Get the spikey part
-                adj = squeeze(adj_all_t(2,:,:));
+                % Get the control part
+                adj = squeeze(adj_all_t(1,:,:));
                 
                 % Flatten just the upper triangle
                 adj_flat = zeros(nchs*(nchs-1)/2,1);
