@@ -97,7 +97,7 @@ for whichPt = whichPts
     
     
     %% Compare ec spikes to ec not spikes (sanity check)
-    %{
+    
     if isfield(stats.network,'ec_notseq') == 1
         p = ranksum(squeeze(stats.network.ec_notseq(1,:,12)),...
             squeeze(stats.network.ec(1,:,12)));
