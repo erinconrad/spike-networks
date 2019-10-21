@@ -100,7 +100,7 @@ for whichPt = whichPts
         end
         
         
-        if 0
+        if 1
         % Show the adj and score for each electrode
         
         adj = coeff(:,i);

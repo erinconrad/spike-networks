@@ -6,7 +6,7 @@ for whichPt = whichPts
     [ns_fun,locs_fun] = pca_2(whichPt);
     
     % Get spike coactivation network node strength
-    [ns_sp,locs_sp] = spike_coactivation(whichPt);
+    [ns_sp,locs_sp] = spike_coactivation_old(whichPt);
     
     % Throw an error if locs aren't the same
     if isequal(locs_fun,locs_sp) == 0

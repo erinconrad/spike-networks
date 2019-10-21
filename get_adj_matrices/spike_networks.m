@@ -1,11 +1,12 @@
 function spike_networks(whichPts)
 
 %% Parameters
+do_simple_corr = 1;
 merge = 1; % merge with existing?
 do_car = 1;
-pre_whiten = 1;
-time_window = 0.25; %in seconds
-n_chunks = 23;
+pre_whiten = 0;
+time_window = 0.5; %in seconds
+n_chunks = 22;
 
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
@@ -54,7 +55,12 @@ for whichPt = whichPts
     data = data.data;
     
      % output folder
-    out_folder = [pt_folder,'adj_small/'];
+    if do_simple_corr == 1
+        out_folder = [pt_folder,'adj_simple/'];
+    else
+        out_folder = [pt_folder,'adj/'];
+    end
+    
     if exist(out_folder,'dir') == 0
         mkdir(out_folder);
     end
@@ -89,7 +95,7 @@ for whichPt = whichPts
         spike = spike.spike;
         
         % Initialize output data
-        meta_file = [out_folder,sprintf('adj_small_%d.mat',f)];
+        meta_file = [out_folder,sprintf('adj_%d.mat',f)];
         
         % Load it if it exists to see how much we've already done
         if exist(meta_file,'file') ~= 0
@@ -143,61 +149,93 @@ for whichPt = whichPts
             index_windows = zeros(n_chunks,2);
             tick_window = time_window*data.fs;
             
-            % Get the time that I will call my spike window (that I will
-            % remove when doing analysis)
-            spike_window = peak + [-tick_window/2 tick_window/2];
+            if 0 % old method of defining windows
             
-            % Show the spike window
-            if 0
-                sp_data = old_values(:,is_sp_ch);
-                figure
-                plot(sp_data);
-                hold on
-                plot(values(:,is_sp_ch))
-                plot([spike_window(1) spike_window(1)],get(gca,'ylim'),'k--')
-                plot([spike_window(2) spike_window(2)],get(gca,'ylim'),'k--')
-                plot([peak peak],get(gca,'ylim'),'b--');
-                beep
-                pause
-                close(gcf)
-                continue
-            end
+                % Get the time that I will call my spike window (that I will
+                % remove when doing analysis)
+                spike_window = peak + [-tick_window/2 tick_window/2];
+
+                % Show the spike window
+                if 0
+                    sp_data = old_values(:,is_sp_ch);
+                    figure
+                    plot(sp_data);
+                    hold on
+                    plot(values(:,is_sp_ch))
+                    plot([spike_window(1) spike_window(1)],get(gca,'ylim'),'k--')
+                    plot([spike_window(2) spike_window(2)],get(gca,'ylim'),'k--')
+                    plot([peak peak],get(gca,'ylim'),'b--');
+                    beep
+                    pause
+                    close(gcf)
+                    continue
+                end
+
+                index_windows(ceil(n_chunks/2),:) = spike_window;
+
+                for i = 1:ceil(n_chunks/2)-1
+                    index_windows(i,1) = spike_window(1) - tick_window*(ceil(n_chunks/2)-i);
+                    index_windows(i,2) = index_windows(i,1) + tick_window;
+                end
+
+                for i = ceil(n_chunks/2)+1:n_chunks
+                    index_windows(i,1) = spike_window(2) + tick_window*(i-ceil(n_chunks/2)-1);
+                    index_windows(i,2) = index_windows(i,1) + tick_window;
+                end
             
-            index_windows(ceil(n_chunks/2),:) = spike_window;
-            
-            for i = 1:ceil(n_chunks/2)-1
-                index_windows(i,1) = spike_window(1) - tick_window*(ceil(n_chunks/2)-i);
-                index_windows(i,2) = index_windows(i,1) + tick_window;
-            end
-            
-            for i = ceil(n_chunks/2)+1:n_chunks
-                index_windows(i,1) = spike_window(2) + tick_window*(i-ceil(n_chunks/2)-1);
-                index_windows(i,2) = index_windows(i,1) + tick_window;
+            else % new way of defining windows; spike is in between the two middle ones
+                for i = 1:n_chunks
+                    index_windows(i,1) = peak - tick_window*n_chunks/2 + tick_window*(i-1);
+                    index_windows(i,2) = peak - tick_window*n_chunks/2 + tick_window*(i);
+                end
+                
             end
             
             %% Get adjacency matrices
             %fprintf('Calculating functional networks...\n');
 
-            % Initialize adjacency matrix
-            for ff = 1:size(freq_bands,1)
-                adj(ff).name = freq_names{ff};
-                adj(ff).adj = zeros(n_chunks,nchs,nchs);
-            end
-            
-            for tt = 1:n_chunks
-                
-                % get appropriate points
-                temp_values = values(round(index_windows(tt,1)):round(index_windows(tt,2)),:); 
-                
-                % Get adjacency matrices
-                t_adj = get_adj_matrices(temp_values,data.fs,freq_bands);
-                
+            if do_simple_corr == 0
+                % Initialize adjacency matrix
                 for ff = 1:size(freq_bands,1)
-                    adj(ff).adj(tt,:,:) = t_adj(ff).adj;
+                    adj(ff).name = freq_names{ff};
+                    adj(ff).adj = zeros(n_chunks,nchs,nchs);
+                end
+
+                for tt = 1:n_chunks
+
+                    % get appropriate points
+                    temp_values = values(round(index_windows(tt,1)):round(index_windows(tt,2)),:); 
+
+                    % Get adjacency matrices
+                    t_adj = get_adj_matrices(temp_values,data.fs,freq_bands);
+
+                    for ff = 1:size(freq_bands,1)
+                        adj(ff).adj(tt,:,:) = t_adj(ff).adj;
+                    end
+
                 end
                 
+            elseif do_simple_corr == 1
+                adj = zeros(n_chunks,nchs,nchs);
+                for tt = 1:n_chunks
+                    % get appropriate points
+                    temp_values = values(round(index_windows(tt,1)):round(index_windows(tt,2)),:); 
+                    adj(tt,:,:) = get_simple_corr(temp_values);
+                end
+                
+                if 0
+                    figure
+                    set(gcf,'position',[1 500 1400 297])
+                    nplots = 5;
+                    ha = tight_subplot(1,nplots);
+                    
+                    for i = 1:nplots
+                        axes(ha(i))
+                        imagesc(squeeze(adj(i+8,:,:)))
+                    end
+                end
             end
-            
+
             meta.spike(s).adj = adj;
             meta.spike(s).index_windows = index_windows;
             
@@ -209,6 +247,7 @@ for whichPt = whichPts
             
             if 0
                 figure
+                
                 set(gcf,'position',[200 250 1175 400]);
                 for tt = 1:n_chunks-1
                     subplot(2,5,tt);

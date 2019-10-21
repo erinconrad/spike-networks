@@ -1,4 +1,4 @@
-function [ns,locs] = spike_coactivation(whichPts)
+function [ns,locs] = spike_coactivation_old(whichPts)
 
 %% File path
 locations = spike_network_files;
@@ -126,7 +126,7 @@ for whichPt = whichPts
         end
         
         % subtract mean
-        coA_temp = coA_temp - mean(mean(coA_temp));
+       % coA_temp = coA_temp - mean(mean(coA_temp));
         
         % Flatten the adjacency matrix
         adj_flat = zeros(nchs*(nchs-1)/2,1);
@@ -205,7 +205,7 @@ for whichPt = whichPts
     end
     end
     
-    if 0
+    if 1
     % take first two principal components
     for i = 1:2
         adj = coeff(:,i);
