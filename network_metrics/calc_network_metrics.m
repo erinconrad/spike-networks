@@ -1,11 +1,17 @@
-function calc_network_metrics(whichPts,small)
+function calc_network_metrics(whichPts)
 
 %% Parameters
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
-n_seconds = 14;
+simple = 1;
+
+if simple == 1
+    small =3;
+    n_f = 1;
+end
+
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -14,6 +20,7 @@ results_folder = [main_folder,'results/'];
 data_folder = [main_folder,'data/'];
 script_folder = locations.script_folder;
 addpath(genpath(script_folder));
+addpath(genpath(locations.BCT));
 spike_times_file = [data_folder,'spike_times/times.mat'];
 pt_file = [data_folder,'spike_structures/pt.mat'];
 bct_folder = locations.BCT;
@@ -50,6 +57,9 @@ for whichPt = whichPts
     elseif small == 2
         adj_folder = [results_folder,name,'/adj_test/'];
         stats_folder = [pt_folder,'stats_test/'];
+    elseif small == 3
+        adj_folder = [results_folder,name,'/adj_simple/'];
+        stats_folder = [pt_folder,'stats_simple/'];
     end
     fs = pt(whichPt).fs;
     %error('look\n');
@@ -76,6 +86,7 @@ for whichPt = whichPts
     
     
     n_times = size(meta.spike(1).index_windows,1);
+    n_seconds = 14;
     
     % Prep network matrices
     ge = nan(n_f,n_spikes,n_times);
@@ -143,13 +154,18 @@ for whichPt = whichPts
             index_windows = meta.spike(s).index_windows;
             
             % readjust size
-            if length(values) < size(dev,2)
-                fprintf('Padding values by %d\n',size(dev,2)-length(values));
-                values = [values;nan(size(dev,2)-length(values),1)];
-                
-            elseif length(values) > size(dev,2)
-                fprintf('Shortening values by %d\n',size(dev,2)-length(values));
-                values = values(1:end-(length(values)-size(dev,2)));
+            
+            if 1
+                if length(values) < size(dev,2)
+                    fprintf('Padding values by %d\n',size(dev,2)-length(values));
+                    values = [values;nan(size(dev,2)-length(values),1)];
+
+                elseif length(values) > size(dev,2)
+                    fprintf('Shortening values by %d\n',size(dev,2)-length(values));
+                    values = values(1:end-(length(values)-size(dev,2)));
+
+                end
+            
                 
             end
             
@@ -161,8 +177,12 @@ for whichPt = whichPts
                     round(index_windows(i,2))));
             end
             
-            for which_freq = 1:length(meta.spike(s).adj)
-                adj_all_t= meta.spike(s).adj(which_freq).adj;
+            for which_freq = 1:n_f
+                if simple == 0
+                    adj_all_t= meta.spike(s).adj(which_freq).adj;
+                elseif simple == 1
+                    adj_all_t= meta.spike(s).adj;
+                end
 
                 % Loop through times
                 for tt = 1:size(adj_all_t,1)
@@ -249,6 +269,7 @@ for whichPt = whichPts
     out.network.ns_sp = ns_sp_net;
     out.network.ge_sp = ge_sp_net;
     out.network.sync_sp = sync_sp_net;
+    out.network.index_windows = meta.spike(1).index_windows;
 
     if small == 1
         save([stats_folder,'stats_small.mat'],'out');
@@ -256,6 +277,8 @@ for whichPt = whichPts
         save([stats_folder,'stats.mat'],'out');
     elseif small == 2
         save([stats_folder,'stats_test.mat'],'out');
+    elseif small == 3
+        save([stats_folder,'stats_simple.mat'],'out');
     end
     
     z_ns = (((ns_seq-mean(ns_seq,3))./std(ns_seq,0,3)));

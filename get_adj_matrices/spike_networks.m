@@ -115,6 +115,7 @@ for whichPt = whichPts
         
         % Loop through spikes
         for s = start_spike:length(spike)
+            fprintf('Doing file %d of %d...\n',f,10);
             fprintf('Doing spike %d of %d...\n',s,length(spike));
             tic
             if isempty(spike(s).time) == 1, continue; end

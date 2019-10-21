@@ -1,12 +1,19 @@
-function spike_plot(whichPts,small)
+function spike_plot(whichPts)
 
 %% Parameters
-sp_net = 1;
+sp_net = 0;
+simple = 1;
+if simple == 1
+    small = 3;
+end
 
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
+if simple == 1
+    n_f = 1;
+end
 
 %% Get file locations, load spike times and pt structure
 if sp_net == 1
@@ -54,9 +61,12 @@ for whichPt = whichPts
     if small == 1
         stats_folder = [pt_folder,'stats_small/'];
         out = load([stats_folder,'stats_small.mat']);
-    else
+    elseif small == 0
         stats_folder = [pt_folder,'stats/'];
         out = load([stats_folder,'stats.mat']);
+    elseif small == 3
+        stats_folder = [pt_folder,'stats_simple/'];
+        out = load([stats_folder,'stats_simple.mat']);
     end
     stats = out.out;
     
@@ -123,17 +133,18 @@ for whichPt = whichPts
     %% Plot aggregated metrics
     figure
     set(gcf,'position',[26 0 1242 900])
-    [ha, pos] = tight_subplot(n_f-2, 4, [0.04 0.04], [0.08 0.08], [0.05 0.01]);
-    for f = 1:n_f-2
+    
+    [ha, pos] = tight_subplot(1, 4, [0.04 0.04], [0.08 0.08], [0.05 0.01]);
+    for f = 1%1:n_f-2
         for i = 1:size(plot_thing,1)
             axes(ha((f-1)*4+i))
-            plot(squeeze(plot_thing(i,f,:)),'ks-','linewidth',2)
+            plot(squeeze(plot_thing(i,:)),'ks-','linewidth',2)
             hold on
-            for j = 2:size(plot_thing,3)
+            for j = 2:size(plot_thing,2)
                 h = ttest(squeeze(orig_thing(i,f,:,1)),...
-                    squeeze(orig_thing(i,f,:,j)),'alpha',0.05/(length(avg_bin_dev)-1)/(n_f-2)/4);
+                    squeeze(orig_thing(i,f,:,j)),'alpha',0.05/(length(avg_bin_dev)-1)/(n_f)/4);
                 if h == 1
-                    scatter(j,squeeze(plot_thing(i,f,j)),100,'r','filled')
+                    scatter(j,squeeze(plot_thing(i,j)),100,'r','filled')
                 end
             end
             
