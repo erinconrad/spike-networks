@@ -5,8 +5,8 @@ function avg_adj_mat(whichPts,small)
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
-n_times = 11*2+1;
-do_plot = 0;
+n_times = 11*2;
+do_plot = 1;
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -54,6 +54,9 @@ for whichPt = whichPts
     elseif small == 2
         adj_folder = [results_folder,name,'/adj_test/'];
         stats_folder = [pt_folder,'stats_test/'];
+    elseif small == 3
+        adj_folder = [results_folder,name,'/adj_simple/'];
+        stats_folder = [pt_folder,'stats_simple/'];
     end
     
     
@@ -74,7 +77,11 @@ for whichPt = whichPts
     meta = load([adj_folder,listing(1).name]); 
     meta = meta.meta;
     nchs = length(meta.spike(1).is_seq_ch);
-    nfreq = length(meta.spike(1).adj);
+    if small == 3
+        nfreq = 1;
+    else
+        nfreq = length(meta.spike(1).adj);
+    end
     
     for i = 1:nfreq
         adj_avg(i).adj = zeros(n_times,nchs,nchs);
@@ -94,14 +101,18 @@ for whichPt = whichPts
         % Loop through spikes
         for s = 1:length(meta.spike)
 
-            if sum(sum(sum(isnan(meta.spike(s).adj(1).adj)))) > 0
+            if sum(sum(sum(isnan(meta.spike(s).adj)))) > 0
                 continue
             end
             
        
             
-            for which_freq = 1:length(meta.spike(s).adj)
-                adj_all_t= meta.spike(s).adj(which_freq).adj;  
+            for which_freq = 1:nfreq
+                if small == 3
+                    adj_all_t= meta.spike(s).adj; 
+                else
+                    adj_all_t= meta.spike(s).adj(which_freq).adj; 
+                end
                 adj_avg(which_freq).adj = adj_avg(which_freq).adj + adj_all_t;
             end
             
@@ -138,6 +149,8 @@ for whichPt = whichPts
         save([stats_folder,'/avg_adj_small.mat'],'adj_avg');
     elseif small == 2
         save([stats_folder,'/avg_adj_test.mat'],'adj_avg');
+    elseif small == 3
+        save([stats_folder,'/avg_adj_simple.mat'],'adj_avg');
     end
     
     plot_thing(1,:,:) = ge;
@@ -154,8 +167,8 @@ for whichPt = whichPts
     
     figure
     set(gcf,'position',[1 200 1440 530]);
-    [ha, pos] = tight_subplot(n_f-2, n_times, [0 0], [0.08 0.08], [0.05 0.01]);
-    for f = 1:n_f-2
+    [ha, pos] = tight_subplot(1, n_times, [0 0], [0.08 0.08], [0.05 0.01]);
+    for f = 1%1:n_f-2
         
         % get cmap range within that frequency band
         c_max = max(max(max(adj_avg(f).adj-adj_avg(f).adj(1,:,:))));
@@ -185,10 +198,11 @@ for whichPt = whichPts
     if 1
     figure
     set(gcf,'position',[26 0 1242 900])
-    [ha, pos] = tight_subplot(n_f-2, size(plot_thing,1), [0.04 0.04], [0.08 0.08], [0.05 0.01]);
-    for f = 1:n_f-2
+    [ha, pos] = tight_subplot(1, size(plot_thing,1), [0.04 0.04], [0.08 0.08], [0.05 0.01]);
+    for f = 1%1:n_f-2
         for i = 1:size(plot_thing,1)
-            axes(ha((f-1)*size(plot_thing,1)+i))
+            %axes(ha((f-1)*size(plot_thing,1)+i))
+            axes(ha(i))
             plot(squeeze(plot_thing(i,f,:)),'ks-','linewidth',2)
             if f == 1
                 title(sprintf(plot_title{i}));
