@@ -101,9 +101,7 @@ for whichPt = whichPts
         % Loop through spikes
         for s = 1:length(meta.spike)
 
-            if sum(sum(sum(isnan(meta.spike(s).adj)))) > 0
-                continue
-            end
+            
             
        
             
@@ -111,6 +109,9 @@ for whichPt = whichPts
                 if small == 3
                     adj_all_t= meta.spike(s).adj; 
                 else
+                    if sum(sum(sum(isnan(meta.spike(s).adj(which_freq).adj)))) > 0
+                        continue
+                    end
                     adj_all_t= meta.spike(s).adj(which_freq).adj; 
                 end
                 adj_avg(which_freq).adj = adj_avg(which_freq).adj + adj_all_t;
