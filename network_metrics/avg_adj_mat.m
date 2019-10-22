@@ -1,4 +1,4 @@
-function avg_adj_mat(whichPts)
+function avg_adj_mat(whichPts,small)
 
 %% Parameters
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
@@ -7,7 +7,6 @@ freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma'
 n_f = length(freq_text);
 n_times = 11*2;
 do_plot = 1;
-small = 3;
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;

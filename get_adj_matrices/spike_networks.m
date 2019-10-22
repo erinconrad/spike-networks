@@ -224,7 +224,7 @@ for whichPt = whichPts
                     adj(tt,:,:) = get_simple_corr(temp_values);
                 end
                 
-                if 0
+                if 1
                     figure
                     set(gcf,'position',[1 500 1400 297])
                     nplots = 5;
