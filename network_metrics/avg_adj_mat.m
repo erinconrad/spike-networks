@@ -5,7 +5,11 @@ function avg_adj_mat(whichPts,small)
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
-n_times = 11*2;
+if small == 3
+    n_times = 11*2;
+else
+    n_times = 11*2 + 1;
+end
 do_plot = 1;
 
 %% Get file locations, load spike times and pt structure
