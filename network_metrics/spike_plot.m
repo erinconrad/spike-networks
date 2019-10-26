@@ -1,17 +1,13 @@
-function spike_plot(whichPts)
+function spike_plot(whichPts,small)
 
 %% Parameters
 sp_net = 0;
-simple = 1;
-if simple == 1
-    small = 3;
-end
 
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
-if simple == 1
+if small == 3
     n_f = 1;
 end
 
@@ -134,24 +130,38 @@ for whichPt = whichPts
     figure
     set(gcf,'position',[26 0 1242 900])
     
-    [ha, pos] = tight_subplot(1, 4, [0.04 0.04], [0.08 0.08], [0.05 0.01]);
-    for f = 1%1:n_f-2
+    [ha, pos] = tight_subplot(n_f, 4, [0.04 0.04], [0.08 0.08], [0.05 0.01]);
+    for f = 1:n_f
         for i = 1:size(plot_thing,1)
             axes(ha((f-1)*4+i))
-            plot(squeeze(plot_thing(i,:)),'ks-','linewidth',2)
+            if small == 3
+                plot(squeeze(plot_thing(i,:)),'ks-','linewidth',2)
+            else
+                plot(squeeze(plot_thing(i,f,:)),'ks-','linewidth',2)
+            end
             hold on
-            for j = 2:size(plot_thing,2)
-                h = ttest(squeeze(orig_thing(i,f,:,1)),...
-                    squeeze(orig_thing(i,f,:,j)),'alpha',0.05/(length(avg_bin_dev)-1)/(n_f)/4);
-                if h == 1
-                    scatter(j,squeeze(plot_thing(i,j)),100,'r','filled')
+            if small == 3
+                for j = 2:size(plot_thing,2)
+                    h = ttest(squeeze(orig_thing(i,f,:,1)),...
+                        squeeze(orig_thing(i,f,:,j)),'alpha',0.05/(length(avg_bin_dev)-1)/(n_f)/4);
+                    if h == 1
+                        scatter(j,squeeze(plot_thing(i,j)),100,'r','filled')
+                    end
+                end
+            else
+                for j = 2:size(plot_thing,3)
+                    h = ttest(squeeze(orig_thing(i,f,:,1)),...
+                        squeeze(orig_thing(i,f,:,j)),'alpha',0.05/(length(avg_bin_dev)-1)/(n_f)/4);
+                    if h == 1
+                        scatter(j,squeeze(plot_thing(i,f,j)),100,'r','filled')
+                    end
                 end
             end
             
             if f == 1
                 title(sprintf(plot_title{i}));
             end
-            if f == n_f-2
+            if f == n_f
                xlabel('Time') 
             end
            % yticklabels([])

@@ -150,7 +150,7 @@ for whichPt = whichPts
             index_windows = zeros(n_chunks,2);
             tick_window = time_window*data.fs;
             
-            if 0 % old method of defining windows
+            if do_simple_corr == 0 % old method of defining windows
             
                 % Get the time that I will call my spike window (that I will
                 % remove when doing analysis)
