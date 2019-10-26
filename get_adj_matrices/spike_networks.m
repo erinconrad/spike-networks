@@ -1,12 +1,11 @@
-function spike_networks(whichPts)
+function spike_networks(whichPts,do_simple_corr)
 
 %% Parameters
-do_simple_corr = 1;
 merge = 1; % merge with existing?
 do_car = 1;
 pre_whiten = 0;
 time_window = 0.5; %in seconds
-n_chunks = 22;
+n_chunks = 22; % number of time windows
 
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
@@ -58,7 +57,7 @@ for whichPt = whichPts
     if do_simple_corr == 1
         out_folder = [pt_folder,'adj_simple/'];
     else
-        out_folder = [pt_folder,'adj/'];
+        out_folder = [pt_folder,'adj_coherence/'];
     end
     
     if exist(out_folder,'dir') == 0
@@ -150,7 +149,7 @@ for whichPt = whichPts
             index_windows = zeros(n_chunks,2);
             tick_window = time_window*data.fs;
             
-            if do_simple_corr == 0 % old method of defining windows
+            if 0 % old method of defining windows
             
                 % Get the time that I will call my spike window (that I will
                 % remove when doing analysis)
