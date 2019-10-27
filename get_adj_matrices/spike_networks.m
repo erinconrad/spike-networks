@@ -256,6 +256,7 @@ for whichPt = whichPts
                     title(sprintf('%d s',tt))
                 end
                 beep
+                %return
                 pause
                 close(gcf)
             end

@@ -15,12 +15,13 @@ for i = 1:nchs
         y = values(:,j);
 
        
-        % This is the same as mscohere, except it removes an evalin call
+        % This is the same as mscohere, except it removes a parameter
+        % parsing call
         % that was taking up the majority of the computational time. I
         % expect that I cannot call this with additional arguments because
         % of this change.
-        %[cxy,w] = mscohere_erin(x,y);
-        [cxy,w] = mscohere(x,y);
+        [cxy,w] = mscohere_erin(x,y);
+        %[cxy,w] = mscohere(x,y);
         f = w*fs*2/pi;
         
        % [cxy_old,f_old] = mscohere(x,y,[],[],[],fs);
@@ -46,8 +47,8 @@ if 0
     imagesc(adj(2).adj)
     title('Beta')
     colorbar
-    pause
-    close(gcf)
+    %pause
+    %close(gcf)
 end
 
 end
