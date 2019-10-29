@@ -179,10 +179,11 @@ for whichPt = whichPts
             end
             
             for which_freq = 1:n_f
-                if simple == 0
-                    adj_all_t= meta.spike(s).adj(which_freq).adj;
-                elseif simple == 1
+                if small == 3
                     adj_all_t= meta.spike(s).adj;
+                else
+                    adj_all_t= meta.spike(s).adj(which_freq).adj;
+                    
                 end
 
                 % Loop through times
