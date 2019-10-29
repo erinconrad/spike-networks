@@ -1,14 +1,12 @@
-function calc_network_metrics(whichPts)
+function calc_network_metrics(whichPts,small)
 
 %% Parameters
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
-simple = 1;
 
-if simple == 1
-    small =3;
+if small == 3
     n_f = 1;
 end
 
@@ -60,6 +58,9 @@ for whichPt = whichPts
     elseif small == 3
         adj_folder = [results_folder,name,'/adj_simple/'];
         stats_folder = [pt_folder,'stats_simple/'];
+    elseif small == 4
+        adj_folder = [results_folder,name,'/adj_coherence/'];
+        stats_folder = [pt_folder,'stats_coherence/'];
     end
     fs = pt(whichPt).fs;
     %error('look\n');
@@ -279,6 +280,8 @@ for whichPt = whichPts
         save([stats_folder,'stats_test.mat'],'out');
     elseif small == 3
         save([stats_folder,'stats_simple.mat'],'out');
+    elseif small == 4
+        save([stats_folder,'stats_coherence.mat'],'out');
     end
     
     z_ns = (((ns_seq-mean(ns_seq,3))./std(ns_seq,0,3)));
