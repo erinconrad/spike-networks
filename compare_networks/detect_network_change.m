@@ -61,6 +61,9 @@ for whichPt = whichPts
     elseif small == 3
         adj_folder = [results_folder,name,'/adj_simple/'];
         stats_folder = [pt_folder,'stats_simple/'];
+    elseif small == 4
+        adj_folder = [results_folder,name,'/adj_coherence/'];
+        stats_folder = [pt_folder,'stats_coherence/'];
     end
     
     
