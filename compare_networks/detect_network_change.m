@@ -86,10 +86,12 @@ for whichPt = whichPts
     nchs = length(meta.spike(1).is_seq_ch);
     if small == 3
         nfreq = 1;
+        n_times = size(meta.spike(1).adj,1);
     else
         nfreq = length(meta.spike(1).adj);
+        n_times = size(meta.spike(1).adj(1).adj,1);
     end
-    n_times = size(meta.spike(1).adj,1);
+    
     
     for i = 1:nfreq
         adj_avg(i).adj = zeros(n_times,nchs*(nchs-1)/2,1000);
@@ -98,7 +100,7 @@ for whichPt = whichPts
         sim(i).p = zeros(n_times,1);
         
         % First second is the control
-        sim(i).boot_sim(1,:) = nan;
+        sim(i).boot_sim(1,:) = nan(1,n_boot);
         sim(i).p(1) = nan;
     end
     
