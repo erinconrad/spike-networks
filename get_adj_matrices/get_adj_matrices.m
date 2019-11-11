@@ -7,6 +7,11 @@ for i = 1:size(freq_bands,1)
     adj(i).adj = zeros(nchs,nchs);
 end
 
+% If any nans, make adj nans
+if sum(sum(isnan(values))) > 0
+    adj(i).adj = nan(nchs,nchs);
+    return
+end
 
 % Do it for each frequency 
 for i = 1:nchs
