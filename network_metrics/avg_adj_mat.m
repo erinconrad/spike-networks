@@ -5,7 +5,7 @@ function avg_adj_mat(whichPts,small)
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
-if small == 3
+if small == 3 || small == 4
     n_times = 11*2;
 else
     n_times = 11*2 + 1;
@@ -61,6 +61,9 @@ for whichPt = whichPts
     elseif small == 3
         adj_folder = [results_folder,name,'/adj_simple/'];
         stats_folder = [pt_folder,'stats_simple/'];
+    elseif small == 4
+        adj_folder = [results_folder,name,'/adj_coherence/'];
+        stats_folder = [pt_folder,'stats_coherence/'];
     end
     
     
@@ -156,6 +159,8 @@ for whichPt = whichPts
         save([stats_folder,'/avg_adj_test.mat'],'adj_avg');
     elseif small == 3
         save([stats_folder,'/avg_adj_simple.mat'],'adj_avg');
+    elseif small == 4
+        save([stats_folder,'/avg_adj_coherence.mat'],'adj_avg');
     end
     
     plot_thing(1,:,:) = ge;
