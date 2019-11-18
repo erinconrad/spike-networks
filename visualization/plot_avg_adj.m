@@ -1,16 +1,22 @@
-function avg_adj_mat(whichPts,small)
+function plot_avg_adj(whichPts,small)
 
 %% Parameters
+times_to_plot = [9:14];
+
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
-freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma','broadband'};
+freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma'};
 %freq_text = {'alpha/theta'};
-n_f = length(freq_text);
+if small == 3
+    n_f = 1;
+else
+    n_f = length(freq_text);
+end
 if small == 3 || small == 4
     n_times = 11*2;
 else
     n_times = 11*2 + 1;
 end
-do_plot = 1;
+
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -23,10 +29,7 @@ spike_times_file = [data_folder,'spike_times/times.mat'];
 pt_file = [data_folder,'spike_structures/pt.mat'];
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
-plot_folder = [results_folder,'plots/'];
-if exist(plot_folder,'dir') == 0
-    mkdir(plot_folder);
-end
+
 
 times = load(spike_times_file); % will result in a structure called "out"
 times = times.out;
@@ -47,6 +50,10 @@ for whichPt = whichPts
     fprintf('\nDoing %s\n',name);
     pt_folder = [results_folder,name,'/'];
     adj_folder = [results_folder,name,'/adj/'];
+    plot_folder = [results_folder,name,'/plot/'];
+    if exist('plot_folder','dir') == 0
+        mkdir(plot_folder)
+    end
     fs = pt(whichPt).fs;
     
     if small == 1
@@ -87,7 +94,7 @@ for whichPt = whichPts
     if small == 3
         nfreq = 1;
     else
-        nfreq = length(meta.spike(1).adj);
+        nfreq = n_f;
     end
     
     for i = 1:nfreq
@@ -108,12 +115,12 @@ for whichPt = whichPts
         % Loop through spikes
         for s = 1:length(meta.spike)
 
-            
-            
-       
-            
+
             for which_freq = 1:nfreq
                 if small == 3
+                    if sum(sum(sum(isnan(meta.spike(s).adj)))) > 0
+                        continue
+                    end
                     adj_all_t= meta.spike(s).adj; 
                 else
                     if sum(sum(sum(isnan(meta.spike(s).adj(which_freq).adj)))) > 0
@@ -121,6 +128,7 @@ for whichPt = whichPts
                     end
                     adj_all_t= meta.spike(s).adj(which_freq).adj; 
                 end
+                
                 adj_avg(which_freq).adj = adj_avg(which_freq).adj + adj_all_t;
             end
             
@@ -130,70 +138,37 @@ for whichPt = whichPts
         
     end
     
-    %% Divide by number of spikes to get average and calculate global metrics
-    ge = nan(nfreq,n_times);
-    sync = nan(nfreq,n_times);
-    
+    %% Divide by number of spikes to get average
    
-    
     for which_freq = 1:length(adj_avg)
         adj_avg(which_freq).adj = adj_avg(which_freq).adj/s_count;
         
-        if sum(sum(sum(isnan(adj_avg(which_freq).adj)))) > 0
-            continue
-        end
-        
-        for tt = 1:size(adj_avg(which_freq).adj,1)
-            ge(which_freq,tt) = efficiency_wei(squeeze(adj_avg(which_freq).adj(tt,:,:)),0);
-            sync(which_freq,tt) = synchronizability_sp(squeeze(adj_avg(which_freq).adj(tt,:,:)));
-            
-        end
     end
     
-    %% Save the avg adjacency matrix
-    if small == 0
-        save([stats_folder,'/avg_adj.mat'],'adj_avg');
-    elseif small == 1
-        save([stats_folder,'/avg_adj_small.mat'],'adj_avg');
-    elseif small == 2
-        save([stats_folder,'/avg_adj_test.mat'],'adj_avg');
-    elseif small == 3
-        save([stats_folder,'/avg_adj_simple.mat'],'adj_avg');
-    elseif small == 4
-        save([stats_folder,'/avg_adj_coherence.mat'],'adj_avg');
-    end
     
-    plot_thing(1,:,:) = ge;
-    plot_thing(2,:,:) = sync;
-    
-    plot_title = {'Global efficiency','Synchronizability'};
-    
-    
-    %% Plot aggregated metrics
+    %% Plot average adjacency matrix
     fprintf('Spike count is %d\n',s_count);
     
-    if do_plot == 1
-
     
     figure
-    set(gcf,'position',[1 200 1440 530]);
-    [ha, pos] = tight_subplot(1, n_times, [0 0], [0.08 0.08], [0.05 0.01]);
-    for f = 1%1:n_f-2
+    set(gcf,'position',[1 200 1440 (nfreq-1)*250+300]);
+    [ha, pos] = tight_subplot(nfreq, length(times_to_plot), [0 0], [0.03 0.1], [0.05 0.01]);
+    for f = 1:nfreq
         
         % get cmap range within that frequency band
         c_max = max(max(max(adj_avg(f).adj-adj_avg(f).adj(1,:,:))));
         c_min = min(min(min(adj_avg(f).adj-adj_avg(f).adj(1,:,:))));
         
-        for i = 1:n_times
-            axes(ha((f-1)*n_times+i))
-            imagesc(squeeze(adj_avg(f).adj(i,:,:)-adj_avg(f).adj(1,:,:)))
-            caxis([c_min c_max])
-            if i == 1
+        for i = 1:length(times_to_plot)
+            axes(ha((f-1)*length(times_to_plot)+i))
+            imagesc(squeeze(adj_avg(f).adj(times_to_plot(i),:,:)))
+            %caxis([c_min c_max])
+            if i == 1 && small ~= 3
                 ylabel(sprintf(freq_text{f}));
             end
             
             if f==1
-                title(sprintf('%d s',i));  
+                title(sprintf('Time window %d',times_to_plot(i)));  
             end
             
             set(gca,'fontsize',20)
@@ -201,41 +176,17 @@ for whichPt = whichPts
             yticklabels([])
         end
     end
-    filename = [name,'_avg_adj'];
+    if small == 3
+        filename = [name,'_avg_adj_simple'];
+    elseif small == 4
+        filename = [name,'_avg_adj_coherence'];
+    end
+    
     print([plot_folder,filename],'-depsc');
+    close(gcf)
+  
     
-    
-    if 0
-    figure
-    set(gcf,'position',[26 0 1242 900])
-    [ha, pos] = tight_subplot(1, size(plot_thing,1), [0.04 0.04], [0.08 0.08], [0.05 0.01]);
-    for f = 1%1:n_f-2
-        for i = 1:size(plot_thing,1)
-            %axes(ha((f-1)*size(plot_thing,1)+i))
-            axes(ha(i))
-            plot(squeeze(plot_thing(i,f,:)),'ks-','linewidth',2)
-            if f == 1
-                title(sprintf(plot_title{i}));
-            end
-            if f == n_f-2
-               xlabel('Time (s)') 
-            end
-            yticklabels([])
-            
-            if i == 1
-                ylabel(sprintf(freq_text{f}));
-            end
-            set(gca,'fontsize',20)
-        end
-    end
-    filename = [name,'_avg_adj_metrics'];
-    print([plot_folder,filename],'-depsc');
-    end
-    
-    end
-    
-    
-end
 
+end
 
 end
