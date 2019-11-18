@@ -100,7 +100,7 @@ for whichPt = whichPts
             
             % For first spike, initialize array
             if f==1 && s == 1
-                all_dev = zeros(1000,index_windows(end,2) - index_windows(1,1) +1);
+                all_dev = zeros(1000,round(index_windows(end,2) - index_windows(1,1) +1));
                 times_plot = [(index_windows(1,1)-peak)/data.fs,(index_windows(end,2)-peak)/data.fs];
             end
             
