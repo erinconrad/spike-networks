@@ -1,7 +1,6 @@
-function plot_avg_adj(whichPts,small)
+function plot_avg_adj(whichPts,small,times_to_plot)
 
 %% Parameters
-times_to_plot = [9:14];
 
 % 1 = alpha/theta; 2 = beta, 3 = low gamma, 4 = high gamma, 5 = ultra high, 6 = broadband
 freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma'};
@@ -155,14 +154,10 @@ for whichPt = whichPts
     [ha, pos] = tight_subplot(nfreq, length(times_to_plot), [0 0], [0.03 0.1], [0.05 0.01]);
     for f = 1:nfreq
         
-        % get cmap range within that frequency band
-        c_max = max(max(max(adj_avg(f).adj-adj_avg(f).adj(1,:,:))));
-        c_min = min(min(min(adj_avg(f).adj-adj_avg(f).adj(1,:,:))));
-        
         for i = 1:length(times_to_plot)
             axes(ha((f-1)*length(times_to_plot)+i))
             imagesc(squeeze(adj_avg(f).adj(times_to_plot(i),:,:)))
-            %caxis([c_min c_max])
+            
             if i == 1 && small ~= 3
                 ylabel(sprintf(freq_text{f}));
             end
