@@ -39,6 +39,11 @@ if isempty(whichPts) == 1
     whichPts = 1:length(times);
 end
 
+plot_folder = [results_folder,'plots/avg_adj/'];
+if exist('plot_folder','dir') == 0
+    mkdir(plot_folder)
+end
+
 for whichPt = whichPts
     
     %% Prep patient
@@ -49,10 +54,7 @@ for whichPt = whichPts
     fprintf('\nDoing %s\n',name);
     pt_folder = [results_folder,name,'/'];
     adj_folder = [results_folder,name,'/adj/'];
-    plot_folder = [results_folder,name,'/plot/'];
-    if exist('plot_folder','dir') == 0
-        mkdir(plot_folder)
-    end
+    
     fs = pt(whichPt).fs;
     
     if small == 1
