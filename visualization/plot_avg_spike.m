@@ -101,7 +101,7 @@ for whichPt = whichPts
             % For first spike, initialize array
             if f==1 && s == 1
                 all_dev = zeros(1000,index_windows(end,2) - index_windows(1,1) +1);
-                times = [(index_windows(1,1)-peak)/data.fs,(index_windows(end,2)-peak)/data.fs];
+                times_plot = [(index_windows(1,1)-peak)/data.fs,(index_windows(end,2)-peak)/data.fs];
             end
             
             % Get values from spike channel
@@ -121,7 +121,7 @@ for whichPt = whichPts
     mean_dev = nanmean(all_dev,1);
     figure
     set(gcf,'position',[1 352 1375 446])
-    plot(linspace(times(1),times(2),length(mean_dev)),mean_dev,'k','linewidth',2);
+    plot(linspace(times_plot(1),times_plot(2),length(mean_dev)),mean_dev,'k','linewidth',2);
     hold on
     yl = get(gca,'ylim');
     for i = 1:n_chunks
