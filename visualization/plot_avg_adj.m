@@ -68,6 +68,7 @@ for whichPt = whichPts
         adj_folder = [results_folder,name,'/adj_simple/'];
         stats_folder = [pt_folder,'stats_simple/'];
     elseif small == 4
+        
         adj_folder = [results_folder,name,'/adj_coherence/'];
         stats_folder = [pt_folder,'stats_coherence/'];
     end
@@ -153,7 +154,7 @@ for whichPt = whichPts
     set(gcf,'position',[1 200 1440 (nfreq-1)*250+300]);
     [ha, pos] = tight_subplot(nfreq, length(times_to_plot), [0 0], [0.03 0.1], [0.05 0.01]);
     for f = 1:nfreq
-        
+
         for i = 1:length(times_to_plot)
             axes(ha((f-1)*length(times_to_plot)+i))
             imagesc(squeeze(adj_avg(f).adj(times_to_plot(i),:,:)))

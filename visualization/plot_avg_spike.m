@@ -24,6 +24,13 @@ if isempty(whichPts) == 1
     whichPts = 1:length(times);
 end
 
+ % output folder
+out_folder = [results_folder,'plots/avg_dev/'];
+
+if exist(out_folder,'dir') == 0
+    mkdir(out_folder);
+end
+
 % Loop through patients
 for whichPt = whichPts
     
@@ -39,13 +46,6 @@ for whichPt = whichPts
     pt_folder = [results_folder,name,'/'];
     data = load([pt_folder,'basic_info.mat']); % returns a structure called data
     data = data.data;
-    
-     % output folder
-    out_folder = [pt_folder,'plot/'];
-
-    if exist(out_folder,'dir') == 0
-        mkdir(out_folder);
-    end
     
     % convert ch labels to nice form and decide which to ignore
     ch_labels = data.chLabels(:,1);
@@ -74,9 +74,9 @@ for whichPt = whichPts
  
         % Loop through spikes
         for s = 1:length(spike)
-            fprintf('Doing file %d of %d...\n',f,10);
-            fprintf('Doing spike %d of %d...\n',s,length(spike));
-            tic
+            %fprintf('Doing file %d of %d...\n',f,10);
+            %fprintf('Doing spike %d of %d...\n',s,length(spike));
+            %tic
             if isempty(spike(s).time) == 1, continue; end
             
             s_count = s_count + 1;
@@ -132,6 +132,7 @@ for whichPt = whichPts
     xlabel('Time relative to spike peak (s)')
     title(sprintf('%s average signal deviation from baseline',name))
     set(gca,'fontsize',20)
-    print(gcf,[out_folder,'signal_dev'],'-depsc')
+    print(gcf,[out_folder,name],'-depsc')
+    close(gcf)
     
 end
