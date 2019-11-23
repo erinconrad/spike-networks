@@ -1,4 +1,4 @@
-function data = download_eeg(dataName,indices,pwname,just_chs)
+function data = download_eeg(dataName,indices,pwname,just_chs,chs)
 
 % This is a tool to return information from a specified iEEG dataset
 
@@ -26,7 +26,11 @@ n = 0;
             channelLabels = session.data.channelLabels;
         else
             channelLabels = session.data.channelLabels;
-            values = session.data.getvalues(indices,':');
+            if isempty(chs) == 1
+                values = session.data.getvalues(indices,':');
+            else
+                values = session.data.getvalues(indices,chs);
+            end
         end
     
        %{ 
