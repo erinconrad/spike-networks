@@ -1,4 +1,4 @@
-function spike_processing(sp,pt)
+function spike_processing(whichPts)
 
 %% Parameters
 surround_time = 6;
@@ -20,8 +20,24 @@ if exist(results_folder,'dir') == 0
     mkdir(results_folder);
 end
 
+pt_folder = [main_folder,'data/spike_structures/'];
+pt = load([pt_folder,'pt.mat']);
+pt = pt.pt;
 
-for whichPt = 1:length(sp)
+sp_folder = [main_folder,'data/manual_spikes/'];
+sp = load([sp_folder,'sp.mat']);
+sp = sp.sp;
+
+if isempty(whichPts) == 1
+    whichPts = [];
+    for i = 1:length(sp)
+        if isempty(sp(i).name) == 0
+            whichPts = [whichPts,i];
+        end
+    end
+end
+
+for whichPt = whichPts
     
     name = sp(whichPt).name;
     
@@ -76,6 +92,13 @@ for whichPt = 1:length(sp)
         
         %% Find peak spike time for each channel and which channels I will say are involved in the spike
         
+        % alternate bandpass filter
+        %{
+        bpFilt = designfilt('bandpassiir','FilterOrder',6, ...
+         'HalfPowerFrequency1',2,'HalfPowerFrequency2',70, ...
+         'SampleRate',fs);
+        %}
+        
         % Bandpass filter the data to get the spikey component
         np = 6;
         fc = [2 70];
@@ -85,9 +108,10 @@ for whichPt = 1:length(sp)
         hp_data = zeros(size(data));
         for ich = 1:nch
             hp_data(:,ich) = filtfilt(B,A,data(:,ich));
+            %hp_data(:,ich) = filter(bpFilt,data(:,ich));
         end
         
-        if 0
+        if 1
             figure
             tch = 20;
             plot(data(:,tch));
@@ -135,7 +159,7 @@ for whichPt = 1:length(sp)
             spike(s).peak_time(ich) = peak_time;
             spike(s).involved(ich) = involved;
             
-            if 0
+            if 1
                 plot(narrow_unfiltered(:,ich))
                 hold on
                 plot(narrow_data(:,ich))
