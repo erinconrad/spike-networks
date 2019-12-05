@@ -111,7 +111,7 @@ for whichPt = whichPts
             %hp_data(:,ich) = filter(bpFilt,data(:,ich));
         end
         
-        if 1
+        if 0
             figure
             tch = 20;
             plot(data(:,tch));
@@ -159,7 +159,7 @@ for whichPt = whichPts
             spike(s).peak_time(ich) = peak_time;
             spike(s).involved(ich) = involved;
             
-            if 1
+            if 0
                 plot(narrow_unfiltered(:,ich))
                 hold on
                 plot(narrow_data(:,ich))
