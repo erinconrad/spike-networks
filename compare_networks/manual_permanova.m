@@ -46,6 +46,8 @@ end
 
 
 for whichPt = whichPts
+    
+    adj_avg = 0;
 
     % Skip it if name is empty
     if isempty(pt(whichPt).name) == 1, continue; end
