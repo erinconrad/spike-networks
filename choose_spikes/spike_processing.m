@@ -1,5 +1,9 @@
 function spike_processing(whichPts)
 
+%{
+This function stores eeg data for manually detected spikes
+%}
+
 %% Parameters
 surround_time = 6;
 thresh_spike = 6;

@@ -31,6 +31,19 @@ pt_file = [data_folder,'spike_structures/pt.mat'];
 pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
+sp_folder = [main_folder,'data/manual_spikes/'];
+sp = load([sp_folder,'sp.mat']);
+sp = sp.sp;
+
+if isempty(whichPts) == 1
+    whichPts = [];
+    for i = 1:length(sp)
+        if isempty(sp(i).name) == 0
+            whichPts = [whichPts,i];
+        end
+    end
+end
+
 % Loop through patients
 for whichPt = whichPts
     
