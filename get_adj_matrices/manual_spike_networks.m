@@ -196,7 +196,7 @@ for whichPt = whichPts
     end
 
     % Once I've done all spikes for the file, make a finished.mat
-    save([out_folder,sprintf('finished.mat')],'finished');
+   % save([out_folder,sprintf('finished.mat')],'finished');
         
     
 end
