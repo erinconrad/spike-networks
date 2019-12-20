@@ -170,7 +170,7 @@ for whichPt = whichPts
     end
         
 %% Save the sim structure
-save([out_folder,name,'_perm.mat']);
+save([out_folder,name,'_perm.mat'],'sim');
 
 end
 
