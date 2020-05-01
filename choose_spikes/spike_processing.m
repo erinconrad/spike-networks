@@ -29,8 +29,13 @@ pt = load([pt_folder,'pt.mat']);
 pt = pt.pt;
 
 sp_folder = [main_folder,'data/manual_spikes/'];
+sp = get_manual_times_from_excel;
+
+%{
+% old spikes
 sp = load([sp_folder,'sp.mat']);
 sp = sp.sp;
+%}
 
 if isempty(whichPts) == 1
     whichPts = [];
@@ -46,6 +51,8 @@ for whichPt = whichPts
     name = sp(whichPt).name;
     
     if isempty(name) == 1
+        continue;
+    elseif sp(whichPt).complete == 0
         continue;
     else
         fprintf('Doing %s...\n',name);
@@ -77,7 +84,7 @@ for whichPt = whichPts
     for s = 1:n_spikes
         
         %% Load the data surrounding the spike
-        s_time = sp(whichPt).spike(s).time;
+        s_time = sp(whichPt).spike(s);
         which_times = [s_time-surround_time,s_time+surround_time];
         
         % get indices

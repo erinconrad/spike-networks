@@ -1,5 +1,12 @@
 %{
 
+Ideas:
+- probably need more spikes (I don't like that the spike period isn't
+significantly different)
+- play more with NBS, play with other PERMANOVA distance functions
+- to minimize comparisons, what if I just compare pre-spike to post-spike
+
+
 Plan for spike networks project:
 - the goal is to determine whether interictal spikes acutely change nodal,
 local (close to the spike), or global network properties.

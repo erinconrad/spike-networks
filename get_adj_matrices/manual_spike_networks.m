@@ -32,14 +32,21 @@ pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
 sp_folder = [main_folder,'data/manual_spikes/'];
+sp = get_manual_times_from_excel;
+
+%{
+% old spikes
 sp = load([sp_folder,'sp.mat']);
 sp = sp.sp;
+%}
 
 if isempty(whichPts) == 1
     whichPts = [];
     for i = 1:length(sp)
         if isempty(sp(i).name) == 0
-            whichPts = [whichPts,i];
+            if sp(i).complete == 1
+                whichPts = [whichPts,i];
+            end
         end
     end
 end
