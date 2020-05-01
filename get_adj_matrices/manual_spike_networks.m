@@ -22,7 +22,7 @@ freq_names = {'alpha_theta','beta','low_gamma',...
 locations = spike_network_files;
 main_folder = locations.main_folder;
 eeg_folder = [main_folder,'results/eeg_data/'];
-results_folder = [main_folder,'results/adj_mat/'];
+results_folder = [main_folder,'results/adj_mat/manual/'];
 data_folder = [main_folder,'data/'];
 script_folder = locations.script_folder;
 addpath(genpath(script_folder));
