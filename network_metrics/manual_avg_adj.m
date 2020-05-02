@@ -36,9 +36,9 @@ for whichPt = whichPts
     name = pt(whichPt).name;
     
     if simple == 1
-        adj_folder = [results_folder,'adj_mat/adj_simple/'];
+        adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
     elseif simple == 0
-        adj_folder = [results_folder,'adj_mat/adj_coherence/'];
+        adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
     end
 
     
