@@ -48,7 +48,7 @@ for j = 1:length(listing)
     
 
     %% Load adjacency matrices and calculate metrics
-    meta = load([adj_folder,name,'_adj.mat']);
+    meta = load([adj_folder,ptname,'_adj.mat']);
     meta = meta.meta;
     
     %% Prep avg adjacency matrices
