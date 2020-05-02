@@ -1,4 +1,4 @@
-function manual_avg_adj(whichPts,simple)
+function manual_avg_adj(simple)
 
 %% Parameters
 which_times = [8 9 10 11 12 13 14];
@@ -10,7 +10,7 @@ freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma'
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;
-results_folder = [main_folder,'results/'];
+results_folder = [main_folder,'results/adj_mat/manual'];
 data_folder = [main_folder,'data/'];
 script_folder = locations.script_folder;
 addpath(genpath(script_folder));
@@ -26,22 +26,27 @@ end
 pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
+if simple == 1
+    adj_folder = [results_folder,'adj_simple/'];
+else
+    adj_folder = [results_folder,'adj_coherence/'];
+end
 
-for whichPt = whichPts
+listing = dir([adj_folder,'*_adj.mat']);
+new_out_folder = [adj_folder,'plots/'];
+if exist(new_out_folder,'dir') == 0
+    mkdir(new_out_folder);
+end
+
+for i = 1:length(listing)
     
     %% Prep patient
     
-    % Skip it if name is empty
-    if isempty(pt(whichPt).name) == 1, continue; end
-    name = pt(whichPt).name;
+    name = listing(i).name;
+    name_sp = split(name,'_');
+    ptname = name_sp{1};
     
-    if simple == 1
-        adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
-    elseif simple == 0
-        adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
-    end
 
-    
     %% Load adjacency matrices and calculate metrics
     meta = load([adj_folder,name,'_adj.mat']);
     meta = meta.meta;
