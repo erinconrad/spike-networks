@@ -38,11 +38,11 @@ if exist(new_out_folder,'dir') == 0
     mkdir(new_out_folder);
 end
 
-for i = 1:length(listing)
+for j = 1:length(listing)
     
     %% Prep patient
     
-    name = listing(i).name;
+    name = listing(j).name;
     name_sp = split(name,'_');
     ptname = name_sp{1};
     
