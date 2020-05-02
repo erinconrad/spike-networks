@@ -121,6 +121,7 @@ end
             set(gca,'fontsize',20)
         end
     end
+    print(gcf,[new_out_folder,ptname,'_avg_adj'],'-depsc');
     
     
 
