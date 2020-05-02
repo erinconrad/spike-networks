@@ -82,9 +82,9 @@ for i = 1:length(listing)
     set(gcf,'position',[1 200 1440 (nfreq-1)*180+180]);
     [ha, pos] = tight_subplot(nfreq, length(times), [0 0], [0.03 0.12], [0.05 0.01]);
     for f = 1:nfreq
-        for t =times
+        for t =1:length(times)
             axes(ha((f-1)*length(times)+t))
-            imagesc(squeeze(adj_avg(f).adj(t,:,:)))
+            imagesc(squeeze(adj_avg(f).adj(times(t),:,:)))
             
             if t == 1
                 ylabel(sprintf(freq_text{f}));
