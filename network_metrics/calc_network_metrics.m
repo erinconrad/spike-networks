@@ -6,10 +6,6 @@ freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma'
 %freq_text = {'alpha/theta'};
 n_f = length(freq_text);
 
-if small == 3
-    n_f = 1;
-end
-
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -58,9 +54,13 @@ for whichPt = whichPts
     elseif small == 3
         adj_folder = [results_folder,name,'/adj_simple/'];
         stats_folder = [pt_folder,'stats_simple/'];
+        n_f = 1;
     elseif small == 4
         adj_folder = [results_folder,name,'/adj_coherence/'];
         stats_folder = [pt_folder,'stats_coherence/'];
+    elseif small == 5
+        adj_folder = 'adj_mat/manual/adj_simple/';
+        stats_folder = 'stats/manual/simple/';
     end
     fs = pt(whichPt).fs;
     %error('look\n');
@@ -70,7 +70,14 @@ for whichPt = whichPts
     end
     
     %% Load adjacency matrices and calculate metrics
-    listing = dir([adj_folder,'adj*.mat']);
+    
+    if small == 5
+        listing = dir([adj_folder,name,'*']);
+    else
+        listing = dir([adj_folder,'adj*.mat']);
+        
+    end
+    
     if length(listing) == 0
         fprintf('No adjacency matrices for %s, skipping...\n',name);
         continue

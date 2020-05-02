@@ -94,8 +94,8 @@ for i = 1:length(listing)
         for s = 1:length(spike)
 
             mean_signal = mean(spike(s).data,1);
-            z_signal = (spike(s).data-mean_signal)/std(spike(s).data);
-            z_signal_avg_all_chs = mean(z_signal,2);
+            z_signal = (spike(s).data-mean_signal)./std(spike(s).data);
+            z_signal_avg_all_chs = mean(z_signal(:,spike(s).involved),2);
             all_z(:,s) = z_signal_avg_all_chs;
             
         end
