@@ -1,4 +1,4 @@
-function plot_manual_networks(simple)
+function plot_manual_networks(simple,brief)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -69,12 +69,20 @@ for i = 1:length(listing)
         adj_avg(f).adj = adj_avg(f).adj/nspikes;
     end
     
+    % Decide times to loop through
+    ntimes = size(adj_avg(1).adj,1);
+    if brief == 1
+        times = [floor(ntimes/2)-3;floor(ntimes/2)+3];
+    else
+        times = 1:size(adj_avg(1).adj,1);
+    end
+    
     % Make plots
     figure
     set(gcf,'position',[1 200 1440 (nfreq-1)*180+180]);
     [ha, pos] = tight_subplot(nfreq, size(adj_avg(f).adj,1), [0 0], [0.03 0.12], [0.05 0.01]);
     for f = 1:nfreq
-        for t = 1:size(adj_avg(f).adj,1)
+        for t =times
             axes(ha((f-1)*size(adj_avg(f).adj,1)+t))
             imagesc(squeeze(adj_avg(f).adj(t,:,:)))
             

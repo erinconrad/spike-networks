@@ -79,8 +79,6 @@ for j = 1:length(listing)
         s_count = s_count + 1;
 
     end
-
-end
     
     %% Divide by number of spikes to get average and calculate global metrics
 
@@ -122,6 +120,11 @@ end
         end
     end
     print(gcf,[new_out_folder,ptname,'_avg_adj'],'-depsc');
+    close(gcf)
+
+end
+    
+    
     
     
 
