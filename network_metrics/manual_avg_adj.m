@@ -10,7 +10,7 @@ freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma','ultra high\ngamma'
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;
-results_folder = [main_folder,'results/adj_mat/manual'];
+results_folder = [main_folder,'results/adj_mat/manual/'];
 data_folder = [main_folder,'data/'];
 script_folder = locations.script_folder;
 addpath(genpath(script_folder));
