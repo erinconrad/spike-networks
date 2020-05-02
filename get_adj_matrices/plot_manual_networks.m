@@ -80,7 +80,7 @@ for i = 1:length(listing)
     % Make plots
     figure
     set(gcf,'position',[1 200 1440 (nfreq-1)*180+180]);
-    [ha, pos] = tight_subplot(nfreq, size(adj_avg(f).adj,1), [0 0], [0.03 0.12], [0.05 0.01]);
+    [ha, pos] = tight_subplot(nfreq, length(times), [0 0], [0.03 0.12], [0.05 0.01]);
     for f = 1:nfreq
         for t =times
             axes(ha((f-1)*size(adj_avg(f).adj,1)+t))
