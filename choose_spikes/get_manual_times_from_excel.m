@@ -77,7 +77,7 @@ for i = 1:length(T.Properties.VariableNames)
     end
 end
 
-if 1
+if 0
     % show the spikes
     for i = 1:length(sp)
         if sp(i).complete == 1
