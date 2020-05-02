@@ -72,7 +72,7 @@ for i = 1:length(listing)
     % Decide times to loop through
     ntimes = size(adj_avg(1).adj,1);
     if brief == 1
-        times = [floor(ntimes/2)-3;floor(ntimes/2)+3];
+        times = [floor(ntimes/2)-3:floor(ntimes/2)+3];
     else
         times = 1:size(adj_avg(1).adj,1);
     end
