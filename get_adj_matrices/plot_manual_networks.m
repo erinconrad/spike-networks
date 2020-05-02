@@ -83,7 +83,7 @@ for i = 1:length(listing)
     [ha, pos] = tight_subplot(nfreq, length(times), [0 0], [0.03 0.12], [0.05 0.01]);
     for f = 1:nfreq
         for t =times
-            axes(ha((f-1)*size(adj_avg(f).adj,1)+t))
+            axes(ha((f-1)*length(times)+t))
             imagesc(squeeze(adj_avg(f).adj(t,:,:)))
             
             if t == 1
