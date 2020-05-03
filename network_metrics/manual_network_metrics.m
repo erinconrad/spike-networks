@@ -18,7 +18,7 @@ eeg_folder = [results_folder,'eeg_data/'];
 % Adj mat folder
 if simple == 1
     adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
-    network_folder = [results_folder,'manual/simple/plots/'];
+    network_folder = [results_folder,'networks/manual/simple/plots/'];
 end
 
 if exist(network_folder,'dir') == 0

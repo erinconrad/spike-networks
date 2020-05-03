@@ -31,8 +31,13 @@ pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
 sp_folder = [main_folder,'data/manual_spikes/'];
+sp = get_manual_times_from_excel;
+
+%{
+% old spikes
 sp = load([sp_folder,'sp.mat']);
 sp = sp.sp;
+%}
 
 if isempty(whichPts) == 1
     whichPts = [];
@@ -52,9 +57,9 @@ for whichPt = whichPts
     name = pt(whichPt).name;
     
     if simple == 1
-        adj_folder = [results_folder,'adj_mat/adj_simple/'];
+        adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
     elseif simple == 0
-        adj_folder = [results_folder,'adj_mat/adj_coherence/'];
+        adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
     end
 
     
