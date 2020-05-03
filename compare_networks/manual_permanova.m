@@ -20,9 +20,12 @@ end
 
 if simple == 1
     out_folder = [results_folder,'perm_stats/simple/'];
+    adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
 elseif simple == 0
     out_folder = [results_folder,'perm_stats/coherence/'];
+    adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
 end
+
 if exist(out_folder,'dir') == 0
     mkdir(out_folder)
 end
@@ -40,28 +43,17 @@ sp = sp.sp;
 %}
 
 if isempty(whichPts) == 1
-    whichPts = [];
-    for i = 1:length(sp)
-        if isempty(sp(i).name) == 0
-            whichPts = [whichPts,i];
-        end
-    end
+    listing = dir([adj_folder,'*_adj.mat']);
 end
 
 
 
-for whichPt = whichPts
+for j = 1:length(listing)
 
-    % Skip it if name is empty
-    if isempty(pt(whichPt).name) == 1, continue; end
-    name = pt(whichPt).name;
+    filename = listing(j).name;
+    name_sp = split(filename,'_');
+    name = name_sp{1};
     
-    if simple == 1
-        adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
-    elseif simple == 0
-        adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
-    end
-
     
     %% Load adjacency matrices 
     meta = load([adj_folder,name,'_adj.mat']);
