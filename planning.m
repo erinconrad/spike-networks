@@ -2,8 +2,10 @@
 
 Ideas:
 - probably need more spikes (I don't like that the spike period isn't
-significantly different)
-- play more with NBS, play with other PERMANOVA distance functions
+significantly different): try 50 per patient
+- try the few basic network metrics
+- play more with NBS
+- play with other PERMANOVA distance functions
 - to minimize comparisons, what if I just compare pre-spike to post-spike
 
 

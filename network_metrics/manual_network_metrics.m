@@ -18,7 +18,7 @@ eeg_folder = [results_folder,'eeg_data/'];
 % Adj mat folder
 if simple == 1
     adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
-    network_folder = [results_folder,'networks/manual/simple/plots/'];
+    network_folder = [results_folder,'networks/manual/simple/'];
 end
 
 if exist(network_folder,'dir') == 0
@@ -32,6 +32,8 @@ for i = 1:length(listing)
     filename = listing(i).name;
     name_sp = split(filename,'_');
     name = name_sp{1};
+    
+    metrics(i).name = name;
     
     % load adj matrix
     meta = load([adj_folder,filename]);
@@ -81,21 +83,72 @@ for i = 1:length(listing)
             
     end
     
+    %% Turn them into z-scores
     z_ns = (((ns_seq-mean(ns_seq,3))./std(ns_seq,0,3)));
     z_ge = (((ge-mean(ge,3))./std(ge,0,3)));
     avg_z_ns = squeeze(nanmean(z_ns,2));
     avg_z_ge = squeeze(nanmean(z_ge,2));
     
-    figure
-    subplot(2,1,1)
-    plot(avg_z_ns)
-    title('node strength')
+    metrics(i).metric(1).name = 'ns of involved channels';
+    metrics(i).metric(2).name = 'ge';
+    metrics(i).metric(1).val = ns_seq;
+    metrics(i).metric(2).val = ge;
+    metrics(i).metric(1).z = z_ns;
+    metrics(i).metric(2).z = z_ge;
     
-    subplot(2,1,2)
-    plot(avg_z_ge)
-    title('ge')
-    print(gcf,[network_folder,name],'-depsc');       
-    close(gcf)
+    
+    %% Significance testing
+    
+    % Loop through the metrics we're testings
+    for m = 1:length(metrics(i).metric)
+        
+        metrics(i).metric(m).alpha = 0.05/((size(z_ns,3)-1)*size(z_ns,1));
+            
+        % Loop through times 2:end and compare each to first time
+        for t = 2:size(z_ns,3)
+   
+            % Loop through the frequencies
+            for f = 1:size(metrics(i).metric(m).z,1)
+            
+                % Do a 2-sample independent t-test to compare the z scores in each
+                [~,p,ci,stats] = ttest2(metrics(i).metric(m).z(f,:,1),...
+                    metrics(i).metric(m).z(f,:,t));
+                metrics(i).metric(m).p(f,t) = p;
+                
+                metrics(i).metric(m).ci(f,t,:) = ci;
+                metrics(i).metric(m).stats(f,t) = stats;
+                
+            end
+            
+        end
+        
+        
+    end
+    
+    %% Save the output structure
+    save([network_folder,'network_stats.mat'],'metrics');
+    
+    %% Plot z-scores over time
+    if size(z_ns,1) == 1
+        figure
+        subplot(2,1,1)
+        plot(avg_z_ns,'linewidth',2)
+        hold on
+        plot(find((metrics(i).metric(1).p<metrics(i).metric(1).alpha)),...
+            avg_z_ns(metrics(i).metric(1).p<metrics(i).metric(1).alpha),...
+            'r*');
+        title('node strength','fontsize',20)
+
+        subplot(2,1,2)
+        plot(avg_z_ge,'linewidth',2)
+        hold on
+        plot(find((metrics(i).metric(2).p<metrics(i).metric(2).alpha)),...
+            avg_z_ge(metrics(i).metric(2).p<metrics(i).metric(2).alpha),...
+            'r*');
+        title('ge','fontsize',20)
+        print(gcf,[network_folder,'plots/',name],'-depsc');       
+        close(gcf)
+    end
     
 end
 

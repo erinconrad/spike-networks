@@ -67,7 +67,9 @@ for j = 1:length(listing)
     
     %% Get arrays of flattened adjacency matrices
     for i = 1:nfreq
-        adj_avg(i).adj = zeros(n_times,nchs*(nchs-1)/2,nspikes);
+        
+        
+        adj_avg(i).adj = nan(n_times,nchs*(nchs-1)/2,nspikes);
         sim(i).p = zeros(n_times,1);
         sim(i).F = zeros(n_times,1);
         sim(i).indices = (1:n_times)';
@@ -101,10 +103,11 @@ for j = 1:length(listing)
     for which_freq = 1:nfreq
         adj_avg(which_freq).adj(:,:,any(isnan(adj_avg(which_freq).adj),[1 2])) = [];
     end
-    
+
     for which_freq = 1:nfreq
         adj_avg(which_freq).adj(:,:,sum(adj_avg(which_freq).adj,3)==0) = [];
     end
+    
     
     %% Compare first time period to all additional time periods with permanova
     for which_freq = 1:nfreq
