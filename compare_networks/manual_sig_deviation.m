@@ -19,6 +19,10 @@ adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
 
 listing = dir([eeg_folder,'*_eeg.mat']);
 
+if exist(sig_dev_folder,'dir') == 0
+    mkdir(sig_dev_folder);
+end
+
 for i = 1:length(listing)
     
     filename = listing(i).name;
