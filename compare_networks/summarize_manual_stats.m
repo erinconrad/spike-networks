@@ -1,6 +1,11 @@
 function summarize_manual_stats(simple)
 
+%{
+This function only makes summary tables for the simple correlation case
+%}
+
 %% parameters
+fs = 512;
 alpha = 0.05;
 
 %% Get file locations, load spike times and pt structure
@@ -16,56 +21,95 @@ addpath(genpath(bct_folder));
 plot_folder = [results_folder,'plots/'];
 
 if simple == 1
-    out_folder = [results_folder,'perm_stats/simple/'];
+    network_folder = [results_folder,'networks/manual/simple/'];
+    perm_folder = [results_folder,'perm_stats/simple/'];
+    var_names_pt = {'Time','SignalDev','Perm','NS','GE'};
 elseif simple == 0
-    out_folder = [results_folder,'perm_stats/coherence/'];
+    network_folder = [results_folder,'networks/manual/coherence/'];
+    perm_folder = [results_folder,'perm_stats/coherence/'];
+    
 end
+
+% Load signal deviation file
+sig_dev_folder = [results_folder,'signal_deviation/manual/'];
+sig_dev = load([sig_dev_folder,'sig_dev.mat']);
+sig_dev = sig_dev.sig_dev;
+
+% Load network stats file
+net_stats = load([network_folder,'network_stats.mat']);
+metrics = net_stats.metrics;
 
 % Get the individual patient stat files
-listing = dir([out_folder,'*_perm.mat']);
+listing = dir([perm_folder,'*_perm.mat']);
 
 % Initialize table of significant values
-sig_table = cell2table(cell(0,5),'VariableNames',{'Name','Freq','Time','F','p'});
+%sig_table = cell2table(cell(0,5),'VariableNames',{'Name','Freq','Time','F','p'});
+
 
 % Loop through patients
+pt_count = 0;
 for i = 1:length(listing)
     
-    % Load the file
+    
+    % Load the permutation file
     name = listing(i).name;
-    sim = load([out_folder,name]);
+    pt_name = strsplit(name,'_');
+    pt_name = pt_name{1};
+    sim = load([perm_folder,name]);
     sim = sim.sim;
+    sim_p = sim.p;
+    %sim_p_text = arrayfun(@(x) sprintf('%1.3f',x), sim_p,'UniformOutput',false);
+    
+    pt_count = pt_count + 1;
     
     nfreq = length(sim);
+    if nfreq > 1, error('This function is only for simple correlation\n'); end
     
-    % Loop through frequencies
-    for f = 1:nfreq
-        
-        % Loop through time points
-        for t = 2:length(sim(f).p)
-            
-            % multiple comparisons (correct for number of time comparisons
-            % and number of frequency comparisons)
-            % 
-            % Note I don't think this can ever be significant when testing
-            % multiple frequencies ********
-            if sim(f).p(t) < alpha/(nfreq)/(length(sim(f).p)-1)
-                
-                % Add info to the significance table
-                sig_table = [sig_table;{name,f,t,sim(f).F(t),sim(f).p(t)}];
-                
-            end
-            
-        end
-        
+    % Get the appropriate times and signal deviation
+    sig_dev_name = sig_dev(pt_count).name;
+    if strcmp(sig_dev_name,pt_name) == 0
+        pt_count = pt_count - 1;
+        continue;
     end
+    window = diff(sig_dev(pt_count).index_windows,1,2)/fs;
+    window = window(1);
+    times = 1:size(sig_dev(pt_count).index_windows,1);
+    times = times*window-window;
+    sig_dev_p = (sig_dev(pt_count).p);
+    sig_dev_p_text = arrayfun(@(x) sprintf('%1.3f',x), sig_dev_p,'UniformOutput',false);
+    
+    
+    
+    % get metrics
+    metric_name = metrics(pt_count).name;
+    if strcmp(metric_name,pt_name) == 0, error('what\n'); end
+    ns_p = metrics(pt_count).metric(1).p;
+    ge_p = metrics(pt_count).metric(2).p;
+    %ns_p_text = arrayfun(@(x) sprintf('%1.3f',x), ns_p,'UniformOutput',false);
+    %ge_p_text = arrayfun(@(x) sprintf('%1.3f',x), ge_p,'UniformOutput',false);
+    
+    % Add asterixes when appropriate
+    sim_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(sim_p)-1)),sim_p,sig_dev_p','UniformOutput',false);
+    ns_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(sim_p)-1)),ns_p',sig_dev_p','UniformOutput',false);
+    ge_p_text=arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(sim_p)-1)),ge_p',sig_dev_p','UniformOutput',false);
+    
+    % add stuff to table
+    pt_name
+    pt_table = table(times',sig_dev_p_text',sim_p_text,ns_p_text,ge_p_text,'VariableNames',var_names_pt)
+   
     
     
 end
 
-% Store the significance table
-save([out_folder,'sig_table.mat'],'sig_table')
 
-% Display the significance table
-sig_table
+end
+
+
+function out = get_asterixes(p,dev_p,alpha)
+    %alpha = 0.05;
+    out = sprintf('%1.3f',p);
+    if p < alpha && dev_p > alpha
+        out = [out,'***'];
+    end
 
 end
