@@ -5,7 +5,7 @@ This function stores eeg data for manually detected spikes
 %}
 
 %% Parameters
-surround_time = 6;
+surround_time = 3; % how many seconds before and after each spike to take for initial analysis
 thresh_spike = 6;
 
 %% Get locations
@@ -28,15 +28,11 @@ pt_folder = [main_folder,'data/spike_structures/'];
 pt = load([pt_folder,'pt.mat']);
 pt = pt.pt;
 
+%% Get the spike times
 sp_folder = [main_folder,'data/manual_spikes/'];
 sp = get_manual_times_from_excel;
 
-%{
-% old spikes
-sp = load([sp_folder,'sp.mat']);
-sp = sp.sp;
-%}
-
+% Get the patients
 if isempty(whichPts) == 1
     whichPts = [];
     for i = 1:length(sp)
@@ -46,13 +42,14 @@ if isempty(whichPts) == 1
     end
 end
 
+% Loop through patients
 for whichPt = whichPts
     
     name = sp(whichPt).name;
     
     if isempty(name) == 1
         continue;
-    elseif sp(whichPt).complete == 0
+    elseif sp(whichPt).complete == 0 % Skip if we don't have complete spike data
         continue;
     else
         fprintf('Doing %s...\n',name);

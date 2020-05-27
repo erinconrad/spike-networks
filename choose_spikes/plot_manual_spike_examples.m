@@ -1,5 +1,11 @@
 function plot_manual_spike_examples(avg)
 
+%{
+This function plots examples of the EEG data surrounding manually detected
+spikes. It will either plot all of the channels or the average signal
+z-score of the involved channels.
+%}
+
 %% Get locations
 locations = spike_network_files;
 script_folder = locations.script_folder;

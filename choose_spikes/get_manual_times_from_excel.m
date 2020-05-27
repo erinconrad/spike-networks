@@ -1,5 +1,13 @@
 function sp = get_manual_times_from_excel
 
+%{
+This takes manual spike times from excel and fills a structure with spike
+times
+%}
+
+%% Parameters
+expected_num = 30; % expected number of spikes
+
 %% Get locations
 locations = spike_network_files;
 script_folder = locations.script_folder;
@@ -70,7 +78,7 @@ for i = 1:length(T.Properties.VariableNames)
         error('surprising input\n');
     end
     
-    if length(sp(whichPt).spike) >= 30
+    if length(sp(whichPt).spike) >= expected_num
         sp(whichPt).complete = 1;
     else
         sp(whichPt).complete = 0;

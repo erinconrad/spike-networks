@@ -1,11 +1,15 @@
 function manual_spike_networks(whichPts,do_simple_corr)
 
+%{
+This function calculates functional networks for EEG data surrounding
+manually detected spikes
+%}
+
 %% Parameters
 merge = 1; % merge with existing?
-do_car = 1;
-pre_whiten = 0;
+do_car = 1; % common average reference?
+pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 time_window = 0.5; %in seconds
-n_chunks = 22; % number of time windows
 
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
@@ -31,7 +35,6 @@ pt_file = [data_folder,'spike_structures/pt.mat'];
 pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
-sp_folder = [main_folder,'data/manual_spikes/'];
 sp = get_manual_times_from_excel;
 
 %{
@@ -116,6 +119,7 @@ for whichPt = whichPts
         %old_values = values;
         values = pre_processing(values,do_car,pre_whiten);
         nchs = size(values,2);
+        n_chunks = round(size(values,1)/fs/time_window);
 
         %% Figure out times for which I will be calculating adjacencies
         % The peak should be the very center of each file
@@ -129,6 +133,11 @@ for whichPt = whichPts
             index_windows(i,1) = peak - tick_window*n_chunks/2 + tick_window*(i-1);
             index_windows(i,2) = peak - tick_window*n_chunks/2 + tick_window*(i);
         end
+        
+        % Fix the first and the last to make sure they don't become
+        % negative or beyond the total size
+        index_windows(1,1) = max(index_windows(1,1),1);
+        index_windows(end,2) = min(index_windows(end,2),size(values,1));
 
 
         %% Get adjacency matrices
