@@ -197,7 +197,7 @@ for whichPt = whichPts
         spike(s).ordered_chs = [in_chs(I),sorted_times];
         
         % Plot
-        if 1
+        if 0
             figure
             set(gcf,'position',[100 100 1000 500])
             offset = 0;
