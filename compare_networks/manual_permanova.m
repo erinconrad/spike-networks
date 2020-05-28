@@ -1,5 +1,11 @@
 function manual_permanova(whichPts,simple)
 
+%{
+This function compares adjacency matrices across time periods surrounding
+the spikes. It flattens the matrices, and then does a multivariate
+non-parametric test to compare all elements of the matrix across times.
+%}
+
 %% Parameters
 nperms = 1e3;
 
@@ -67,14 +73,13 @@ for j = 1:length(listing)
     
     %% Get arrays of flattened adjacency matrices
     for i = 1:nfreq
-        
-        
+
         adj_avg(i).adj = nan(n_times,nchs*(nchs-1)/2,nspikes);
         sim(i).p = zeros(n_times,1);
         sim(i).F = zeros(n_times,1);
         sim(i).indices = (1:n_times)';
         
-         % First second is the control
+        % First second is the control
         sim(i).p(1) = nan;
         sim(i).F(1) = nan;
     end
@@ -111,14 +116,14 @@ for j = 1:length(listing)
     
     %% Compare first time period to all additional time periods with permanova
     for which_freq = 1:nfreq
-        % Get the first second (this will be an nch*(nch-1)/2 x 1000
+        % Get the first second (this will be an nch*(nch-1)/2 x nspike
         % matrix)
         first_sec = squeeze(adj_avg(which_freq).adj(1,:,:));
 
-        % reshape it for permanova (so now it's 1000 x nch*(nch-1)/2)
+        % reshape it for permanova (so now it's nspike x nch*(nch-1)/2)
         first_sec = first_sec';
 
-        % make a 1000 x 1 array with time 1
+        % make a nspike x 1 array with time 1
         first_sec_time = ones(size(first_sec,1),1);
         
         % Loop through subsequent times
@@ -138,7 +143,14 @@ for j = 1:length(listing)
             % Generate the dissimilarity matrix. When I supply this without
             % arguments it defaults to euclidean distance, which is to say
             % the sum of the square difference between each feature of the
-            % 1000x1 vector between time period 1 and 2
+            % nspikex1 vector between time period 1 and 2. This generates
+            % an nspikes*2 x nspikes*2 dissimilarity matrix, basically how
+            % different each spike is from each other spike. If first_sec
+            % and test_sec are very different, then I would expect the RUQ
+            % and LLQ of the dis matrix to be very bright relative to the
+            % LUQ and RLQ (saying that the spikes in different time periods
+            % are more different from each other than they are from spikes
+            % in the same time period).
             dis = f_dis([first_sec;test_sec]);
             
             % Get an F statistic and p-value on the dissimilarity between

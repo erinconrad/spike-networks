@@ -1,4 +1,4 @@
-function spike_processing(whichPts)
+function spike_processing(whichPts,do_save)
 
 %{
 This function stores eeg data for manually detected spikes
@@ -6,7 +6,7 @@ This function stores eeg data for manually detected spikes
 
 %% Parameters
 surround_time = 3; % how many seconds before and after each spike to take for initial analysis
-thresh_spike = 6;
+thresh_spike = 8;
 
 %% Get locations
 locations = spike_network_files;
@@ -107,9 +107,12 @@ for whichPt = whichPts
          'SampleRate',fs);
         %}
         
+        % Common average reference and notch filter the data
+        data = pre_processing(data,1,0,1,fs);
+        
         % Bandpass filter the data to get the spikey component
         np = 6;
-        fc = [2 70];
+        fc = [5 70];%[2 70];
         fn = fs/2;
         [B,A] = butter(np,fc/fn);
         
@@ -121,12 +124,14 @@ for whichPt = whichPts
         
         if 0
             figure
-            tch = 20;
-            plot(data(:,tch));
-            hold on
-            plot(hp_data(:,tch));
-            pause
-            close(gcf)
+            for tch = 1:nch
+                plot(data(:,tch));
+                hold on
+                plot(hp_data(:,tch));
+                title(sprintf('%d %s',tch,chLabels{tch}))
+                pause
+                close(gcf)
+            end
         end
         
         
@@ -178,6 +183,7 @@ for whichPt = whichPts
                 else
                     plot(peak_index,narrow_data(peak_index,ich),'rx','MarkerSize',30)
                 end
+                title(chLabels(ich))
                 pause
                 close(gcf)
             end
@@ -191,12 +197,12 @@ for whichPt = whichPts
         spike(s).ordered_chs = [in_chs(I),sorted_times];
         
         % Plot
-        if 0
+        if 1
             figure
             set(gcf,'position',[100 100 1000 500])
             offset = 0;
-            for ich = 1:length(spike(s).ordered_chs)
-                plot(data(:,ich)-offset)
+            for ich = 1:size(spike(s).ordered_chs,1)
+                plot(data(:,spike(s).ordered_chs(ich,1))-offset)
                 hold on
                 offset = offset - 400;
             end
@@ -208,8 +214,9 @@ for whichPt = whichPts
         spike(s).time = median(sorted_times);
         
     end
-
-    save([results_folder,name,'_eeg.mat'],'spike');
+    if do_save == 1
+        save([results_folder,name,'_eeg.mat'],'spike');
+    end
     
 end
 

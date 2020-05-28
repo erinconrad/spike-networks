@@ -71,9 +71,9 @@ for i = 1:length(listing)
                 adj = squeeze(adj_all_t(tt,:,:));
                 
                 %% Calculate metrics
-                ge(which_freq,s_count,tt) = efficiency_wei(adj,0); % global efficiency
+                ge(which_freq,s_count,tt) = efficiency_wei(adj,0); % global efficiency of full matrix
                 
-                % node strength of all ch involved
+                % node strength of all chs involved
                 ns_temp = strengths_und(adj); 
                 ns_seq(which_freq,s_count,tt) = mean(ns_temp(involved));
                 
@@ -102,6 +102,7 @@ for i = 1:length(listing)
     % Loop through the metrics we're testings
     for m = 1:length(metrics(i).metric)
         
+        % alpha is .05 divided by the number of comparisons
         metrics(i).metric(m).alpha = 0.05/((size(z_ns,3)-1)*size(z_ns,1));
             
         % Loop through times 2:end and compare each to first time

@@ -1,8 +1,13 @@
 %{
 
 Ideas:
-- probably need more spikes (I don't like that the spike period isn't
-significantly different): try 50 per patient
+- add a notch
+- recollect HUP075 1-35
+- 50 spikes per patient
+- decide if I should remove bad channels
+    - I would either need to do this at the outset, applying it to all
+    spikes, or I would need to figure out how to combine adjacency matrices
+    across spikes when I have different subsets of channels for each spike
 - play more with NBS
 - play with other PERMANOVA distance functions
 - to minimize comparisons, what if I just compare pre-spike to post-spike

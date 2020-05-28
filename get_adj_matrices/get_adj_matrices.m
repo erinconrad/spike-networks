@@ -1,5 +1,10 @@
 function adj = get_adj_matrices(values,fs,freq_bands)
 
+%{
+This calculates functional coherence across multiple frequency bands for
+all pairs of channels
+%}
+
 nchs = size(values,2);
 
 % Initialize adjacency matrix

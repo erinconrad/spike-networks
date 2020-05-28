@@ -1,5 +1,11 @@
 function manual_sig_deviation
 
+%{
+This function determines the time periods in which the EEG data surrounding
+the spike is significantly different from the baseline (first half second).
+This serves as a control for other measures
+%}
+
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;

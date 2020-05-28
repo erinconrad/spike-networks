@@ -1,4 +1,4 @@
-function data = pre_processing(data,do_car,pre_whiten)
+function data = pre_processing(data,do_car,pre_whiten,do_notch,fs)
 
 %% Common average reference
 if do_car == 1
@@ -6,6 +6,17 @@ if do_car == 1
     old_data = data;
     data = data - avg;
 end
+
+%% Notch filter
+if do_notch == 1
+    f = designfilt('bandstopiir','FilterOrder',2, ...
+                   'HalfPowerFrequency1',59,'HalfPowerFrequency2',61, ...
+                   'DesignMethod','butter','SampleRate',fs);
+    for i = 1:size(data,2)
+       data(:,i) = filtfilt(f,data(:,i));   
+    end
+end
+
 
 %% Apply an AR(1) model
 %{
@@ -37,6 +48,7 @@ if pre_whiten == 1
         data(:,j) = E;
     end
 end
+
 
 
 end

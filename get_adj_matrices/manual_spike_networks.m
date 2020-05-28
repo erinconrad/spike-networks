@@ -6,7 +6,7 @@ manually detected spikes
 %}
 
 %% Parameters
-merge = 1; % merge with existing?
+do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 time_window = 0.5; %in seconds
@@ -35,6 +35,7 @@ pt_file = [data_folder,'spike_structures/pt.mat'];
 pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
+%% Get manual spike times
 sp = get_manual_times_from_excel;
 
 %{
@@ -106,7 +107,6 @@ for whichPt = whichPts
         involved = spike(s).involved;
         chLabels = spike(s).chLabels;
         fs = spike(s).fs;
-        time = spike(s).time;
         meta.fs = fs;
         meta.chLabels = chLabels;
         meta.spike(s).time =spike(s).time;
@@ -114,10 +114,10 @@ for whichPt = whichPts
 
         %% Pre-processing
         % Parameters 2 and 3 indicate whether to do CAR and pre-whiten,
-        % respectively
+        % respectively; 4 is whether to do notch filter
         %fprintf('Doing pre-processing...\n');
         %old_values = values;
-        values = pre_processing(values,do_car,pre_whiten);
+        values = pre_processing(values,do_car,pre_whiten,do_notch,fs);
         nchs = size(values,2);
         n_chunks = round(size(values,1)/fs/time_window);
 

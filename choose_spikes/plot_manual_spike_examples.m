@@ -1,10 +1,13 @@
-function plot_manual_spike_examples(avg)
+function plot_manual_spike_examples(whichInListing,avg,just_involved)
 
 %{
 This function plots examples of the EEG data surrounding manually detected
 spikes. It will either plot all of the channels or the average signal
 z-score of the involved channels.
 %}
+
+%% Parameters
+num_to_plot = 10; % number of spikes to plot per pt
 
 %% Get locations
 locations = spike_network_files;
@@ -32,9 +35,11 @@ end
 listing = dir([eeg_folder,'*.mat']);
 
 
+if isempty(whichInListing) == 1
+    whichInListing = 1:length(listing);
+end
 
-
-for i = 1:length(listing)
+for i = whichInListing
     
     split_name = strsplit(listing(i).name,'_');
     ptname = split_name{1};
@@ -42,12 +47,19 @@ for i = 1:length(listing)
     eeg = load([eeg_folder,listing(i).name]);
     spike = eeg.spike;
     
+    % Pick a random num_to_plot spikes to plot
+    s_to_plot = randsample(1:length(spike),num_to_plot);
+    
     all_dev = [];
     
     if avg == 0
     
-        for s = 1:length(spike)
-
+        for s = s_to_plot
+            which_chs = 1:size(spike(s).data,2);
+            if just_involved == 1
+                which_chs = which_chs(spike(s).involved);
+            end
+            
             median_signal = median(spike(s).data,1);
             dev_signal = spike(s).data-median_signal;
             all_dev = cat(3,all_dev,dev_signal);
@@ -55,42 +67,45 @@ for i = 1:length(listing)
             xpoints = spike(s).times(2)-spike(s).times(1);%size(spike(s).data,1);
             figure
             set(gcf,'position',[120 183 1440 622])
-            plot(linspace(0,spike(s).times(2)-spike(s).times(1),size(spike(s).data,1)),...
-                spike(s).data(:,1),'k')
-            hold on
-            text(xpoints + 0.1,spike(s).data(end,1),spike(s).chLabels{1});
             offset = 0;
-            for ich = 2:size(spike(s).data,2)
-                offset = offset - (max(spike(s).data(:,ich))-min(spike(s).data(:,ich-1)));
+            for ich = 1:length(which_chs)
+                if ich > 1
+                    offset = offset - (max(spike(s).data(:,which_chs(ich)))-min(spike(s).data(:,which_chs(ich-1))));
+                else
+                    offset = 0;
+                end
                 plot(linspace(0,spike(s).times(2)-spike(s).times(1),size(spike(s).data,1)),...
-                    spike(s).data(:,ich)+ offset,'k')
-                text(xpoints + 0.1,spike(s).data(end,ich)+offset,spike(s).chLabels{ich});
+                    spike(s).data(:,which_chs(ich))+ offset,'k')
+                hold on
+                text(xpoints + 0.1,spike(s).data(end,which_chs(ich))+offset,spike(s).chLabels{which_chs(ich)});
             end
             xlabel('Time (s)')
             title(sprintf('Time %1.1f s',spike(s).time))
             set(gca,'fontsize',20)
-            savefig([plot_folder,ptname,sprintf('_%d',s)]);
+            pause
+            %savefig([plot_folder,ptname,sprintf('_%d',s)]);
             close(gcf)
         end
 
         avg_dev = mean(all_dev,3);
         figure
         set(gcf,'position',[120 183 1440 622])
-        plot(linspace(0,spike(s).times(2)-spike(s).times(1),size(spike(s).data,1)),...
-                avg_dev(:,1),'k')
-        hold on
-        text(xpoints + 0.1,spike(s).data(end,1),spike(s).chLabels{1});
         offset = 0;
-        for ich = 2:size(spike(s).data,2)
-            offset = offset - (max(avg_dev(:,ich))-min(avg_dev(:,ich-1)));
+        for ich = 1:length(which_chs)
+            if ich > 1
+                offset = offset - (max(avg_dev(:,which_chs(ich)))-min(avg_dev(:,which_chs(ich-1))));
+            else
+                offset = 0;
+            end
             plot(linspace(0,spike(s).times(2)-spike(s).times(1),size(spike(s).data,1)),...
                 avg_dev(:,ich)+ offset,'k')
-            text(xpoints + 0.1,avg_dev(end,ich)+offset,spike(s).chLabels{ich});
+            text(xpoints + 0.1,avg_dev(end,which_chs(ich))+offset,spike(s).chLabels{which_chs(ich)});
         end
         xlabel('Time (s)')
         title(sprintf('Average deviation'))
         set(gca,'fontsize',20)
-        savefig([plot_folder,ptname,sprintf('_avg')]);
+        pause
+        %savefig([plot_folder,ptname,sprintf('_avg')]);
         close(gcf)
         
     elseif avg == 1
