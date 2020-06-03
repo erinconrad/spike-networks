@@ -1,4 +1,4 @@
-function manual_nbs(whichPts,simple)
+function manual_nbs(simple)
 
 %% Parameters
 plot_graphs = 0; % show graphs?
@@ -32,8 +32,10 @@ end
 
 if simple == 1
     out_folder = [results_folder,'nbs_stats/simple/'];
+    adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
 elseif simple == 0
     out_folder = [results_folder,'nbs_stats/coherence/'];
+    adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
 end
 if exist(out_folder,'dir') == 0
     mkdir(out_folder)
@@ -46,22 +48,17 @@ sp_folder = [main_folder,'data/manual_spikes/'];
 sp = load([sp_folder,'sp.mat']);
 sp = sp.sp;
 
-if isempty(whichPts) == 1
-    whichPts = [];
-    for i = 1:length(sp)
-        if isempty(sp(i).name) == 0
-            whichPts = [whichPts,i];
-        end
-    end
-end
+
+listing = dir([adj_folder,'*_adj.mat']);
 
 
 
-for whichPt = whichPts
 
-    % Skip it if name is empty
-    if isempty(pt(whichPt).name) == 1, continue; end
-    name = pt(whichPt).name;
+for j = 1:length(listing)
+
+    filename = listing(j).name;
+    name_sp = split(filename,'_');
+    name = name_sp{1};
     
     if simple == 1
         adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
