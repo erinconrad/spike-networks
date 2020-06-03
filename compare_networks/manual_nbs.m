@@ -1,7 +1,19 @@
 function manual_nbs(whichPts,simple)
 
 %% Parameters
-nperms = 1e3;
+plot_graphs = 0; % show graphs?
+nperms = '5000';
+nbs_method = 'Run NBS'; %'Run FDR' 'Run NBS'
+NBS_test_threshold = '3.5';
+test_method = 't-test';
+alpha = '0.05';
+graph_method = 'Extent'; %'Intensity' 'Extent'
+
+% this specifically tests whether the group modeled by the first column is
+% smaller than the group modeled by the second column (columns defined in
+% design matrix). Given how I set up the design matrix, this tests whether
+% the group in time i_time is more connected than the group in time 1
+contrast = [-1 1]; % group 2 (later time) > group 1 (first time)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -52,11 +64,13 @@ for whichPt = whichPts
     name = pt(whichPt).name;
     
     if simple == 1
-        adj_folder = [results_folder,'adj_mat/adj_simple/'];
+        adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
     elseif simple == 0
-        adj_folder = [results_folder,'adj_mat/adj_coherence/'];
+        adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
     end
 
+    %% Initialize structure to output stats
+    nbs_stats.name = name;
     
     %% Load adjacency matrices 
     meta = load([adj_folder,name,'_adj.mat']);
@@ -108,57 +122,79 @@ for whichPt = whichPts
     end
     
     %% Compare first time period to all additional time periods with permanova
-    for which_freq = 1:nfreq
-        % Get the first second (this will be an nch*nch x 1000
-        % matrix)
-        first_sec = squeeze(adj_avg(which_freq).adj(1,:,:,:));
-
-        % make a 1000 x 1 array with time 1
-        first_sec_time = ones(size(first_sec,1),1);
+    for which_freq = 1:nfreq        
         
         % Loop through subsequent times
         for i_time = 2:n_times
             
             fprintf('Doing time %d of %d, freq %d of %d\n',i_time,n_times,which_freq,nfreq);
             
-            % Get current time
-            test_sec = squeeze(adj_avg(which_freq).adj(i_time,:,:,:));
+            % Get design and adjacency matrices in the format needed for
+            % NBS
+            [mat,design] = transform_data_for_NBS(meta,which_freq,i_time);
                 
-            % Reshape it for perMANOVA
-            next_sec_time = 2*ones(size(test_sec,1),1);
-            
-            % Put matrices together for NBS
-            both_secs = cat(3,first_sec,test_sec);
-            
-            % Make design matrix
-            design_mat = [repmat([0,1],size(both_secs,3)/2,1);...
-                repmat([1,0],size(both_secs,3)/2,1)];
-            
-            sim(which_freq).p(i_time) = result.p;
-            sim(which_freq).F(i_time) = result.F;
-            
-            
             if 0
-                % Plot the dissimilarity matrix. Each i,j element shows how
-                % dissimilar time i is from time j (brighter colors mean
-                % more dissimilar). Remember that the first half of the
-                % elements are from time period 1 and the second half are
-                % from time period 2.
-                figure
-                imagesc(dis)
-                xticks(1:size(dis,1))
-                yticks(1:size(dis,1))
-                title(sprintf('Time period 1 vs %d, p = %1.3f',i_time,result.p))
-                pause
-                close(gcf)
+               % visualize the average adjacency matrices for the 2 conditions
+               figure
+               set(gcf,'position',[440 402 992 396])
+               subplot(1,2,1)
+               imagesc(nanmean(mat(:,:,1:size(mat,3)/2),3))
+               title('Time 1')
+               
+               subplot(1,2,2)
+               imagesc(nanmean(mat(:,:,size(mat,3)/2+1:end),3))
+               title(sprintf('Time %d',i_time))
+               pause
+               close(gcf)
             end
+            
+            % Build a UI structure to feed into a command-line call to NBS
+            UI.method.ui = nbs_method;
+            UI.test.ui = test_method;
+            UI.size.ui = graph_method;
+            UI.thresh.ui = NBS_test_threshold;
+            UI.perms.ui = nperms;
+            UI.alpha.ui = alpha;
+            UI.contrast.ui = contrast;
+            UI.design.ui = design;
+            UI.matrices.ui = mat;
+            UI.exchange.ui=''; 
+            UI.node_coor.ui = '';
+            UI.node_label.ui = '';
+            nbs = NBSrun(UI);
+            
+            % Visualize significant results
+            fprintf('Number of significant sub-graphs for time %d: %d\n',...
+                i_time,nbs.NBS.n);
+            if plot_graphs == 1   
+                for i = 1:nbs.NBS.n
+                    figure
+                    subplot(1,3,1)
+                    % Plot average adjacency matrix for time 1
+                    imagesc(squeeze(mean(adj_avg(which_freq).adj(1,:,:,:),4)))
+
+                    subplot(1,3,2)
+                    % Plot average adjacency matrix for time i_time
+                    imagesc(squeeze(mean(adj_avg(which_freq).adj(i_time,:,:,:),4)))
+
+                    subplot(1,3,3)
+                    % Plot the connected components with significant changes
+                    imagesc(nbs.NBS.con_mat{i})
+                    pause
+                    close(gcf)
+                end 
+            end
+            
+            % Fill up structure with stats
+            nbs_stats.freq(which_freq).time(i_time).nbs = nbs.NBS;
+            nbs_stats.freq(which_freq).time(i_time).parameters = nbs.UI;
             
         end
         
     end
         
 %% Save the sim structure
-save([out_folder,name,'_perm.mat'],'sim');
+save([out_folder,name,'_nbs.mat'],'nbs_stats');
 
 end
 

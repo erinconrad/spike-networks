@@ -7,7 +7,7 @@ z-score of the involved channels.
 %}
 
 %% Parameters
-num_to_plot = 10; % number of spikes to plot per pt
+num_to_plot = 50; % number of spikes to plot per pt
 
 %% Get locations
 locations = spike_network_files;
@@ -51,6 +51,7 @@ for i = whichInListing
     s_to_plot = randsample(1:length(spike),num_to_plot);
     
     all_dev = [];
+    fs = spike(1).fs;
     
     if avg == 0
     
@@ -60,9 +61,11 @@ for i = whichInListing
                 which_chs = which_chs(spike(s).involved);
             end
             
-            median_signal = median(spike(s).data,1);
-            dev_signal = spike(s).data-median_signal;
-            all_dev = cat(3,all_dev,dev_signal);
+            signal = spike(s).data;
+            signal = pre_processing(signal,1,0,1,fs);
+            mean_signal = mean(signal,1);
+            z_signal = (signal-mean_signal)./std(signal);
+            all_dev = cat(3,all_dev,z_signal);
 
             xpoints = spike(s).times(2)-spike(s).times(1);%size(spike(s).data,1);
             figure
@@ -70,23 +73,23 @@ for i = whichInListing
             offset = 0;
             for ich = 1:length(which_chs)
                 if ich > 1
-                    offset = offset - (max(spike(s).data(:,which_chs(ich)))-min(spike(s).data(:,which_chs(ich-1))));
+                    offset = offset - (max(signal(:,which_chs(ich)))-min(signal(:,which_chs(ich-1))));
                 else
                     offset = 0;
                 end
-                plot(linspace(0,spike(s).times(2)-spike(s).times(1),size(spike(s).data,1)),...
-                    spike(s).data(:,which_chs(ich))+ offset,'k')
+                plot(linspace(0,spike(s).times(2)-spike(s).times(1),size(signal,1)),...
+                    signal(:,which_chs(ich))+ offset,'k')
                 hold on
-                text(xpoints + 0.1,spike(s).data(end,which_chs(ich))+offset,spike(s).chLabels{which_chs(ich)});
+                text(xpoints + 0.1,signal(end,which_chs(ich))+offset,spike(s).chLabels{which_chs(ich)});
             end
             xlabel('Time (s)')
-            title(sprintf('Time %1.1f s',spike(s).time))
+            title(sprintf('Time %1.1f s for %s',spike(s).time,ptname))
             set(gca,'fontsize',20)
             pause
             %savefig([plot_folder,ptname,sprintf('_%d',s)]);
             close(gcf)
         end
-
+        %{
         avg_dev = mean(all_dev,3);
         figure
         set(gcf,'position',[120 183 1440 622])
@@ -107,25 +110,33 @@ for i = whichInListing
         pause
         %savefig([plot_folder,ptname,sprintf('_avg')]);
         close(gcf)
+        %}
         
     elseif avg == 1
         
         all_z = zeros(size(spike(1).data,1),length(spike));
         
         for s = 1:length(spike)
-
-            mean_signal = mean(spike(s).data,1);
-            z_signal = (spike(s).data-mean_signal)./std(spike(s).data);
+            signal = spike(s).data;
+            signal = pre_processing(signal,1,0,1,fs);
+            mean_signal = mean(signal,1);
+            z_signal = abs(signal-mean_signal)./std(signal);
             z_signal_avg_all_chs = mean(z_signal(:,spike(s).involved),2);
             all_z(:,s) = z_signal_avg_all_chs;
             
         end
         
-        all_z_avg = mean(all_z,2);
+        all_z_avg = nanmean(all_z,2);
         figure
         set(gcf,'position',[120 183 1000 300])
-        plot(all_z_avg);
+        plot([1:size(all_z_avg,1)]/fs,all_z_avg);
+        xlabel('Time (s)')
+        ylabel('Z score')
+        title(sprintf('Average signal deviation surrounding spikes for %s\n(involved channels only)',ptname))
+        xlim([0 6])
+        set(gca,'fontsize',20)
         pause
+        print(gcf,[plot_folder,ptname,sprintf('avg')],'-depsc')
         close(gcf)
         
     end

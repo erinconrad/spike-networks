@@ -1,14 +1,13 @@
 %{
 
 Ideas:
-- add a notch
-- recollect HUP075 1-35
+- recollect HUP075 1-35?
 - 50 spikes per patient
 - decide if I should remove bad channels
     - I would either need to do this at the outset, applying it to all
     spikes, or I would need to figure out how to combine adjacency matrices
     across spikes when I have different subsets of channels for each spike
-- play more with NBS
+- play more with NBS - WHY ALWAYS SIGNIFICANT?????
 - play with other PERMANOVA distance functions
 - to minimize comparisons, what if I just compare pre-spike to post-spike
 
