@@ -14,6 +14,10 @@ graph_method = 'Extent'; %'Intensity' 'Extent'
 % design matrix). Given how I set up the design matrix, this tests whether
 % the group in time i_time is more connected than the group in time 1
 contrast = [-1 1]; % group 2 (later time) > group 1 (first time)
+% NOTE: one potential problem with this is that it's a one sided test. It's
+% possible that later times will be less connected than the first time and
+% we will miss it. May need to do a 2 sided test by choosing both [-1 1]
+% and [1 -1] and bonferroni correcting.
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -186,7 +190,12 @@ for j = 1:length(listing)
             
             % Fill up structure with stats
             nbs_stats.freq(which_freq).time(i_time).nbs = nbs.NBS;
-            nbs_stats.freq(which_freq).time(i_time).parameters = nbs.UI;
+            nbs_stats.freq(which_freq).time(i_time).parameters.nperms = nperms;
+            nbs_stats.freq(which_freq).time(i_time).parameters.nbs_method = nbs_method;
+            nbs_stats.freq(which_freq).time(i_time).parameters.test_threshold = NBS_test_threshold;
+            nbs_stats.freq(which_freq).time(i_time).parameters.test_method = test_method;
+            nbs_stats.freq(which_freq).time(i_time).parameters.alpha = alpha;
+            nbs_stats.freq(which_freq).time(i_time).parameters.graph_method = graph_method;
             
         end
         
