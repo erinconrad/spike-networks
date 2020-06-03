@@ -60,6 +60,8 @@ for j = 1:length(listing)
     name_sp = split(filename,'_');
     name = name_sp{1};
     
+    fprintf('Doing %s\n',name);
+    
     if simple == 1
         adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
     elseif simple == 0
