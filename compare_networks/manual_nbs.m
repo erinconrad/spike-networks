@@ -1,4 +1,4 @@
-function manual_nbs(simple)
+function manual_nbs(simple,time_window)
 
 %% Parameters
 plot_graphs = 0; % show graphs?
@@ -8,6 +8,7 @@ NBS_test_threshold = '3.5';
 test_method = 't-test';
 alpha = '0.05';
 graph_method = 'Extent'; %'Intensity' 'Extent'
+time_text = sprintf('%1.1f/',time_window);
 
 % this specifically tests whether the group modeled by the first column is
 % smaller than the group modeled by the second column (columns defined in
@@ -35,11 +36,11 @@ if exist(plot_folder,'dir') == 0
 end
 
 if simple == 1
-    out_folder = [results_folder,'nbs_stats/simple/'];
-    adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
+    out_folder = [results_folder,'nbs_stats/simple/',time_text];
+    adj_folder = [results_folder,'adj_mat/manual/adj_simple/',time_text];
 elseif simple == 0
-    out_folder = [results_folder,'nbs_stats/coherence/'];
-    adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
+    out_folder = [results_folder,'nbs_stats/coherence/',time_text];
+    adj_folder = [results_folder,'adj_mat/manual/adj_coherence/',time_text];
 end
 if exist(out_folder,'dir') == 0
     mkdir(out_folder)

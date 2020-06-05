@@ -3,11 +3,16 @@
 Ideas:
 - recollect HUP075 1-35?
 - 50 spikes per patient
+- try functional coherence
+- try one second time scales
+- need at least 20 patients
+
 - decide if I should remove bad channels
     - I would either need to do this at the outset, applying it to all
     spikes, or I would need to figure out how to combine adjacency matrices
     across spikes when I have different subsets of channels for each spike
-- play more with NBS - WHY ALWAYS SIGNIFICANT?????
+- play more with NBS - could try different t statistics, could also try a
+two-sided test with the contrast
 - play with other PERMANOVA distance functions
 - to minimize comparisons, what if I just compare pre-spike to post-spike
 

@@ -1,4 +1,4 @@
-function manual_network_metrics(simple)
+function manual_network_metrics(simple,time_window)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -11,14 +11,16 @@ addpath(genpath(locations.BCT));
 pt_file = [data_folder,'spike_structures/pt.mat'];
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
+time_text = sprintf('%1.1f/',time_window);
+
 
 % EEG data folder
 eeg_folder = [results_folder,'eeg_data/'];
 
 % Adj mat folder
 if simple == 1
-    adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
-    network_folder = [results_folder,'networks/manual/simple/'];
+    adj_folder = [results_folder,'adj_mat/manual/adj_simple/',time_text];
+    network_folder = [results_folder,'networks/manual/simple/',time_text];
 end
 
 if exist(network_folder,'dir') == 0

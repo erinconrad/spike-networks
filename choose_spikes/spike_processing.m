@@ -6,7 +6,7 @@ This function stores eeg data for manually detected spikes
 
 %% Parameters
 surround_time = 3; % how many seconds before and after each spike to take for initial analysis
-thresh_spike = 8;
+thresh_spike = 8; % How high above baseline the filtered data must be
 
 %% Get locations
 locations = spike_network_files;

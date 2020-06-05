@@ -1,4 +1,4 @@
-function plot_manual_networks(simple,brief)
+function plot_manual_networks(simple,time_window)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -9,13 +9,13 @@ data_folder = [main_folder,'data/'];
 script_folder = locations.script_folder;
 addpath(genpath(script_folder));
 pt_file = [data_folder,'spike_structures/pt.mat'];
-
+time_text = sprintf('%1.1f/',time_window);
 
 if simple == 1
-    out_folder = [results_folder,'adj_simple/'];
+    out_folder = [results_folder,'adj_simple/',time_text];
     freq_text = {'pairwise\ncorrelation'};
 else
-    out_folder = [results_folder,'adj_coherence/'];
+    out_folder = [results_folder,'adj_coherence/',time_text];
     freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma'};
 end
 
@@ -70,12 +70,8 @@ for i = 1:length(listing)
     end
     
     % Decide times to loop through
-    ntimes = size(adj_avg(1).adj,1);
-    if brief == 1
-        times = [floor(ntimes/2)-3:floor(ntimes/2)+3];
-    else
-        times = 1:size(adj_avg(1).adj,1);
-    end
+    times = 1:size(adj_avg(1).adj,1);
+    
     
     % Make plots
     figure

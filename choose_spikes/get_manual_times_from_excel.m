@@ -6,7 +6,7 @@ times
 %}
 
 %% Parameters
-expected_num = 30; % expected number of spikes
+expected_num = 50; % expected number of spikes
 
 %% Get locations
 locations = spike_network_files;

@@ -9,7 +9,7 @@ manually detected spikes
 do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
-time_window = 0.5; %in seconds
+time_window = 1; %in seconds
 
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
@@ -20,7 +20,7 @@ freq_bands = [5 15;... %alpha/theta
     ]; 
 freq_names = {'alpha_theta','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
-
+time_text = sprintf('%1.1f/',time_window);
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -67,9 +67,9 @@ for whichPt = whichPts
     
     % output folder
     if do_simple_corr == 1
-        out_folder = [results_folder,'adj_simple/'];
+        out_folder = [results_folder,'adj_simple/',time_text];
     else
-        out_folder = [results_folder,'adj_coherence/'];
+        out_folder = [results_folder,'adj_coherence/',time_text];
     end
     
     if exist(out_folder,'dir') == 0

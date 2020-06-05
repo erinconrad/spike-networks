@@ -1,4 +1,4 @@
-function manual_permanova(whichPts,simple)
+function manual_permanova(simple,time_window)
 
 %{
 This function compares adjacency matrices across time periods surrounding
@@ -23,13 +23,14 @@ plot_folder = [results_folder,'plots/'];
 if exist(plot_folder,'dir') == 0
     mkdir(plot_folder);
 end
+time_text = sprintf('%1.1f/',time_window);
 
 if simple == 1
-    out_folder = [results_folder,'perm_stats/simple/'];
-    adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
+    out_folder = [results_folder,'perm_stats/simple/',time_text];
+    adj_folder = [results_folder,'adj_mat/manual/adj_simple/',time_text];
 elseif simple == 0
-    out_folder = [results_folder,'perm_stats/coherence/'];
-    adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
+    out_folder = [results_folder,'perm_stats/coherence/',time_text];
+    adj_folder = [results_folder,'adj_mat/manual/adj_coherence/',time_text];
 end
 
 if exist(out_folder,'dir') == 0
@@ -48,9 +49,7 @@ sp = load([sp_folder,'sp.mat']);
 sp = sp.sp;
 %}
 
-if isempty(whichPts) == 1
-    listing = dir([adj_folder,'*_adj.mat']);
-end
+listing = dir([adj_folder,'*_adj.mat']);
 
 
 

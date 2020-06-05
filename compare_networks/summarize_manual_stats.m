@@ -1,4 +1,4 @@
-function summarize_manual_stats(simple)
+function summarize_manual_stats(simple,time_window)
 
 %{
 This function only makes summary tables for the simple correlation case
@@ -19,12 +19,15 @@ pt_file = [data_folder,'spike_structures/pt.mat'];
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
 plot_folder = [results_folder,'plots/'];
+time_text = sprintf('%1.1f/',time_window);
 
 if simple == 1
-    network_folder = [results_folder,'networks/manual/simple/'];
-    perm_folder = [results_folder,'perm_stats/simple/'];
-    var_names_pt = {'Time','SignalDev','Perm','NS','GE'};
+    network_folder = [results_folder,'networks/manual/simple/',time_text];
+    perm_folder = [results_folder,'perm_stats/simple/',time_text];
+    nbs_folder = [results_folder,'nbs_stats/simple/',time_text];
+    var_names_pt = {'Time','SignalDev','NBS','Perm','NS','GE'};
 elseif simple == 0
+    error('can only do for simple\n');
     network_folder = [results_folder,'networks/manual/coherence/'];
     perm_folder = [results_folder,'perm_stats/coherence/'];
     
@@ -60,6 +63,25 @@ for i = 1:length(listing)
     sim_p = sim.p;
     %sim_p_text = arrayfun(@(x) sprintf('%1.3f',x), sim_p,'UniformOutput',false);
     
+    % Load the nbs stats file
+    nbs_stats = load([nbs_folder,pt_name,'_nbs.mat']);
+    nbs_stats = nbs_stats.nbs_stats;
+    
+    % Get an array of p values for nbs
+    nbs_p = nan;
+    for it = 2:length(nbs_stats.freq.time)
+        nbs_curr = nbs_stats.freq.time(it).nbs;
+        if nbs_curr.n == 0
+            nbs_p = [nbs_p;nan];
+        else
+            % take the smallest p value of however many significant graphs
+            % there are
+            nbs_p = [nbs_p;min(nbs_curr.pval)];
+        end
+        
+    end
+    
+    
     pt_count = pt_count + 1;
     
     nfreq = length(sim);
@@ -89,13 +111,15 @@ for i = 1:length(listing)
     %ge_p_text = arrayfun(@(x) sprintf('%1.3f',x), ge_p,'UniformOutput',false);
     
     % Add asterixes when appropriate
+    nbs_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(nbs_p)-1)),nbs_p,sig_dev_p','UniformOutput',false);
     sim_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(sim_p)-1)),sim_p,sig_dev_p','UniformOutput',false);
     ns_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(sim_p)-1)),ns_p',sig_dev_p','UniformOutput',false);
     ge_p_text=arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(sim_p)-1)),ge_p',sig_dev_p','UniformOutput',false);
     
     % add stuff to table
     pt_name
-    pt_table = table(times',sig_dev_p_text',sim_p_text,ns_p_text,ge_p_text,'VariableNames',var_names_pt)
+    pt_table = table(times',sig_dev_p_text',nbs_p_text,sim_p_text,ns_p_text,...
+        ge_p_text,'VariableNames',var_names_pt)
    
     
     
