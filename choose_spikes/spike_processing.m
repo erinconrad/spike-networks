@@ -1,4 +1,4 @@
-function spike_processing(whichPts,do_save)
+function spike_processing(whichPts,do_save,overwrite)
 
 %{
 This function stores eeg data for manually detected spikes
@@ -53,6 +53,14 @@ for whichPt = whichPts
         continue;
     else
         fprintf('Doing %s...\n',name);
+    end
+    
+    % Skip if I already did it
+    if overwrite == 0
+        if exist([results_folder,name,'_eeg.mat'],'file') ~= 0
+            fprintf('Already did %s, skipping...\n',name);
+            continue;
+        end
     end
     
     n_spikes = length(sp(whichPt).spike);

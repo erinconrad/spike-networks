@@ -1,4 +1,4 @@
-function manual_spike_networks(whichPts,do_simple_corr,time_window)
+function manual_spike_networks(whichPts,overwrite,do_simple_corr,time_window)
 
 %{
 This function calculates functional networks for EEG data surrounding
@@ -74,8 +74,7 @@ for whichPt = whichPts
     if exist(out_folder,'dir') == 0
         mkdir(out_folder);
     end
-
-    
+ 
     spike = load([eeg_folder,sprintf('%s_eeg.mat',name)]);
     spike = spike.spike;
 
@@ -83,13 +82,20 @@ for whichPt = whichPts
     meta_file = [out_folder,sprintf('%s_adj.mat',name)];
 
     % Load it if it exists to see how much we've already done
-    if exist(meta_file,'file') ~= 0
-        meta = load(meta_file);
-        meta = meta.meta;
+    if overwrite == 0
+        if exist(meta_file,'file') ~= 0
+            meta = load(meta_file);
+            meta = meta.meta;
 
-        % Find first unfinished spike
-        start_spike = length(meta.spike) + 1;
+            % Find first unfinished spike
+            start_spike = length(meta.spike) + 1;
+            
+            fprintf('File already exists, loading and starting from unfinished spike.\n');
 
+        else
+            start_spike = 1;
+            meta.name = name;
+        end
     else
         start_spike = 1;
         meta.name = name;
