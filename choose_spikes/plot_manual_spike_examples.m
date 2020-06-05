@@ -1,4 +1,4 @@
-function plot_manual_spike_examples(whichInListing,avg,just_involved)
+function plot_manual_spike_examples(whichInListing,avg,just_involved,just_save)
 
 %{
 This function plots examples of the EEG data surrounding manually detected
@@ -135,7 +135,9 @@ for i = whichInListing
         title(sprintf('Average signal deviation surrounding spikes for %s\n(involved channels only)',ptname))
         xlim([0 6])
         set(gca,'fontsize',20)
-        pause
+        if just_save == 0
+            pause
+        end
         print(gcf,[plot_folder,ptname,sprintf('avg')],'-depsc')
         close(gcf)
         
