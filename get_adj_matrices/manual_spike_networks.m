@@ -1,4 +1,4 @@
-function manual_spike_networks(whichPts,do_simple_corr)
+function manual_spike_networks(whichPts,do_simple_corr,time_window)
 
 %{
 This function calculates functional networks for EEG data surrounding
@@ -9,7 +9,6 @@ manually detected spikes
 do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
-time_window = 1; %in seconds
 
 freq_bands = [5 15;... %alpha/theta
     15 25;... %beta
