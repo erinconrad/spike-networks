@@ -156,6 +156,9 @@ for i = 1:length(listing)
             avg_z_ge(metrics.metric(2).p<metrics.metric(2).alpha),...
             'r*');
         title('ge','fontsize',20)
+        if exist([network_folder,'plots/'],'dir') == 0
+            mkdir([network_folder,'plots/'])
+        end
         print(gcf,[network_folder,'plots/',name],'-depsc');       
         close(gcf)
     end
