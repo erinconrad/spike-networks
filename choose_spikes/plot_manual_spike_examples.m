@@ -43,6 +43,7 @@ for i = whichInListing
     
     split_name = strsplit(listing(i).name,'_');
     ptname = split_name{1};
+    fprintf('Doing %s\n',ptname);
     
     eeg = load([eeg_folder,listing(i).name]);
     spike = eeg.spike;
