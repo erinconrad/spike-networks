@@ -34,7 +34,7 @@ elseif simple == 0
 end
 
 % Load signal deviation file
-sig_dev_folder = [results_folder,'signal_deviation/manual/'];
+sig_dev_folder = [results_folder,'signal_deviation/manual/',time_text];
 sig_dev = load([sig_dev_folder,'sig_dev.mat']);
 sig_dev = sig_dev.sig_dev;
 
