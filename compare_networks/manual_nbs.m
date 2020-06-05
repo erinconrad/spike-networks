@@ -1,4 +1,4 @@
-function manual_nbs(simple,time_window)
+function manual_nbs(overwrite,simple,time_window)
 
 %% Parameters
 plot_graphs = 0; % show graphs?
@@ -71,6 +71,13 @@ for j = 1:length(listing)
         adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
     elseif simple == 0
         adj_folder = [results_folder,'adj_mat/manual/adj_coherence/'];
+    end
+    
+    if overwrite == 0
+        if exist([out_folder,name,'_nbs.mat'],'file') ~= 0
+            fprintf('Already done %s, skipping...\n',name);
+            continue;
+        end
     end
 
     %% Initialize structure to output stats
