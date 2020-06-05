@@ -38,9 +38,6 @@ sig_dev_folder = [results_folder,'signal_deviation/manual/'];
 sig_dev = load([sig_dev_folder,'sig_dev.mat']);
 sig_dev = sig_dev.sig_dev;
 
-% Load network stats file
-net_stats = load([network_folder,'network_stats.mat']);
-metrics = net_stats.metrics;
 
 % Get the individual patient stat files
 listing = dir([perm_folder,'*_perm.mat']);
@@ -66,6 +63,10 @@ for i = 1:length(listing)
     % Load the nbs stats file
     nbs_stats = load([nbs_folder,pt_name,'_nbs.mat']);
     nbs_stats = nbs_stats.nbs_stats;
+    
+    % Load network stats file
+    net_stats = load([network_folder,pt_name,'_network_stats.mat']);
+    metrics = net_stats.metrics;
     
     % Get an array of p values for nbs
     nbs_p = nan;
@@ -103,10 +104,8 @@ for i = 1:length(listing)
     
     
     % get metrics
-    metric_name = metrics(pt_count).name;
-    if strcmp(metric_name,pt_name) == 0, error('what\n'); end
-    ns_p = metrics(pt_count).metric(1).p;
-    ge_p = metrics(pt_count).metric(2).p;
+    ns_p = metrics.metric(1).p;
+    ge_p = metrics.metric(2).p;
     %ns_p_text = arrayfun(@(x) sprintf('%1.3f',x), ns_p,'UniformOutput',false);
     %ge_p_text = arrayfun(@(x) sprintf('%1.3f',x), ge_p,'UniformOutput',false);
     
