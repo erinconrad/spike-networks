@@ -219,7 +219,7 @@ for whichPt = whichPts
     % Once I've done all spikes for the file, make a finished.mat
    % save([out_folder,sprintf('finished.mat')],'finished');
         
-    
+    clear meta
 end
 
 

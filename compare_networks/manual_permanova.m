@@ -1,4 +1,4 @@
-function manual_permanova(simple,time_window)
+function manual_permanova(overwrite,simple,time_window)
 
 %{
 This function compares adjacency matrices across time periods surrounding
@@ -7,7 +7,7 @@ non-parametric test to compare all elements of the matrix across times.
 %}
 
 %% Parameters
-nperms = 1e3;
+nperms = 5e3;
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -59,6 +59,12 @@ for j = 1:length(listing)
     name_sp = split(filename,'_');
     name = name_sp{1};
     
+    if overwrite == 0
+        if exist([out_folder,name,'_perm.mat'],'file') ~= 0
+            fprintf('%s already exists, skipping...\n');
+            continue;
+        end
+    end
     
     %% Load adjacency matrices 
     meta = load([adj_folder,name,'_adj.mat']);
