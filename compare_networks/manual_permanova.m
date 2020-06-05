@@ -61,7 +61,7 @@ for j = 1:length(listing)
     
     if overwrite == 0
         if exist([out_folder,name,'_perm.mat'],'file') ~= 0
-            fprintf('%s already exists, skipping...\n');
+            fprintf('%s already exists, skipping...\n',name);
             continue;
         end
     end
