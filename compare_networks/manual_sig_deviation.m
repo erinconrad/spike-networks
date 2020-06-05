@@ -1,4 +1,4 @@
-function manual_sig_deviation
+function manual_sig_deviation(time_window)
 
 %{
 This function determines the time periods in which the EEG data surrounding
@@ -17,11 +17,12 @@ addpath(genpath(locations.BCT));
 pt_file = [data_folder,'spike_structures/pt.mat'];
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
+time_text = sprintf('%1.1f/',time_window);
 
 % Folders
 eeg_folder = [results_folder,'eeg_data/'];
-sig_dev_folder = [results_folder,'signal_deviation/manual/'];
-adj_folder = [results_folder,'adj_mat/manual/adj_simple/'];
+sig_dev_folder = [results_folder,'signal_deviation/manual/',time_text];
+adj_folder = [results_folder,'adj_mat/manual/adj_simple/',time_text];
 
 listing = dir([adj_folder,'*_adj.mat']);
 
