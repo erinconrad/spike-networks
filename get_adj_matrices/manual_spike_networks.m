@@ -161,7 +161,7 @@ for whichPt = whichPts
                 temp_values = values(round(index_windows(tt,1)):round(index_windows(tt,2)),:); 
 
                 % Get adjacency matrices
-                t_adj = get_adj_matrices(temp_values,data.fs,freq_bands);
+                t_adj = get_adj_matrices(temp_values,fs,freq_bands);
 
                 for ff = 1:size(freq_bands,1)
                     adj(ff).adj(tt,:,:) = t_adj(ff).adj;
