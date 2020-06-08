@@ -25,14 +25,19 @@ if simple == 1
     network_folder = [results_folder,'networks/manual/simple/',time_text];
     perm_folder = [results_folder,'perm_stats/simple/',time_text];
     nbs_folder = [results_folder,'nbs_stats/simple/',time_text];
-   
+    out_folder = [results_folder,'stats_sum/simple/',time_text];
 elseif simple == 0
     network_folder = [results_folder,'networks/manual/coherence/',time_text];
     perm_folder = [results_folder,'perm_stats/coherence/',time_text];
     nbs_folder = [results_folder,'nbs_stats/coherence/',time_text];
     adj_folder = [results_folder,'adj_mat/manual/adj_coherence/',time_text];
+    out_folder = [results_folder,'stats_sum/coherence/',time_text];
 end
 var_names_pt = {'Time','SignalDev','NBS','Perm','NS','GE'};
+
+if exist(out_folder,'dir') == 0
+    mkdir(out_folder);
+end
 
 % Load signal deviation file
 sig_dev_folder = [results_folder,'signal_deviation/manual/',time_text];
@@ -45,7 +50,6 @@ listing = dir([perm_folder,'*_perm.mat']);
 
 % Initialize table of significant values
 %sig_table = cell2table(cell(0,5),'VariableNames',{'Name','Freq','Time','F','p'});
-
 
 % Loop through patients
 for i = 1:length(listing)
@@ -189,13 +193,17 @@ for i = 1:length(listing)
         if simple == 1
             pt_table = table(times',sig_dev_p_text',nbs_p_text,sim_p_text,ns_p_text,...
                 ge_p_text,'VariableNames',var_names_pt)
+            all_tables(i).name = pt_name;
+            all_tables(i).table = pt_table;
         else
             for f = 1:nf
                 freq_text{f}
                 pt_table = table(times',sig_dev_p_text',nbs_p_text(:,f),...
                     sim_p_text(:,f),ns_p_text(:,f),...
                 ge_p_text(:,f),'VariableNames',var_names_pt)
-                
+                all_tables(i).name = pt_name;
+                all_tables(i).freq(f).name = freq_text{f};
+                all_tables(i).freq(f).table = pt_table;
             end
         end
     end
@@ -204,6 +212,8 @@ for i = 1:length(listing)
     
 end
 
+
+save([out_folder,'stats_sum.mat'],'all_tables');
 
 end
 
