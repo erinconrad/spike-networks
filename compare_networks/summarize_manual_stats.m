@@ -25,13 +25,14 @@ if simple == 1
     network_folder = [results_folder,'networks/manual/simple/',time_text];
     perm_folder = [results_folder,'perm_stats/simple/',time_text];
     nbs_folder = [results_folder,'nbs_stats/simple/',time_text];
-    var_names_pt = {'Time','SignalDev','NBS','Perm','NS','GE'};
+   
 elseif simple == 0
-    error('can only do for simple\n');
-    network_folder = [results_folder,'networks/manual/coherence/'];
-    perm_folder = [results_folder,'perm_stats/coherence/'];
-    
+    network_folder = [results_folder,'networks/manual/coherence/',time_text];
+    perm_folder = [results_folder,'perm_stats/coherence/',time_text];
+    nbs_folder = [results_folder,'nbs_stats/coherence/',time_text];
+    adj_folder = [results_folder,'adj_mat/manual/adj_coherence/',time_text];
 end
+var_names_pt = {'Time','SignalDev','NBS','Perm','NS','GE'};
 
 % Load signal deviation file
 sig_dev_folder = [results_folder,'signal_deviation/manual/',time_text];
@@ -47,78 +48,157 @@ listing = dir([perm_folder,'*_perm.mat']);
 
 
 % Loop through patients
-pt_count = 0;
 for i = 1:length(listing)
     
-    
-    % Load the permutation file
+    % Get pt name
     name = listing(i).name;
     pt_name = strsplit(name,'_');
     pt_name = pt_name{1};
+    
+    % Load the adjacency matrix to get frequency bands (for coherence
+    % measurements)
+    if simple == 0
+        meta = load([adj_folder,pt_name,'_adj.mat']);
+        meta = meta.meta;
+        freq_text = {};
+        for f = 1:length(meta.spike(1).adj)
+            freq_text = [freq_text,meta.spike(1).adj(f).name];
+        end
+        nf = length(meta.spike(1).adj);
+        nt = size(meta.spike(1).index_windows,1);
+    else
+        nf = 1;
+        
+    end
+    
+    
+    % Load the permutation file and get perm stats
     sim = load([perm_folder,name]);
     sim = sim.sim;
-    sim_p = sim.p;
-    %sim_p_text = arrayfun(@(x) sprintf('%1.3f',x), sim_p,'UniformOutput',false);
+    if simple == 1
+        sim_p = sim.p;
+        nt = length(sim_p);
+    else
+        sim_p = nan(nt,nf);
+        for f = 1:length(sim)
+            sim_p(:,f) = sim(f).p;
+        end
+    end
+         
     
     % Load the nbs stats file
     nbs_stats = load([nbs_folder,pt_name,'_nbs.mat']);
     nbs_stats = nbs_stats.nbs_stats;
     
-    % Load network stats file
-    net_stats = load([network_folder,pt_name,'_network_stats.mat']);
-    metrics = net_stats.metrics;
-    
     % Get an array of p values for nbs
-    nbs_p = nan;
-    for it = 2:length(nbs_stats.freq.time)
-        nbs_curr = nbs_stats.freq.time(it).nbs;
-        if nbs_curr.n == 0
-            nbs_p = [nbs_p;nan];
-        else
-            % take the smallest p value of however many significant graphs
-            % there are
-            nbs_p = [nbs_p;min(nbs_curr.pval)];
+    if simple == 1
+        nbs_p = nan;
+        for it = 2:length(nbs_stats.freq.time)
+            nbs_curr = nbs_stats.freq.time(it).nbs;
+            if nbs_curr.n == 0
+                nbs_p = [nbs_p;nan];
+            else
+                % take the smallest p value of however many significant graphs
+                % there are
+                nbs_p = [nbs_p;min(nbs_curr.pval)];
+            end
+
         end
-        
+    else
+        nbs_p = nan(nt,nf);
+        for f = 1:nf
+            for t = 2:nt
+                nbs_curr = nbs_stats.freq(f).time(t).nbs;
+                if nbs_curr.n == 0
+                    nbs_p(t,f) = nan;
+                else
+                    nbs_p(t,f) = min(nbs_curr.pval);
+                end
+            end
+        end
     end
+     
     
+    % Find the appropriate pt in signal deviation
+    sig_dev_pt = nan;
+    for p = 1:length(sig_dev)
+        if strcmp(sig_dev(p).name,pt_name) == 1
+            sig_dev_pt = p;
+            break
+        end
+    end
+    if isnan(sig_dev_pt) == 1, error('cannot find pt\n'); end
     
-    pt_count = pt_count + 1;
-    
-    nfreq = length(sim);
-    if nfreq > 1, error('This function is only for simple correlation\n'); end
-    
+    sig_dev_name = sig_dev(sig_dev_pt).name;
     % Get the appropriate times and signal deviation
-    sig_dev_name = sig_dev(pt_count).name;
-    if strcmp(sig_dev_name,pt_name) == 0
-        pt_count = pt_count - 1;
-        continue;
-    end
-    window = diff(sig_dev(pt_count).index_windows,1,2)/fs;
+    window = diff(sig_dev(sig_dev_pt).index_windows,1,2)/fs;
     window = window(1);
-    times = 1:size(sig_dev(pt_count).index_windows,1);
+    times = 1:size(sig_dev(sig_dev_pt).index_windows,1);
     times = times*window-window;
-    sig_dev_p = (sig_dev(pt_count).p);
+    sig_dev_p = (sig_dev(sig_dev_pt).p);
     sig_dev_p_text = arrayfun(@(x) sprintf('%1.3f',x), sig_dev_p,'UniformOutput',false);
     
     
+    % Load network stats file
+    if exist([network_folder,pt_name,'_network_stats.mat'],'file') == 0
+        net_stats = [];
+    else
+        net_stats = load([network_folder,pt_name,'_network_stats.mat']);
+    end
+    
+    if simple == 1
+        n_comparisons = nt-1;
+    else
+        n_comparisons = (nt-1)*nf;
+    end
     
     % get metrics
-    ns_p = metrics.metric(1).p;
-    ge_p = metrics.metric(2).p;
-    %ns_p_text = arrayfun(@(x) sprintf('%1.3f',x), ns_p,'UniformOutput',false);
-    %ge_p_text = arrayfun(@(x) sprintf('%1.3f',x), ge_p,'UniformOutput',false);
+    if isempty(net_stats) == 0
+        metrics = net_stats.metrics;
+        if simple == 1
+            ns_p = metrics.metric(1).p;
+            ge_p = metrics.metric(2).p;
+            ns_p(1) = nan; % first time currently set to 0 and not nan
+            ge_p(1) = nan;
+        else
+            ns_p = metrics.metric(1).p;
+            ge_p = metrics.metric(2).p;
+            ns_p(:,1) = nan; % first time currently set to 0 and not nan
+            ge_p(:,1) = nan;
+        end
+    end
+    
     
     % Add asterixes when appropriate
-    nbs_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(nbs_p)-1)),nbs_p,sig_dev_p','UniformOutput',false);
-    sim_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(sim_p)-1)),sim_p,sig_dev_p','UniformOutput',false);
-    ns_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(sim_p)-1)),ns_p',sig_dev_p','UniformOutput',false);
-    ge_p_text=arrayfun(@(x,y) get_asterixes(x,y,alpha/(length(sim_p)-1)),ge_p',sig_dev_p','UniformOutput',false);
+    if isempty(net_stats) == 0
+    ns_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons),ns_p',...
+        repmat(sig_dev_p',1,nf),'UniformOutput',false);
+    ge_p_text=arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons),ge_p',...
+        repmat(sig_dev_p',1,nf),'UniformOutput',false);
+    end
+    nbs_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons),nbs_p,...
+        repmat(sig_dev_p',1,nf),'UniformOutput',false);
+    sim_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons),sim_p,...
+        repmat(sig_dev_p',1,nf),'UniformOutput',false);
+
+    
     
     % add stuff to table
     pt_name
-    pt_table = table(times',sig_dev_p_text',nbs_p_text,sim_p_text,ns_p_text,...
-        ge_p_text,'VariableNames',var_names_pt)
+    if isempty(net_stats) == 0
+        if simple == 1
+            pt_table = table(times',sig_dev_p_text',nbs_p_text,sim_p_text,ns_p_text,...
+                ge_p_text,'VariableNames',var_names_pt)
+        else
+            for f = 1:nf
+                freq_text{f}
+                pt_table = table(times',sig_dev_p_text',nbs_p_text(:,f),...
+                    sim_p_text(:,f),ns_p_text(:,f),...
+                ge_p_text(:,f),'VariableNames',var_names_pt)
+                
+            end
+        end
+    end
    
     
     

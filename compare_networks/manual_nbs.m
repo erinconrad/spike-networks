@@ -88,16 +88,6 @@ for j = 1:length(listing)
     nchs = size(meta.spike(1).adj(1).adj,2);
     
     %% Get arrays of non-flattened adjacency matrices
-    for i = 1:nfreq
-        adj_avg(i).adj = zeros(n_times,nchs,nchs,nspikes);
-        sim(i).p = zeros(n_times,1);
-        sim(i).F = zeros(n_times,1);
-        sim(i).indices = (1:n_times)';
-        
-         % First second is the control
-        sim(i).p(1) = nan;
-        sim(i).F(1) = nan;
-    end
     
     % Loop over spikes
     for s = 1:length(meta.spike)
