@@ -97,6 +97,7 @@ for whichPt = whichPts
             meta.name = name;
         end
     else
+        
         start_spike = 1;
         meta.name = name;
     end
