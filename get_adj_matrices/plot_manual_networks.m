@@ -16,7 +16,7 @@ if simple == 1
     freq_text = {'pairwise\ncorrelation'};
 else
     out_folder = [results_folder,'adj_coherence/',time_text];
-    freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma'};
+    %freq_text = {'alpha/theta','beta','low\ngamma','high\ngamma'};
 end
 
 listing = dir([out_folder,'*_adj.mat']);
@@ -38,9 +38,15 @@ for i = 1:length(listing)
     % Get number of frequencies
     nfreq = length(meta.spike(1).adj);
     
+    
+    if simple == 0
+        freq_text = {};
+    end
     % Initialize average networks
     for f = 1:nfreq
         adj_avg(f).adj = zeros(size(meta.spike(1).adj(1).adj));
+        
+        freq_text{f} = strrep(meta.spike(1).adj(f).name,'_',' ');
     end
     
     nspikes = 0;
@@ -55,12 +61,13 @@ for i = 1:length(listing)
         
         nspikes = nspikes + 1;
         
+        
         for f = 1:nfreq
             
             % add current adjaceny to total
             adj_temp = meta.spike(s).adj(f).adj;
             adj_avg(f).adj = adj_avg(f).adj + adj_temp;
-               
+ 
         end
     end
     
