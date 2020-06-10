@@ -202,7 +202,7 @@ for whichPt = whichPts
         t = toc;
         fprintf('Spike %d took %1.1f minutes.\n\n',s,t/60);
 
-        if 1
+        if 0
             figure
 
             set(gcf,'position',[200 250 1175 400]);
