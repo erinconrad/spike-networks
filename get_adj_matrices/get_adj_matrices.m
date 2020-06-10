@@ -24,13 +24,18 @@ for i = 1:nchs
         x = values(:,i);
         y = values(:,j);
 
-       
+        % subtract mean from each signal (this is because mscohere screws
+        % up if there is a big dc offset between the two signals)
+        x = x-mean(x);
+        y = y-mean(y);
+        
         % This is the same as mscohere, except it removes a parameter
         % parsing call
         % that was taking up the majority of the computational time. I
         % expect that I cannot call this with additional arguments because
         % of this change.
         [cxy,w] = mscohere_erin(x,y);
+        %cxy_alt = erin_alt_coherence(x,y);
         %[cxy,w] = mscohere(x,y);
         f = w*fs*2/pi;
         

@@ -10,14 +10,16 @@ do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 
-freq_bands = [5 15;... %alpha/theta
-    15 25;... %beta
+freq_bands = [1 4;... %delta
+    4 8;...%theta
+    8 13;...% alpha
+    13 25;... %beta
     30 40;... % low gamma
     95 105;... % high gamma
     105 256;... %ultra-high
     0 256;... %broadband    
     ]; 
-freq_names = {'alpha_theta','beta','low_gamma',...
+freq_names = {'delta','theta','alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
 time_text = sprintf('%1.1f/',time_window);
 
@@ -200,13 +202,13 @@ for whichPt = whichPts
         t = toc;
         fprintf('Spike %d took %1.1f minutes.\n\n',s,t/60);
 
-        if 0
+        if 1
             figure
 
             set(gcf,'position',[200 250 1175 400]);
             for tt = 1:n_chunks-1
                 subplot(2,5,tt);
-                imagesc(squeeze(adj(4).adj(tt,:,:)));
+                imagesc(squeeze(adj(1).adj(tt,:,:)));
                 colorbar
                 title(sprintf('%d s',tt))
             end
