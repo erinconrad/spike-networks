@@ -10,13 +10,13 @@ do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 
-freq_bands = [1 4;... %delta
+freq_bands = [0 4;... %delta
     4 8;...%theta
-    8 13;...% alpha
-    13 25;... %beta
+    8 12;...% alpha
+    12 24;... %beta
     30 40;... % low gamma
-    95 105;... % high gamma
-    105 256;... %ultra-high
+    96 106;... % high gamma
+    106 256;... %ultra-high
     0 256;... %broadband    
     ]; 
 freq_names = {'delta','theta','alpha','beta','low_gamma',...
@@ -208,7 +208,7 @@ for whichPt = whichPts
             set(gcf,'position',[200 250 1175 400]);
             for tt = 1:n_chunks-1
                 subplot(2,5,tt);
-                imagesc(squeeze(adj(1).adj(tt,:,:)));
+                imagesc(squeeze(adj(8).adj(tt,:,:)));
                 colorbar
                 title(sprintf('%d s',tt))
             end

@@ -34,12 +34,12 @@ for i = 1:nchs
         % that was taking up the majority of the computational time. I
         % expect that I cannot call this with additional arguments because
         % of this change.
-        [cxy,w] = mscohere_erin(x,y);
+        %[cxy,w] = mscohere_erin(x,y);
         %cxy_alt = erin_alt_coherence(x,y);
         %[cxy,w] = mscohere(x,y);
-        f = w*fs*2/pi;
+        %f = w*fs*2/pi;
         
-       % [cxy_old,f_old] = mscohere(x,y,[],[],[],fs);
+        [cxy,f] = mscohere(x,y,[],[],[],fs);
         
         for ff = 1:size(freq_bands,1)
             adj(ff).adj(i,j) = mean(cxy(f>=freq_bands(ff,1)&...

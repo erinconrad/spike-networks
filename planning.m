@@ -9,7 +9,8 @@ any dc offset of the signals
 - need at least 20 patients
 - try delta band? https://www.biorxiv.org/content/biorxiv/early/2020/06/01/2020.05.27.118802.full.pdf
  this paper found pre-IED increased oscillatory power in the delta and
- theta bands
+ theta bands: I need to think about whether I can measure a change in delta
+ coherence givent the time scales I am using
 
 - decide if I should remove bad channels
     - I would either need to do this at the outset, applying it to all
