@@ -198,6 +198,7 @@ save([out_folder,name,'_nbs.mat'],'nbs_stats');
 
 %% clear the sim structure
 clear nbs_stats
+clear adj_avg
 
 end
 
