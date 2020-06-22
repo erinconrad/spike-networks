@@ -196,6 +196,9 @@ for j = 1:length(listing)
 %% Save the sim structure
 save([out_folder,name,'_nbs.mat'],'nbs_stats');
 
+%% clear the sim structure
+clear nbs_stats
+
 end
 
 end
