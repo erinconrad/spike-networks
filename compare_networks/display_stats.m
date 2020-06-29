@@ -36,6 +36,7 @@ non_spike_change = [];
 for i = 1:length(all_tables)
 for j = 1:length(all_tables(i).freq)
     fprintf('%s %s\n',all_tables(i).name,all_tables(i).freq(j).name)
+    all_tables(i).freq(j).table
     
     %% Check if no signal deviation
     sig_dev = all_tables(i).freq(j).table.SignalDev;
@@ -53,8 +54,9 @@ for j = 1:length(all_tables(i).freq)
         
     %% Now check for lack of network deviation at times of signal deviation
     any_sig_perm_or_nbs = 0;
-    perm = cellfun(@str2num,all_tables(i).freq(j).table.Perm);
-    nbs = cellfun(@str2num,all_tables(i).freq(j).table.NBS);
+    perm = cell2mat(cellfun(@str_2_num_asterisk,all_tables(i).freq(j).table.Perm,'UniformOutput',false));
+    nbs = cell2mat(cellfun(@str_2_num_asterisk,all_tables(i).freq(j).table.NBS,'UniformOutput',false));
+    
     for k = 1:length(significant_sig_dev)
         % add 1 to the row (because it's an array excluding the first time)
         sig_time = significant_sig_dev(k) + 1;
@@ -78,8 +80,10 @@ for j = 1:length(all_tables(i).freq)
     
     %% Now check for any network deviations not at times of signal deviation
     significant_sig_dev_times = significant_sig_dev + 1; % add 1 
-    all_times = length(all_tables(i).freq(j).table.NBS);
-    no_sig_dev_times = all_times(ismember(all_times,significant_sig_dev_times));
+    all_times = 1:length(all_tables(i).freq(j).table.NBS);
+    no_sig_dev_times = all_times(~ismember(all_times,significant_sig_dev_times));
+    
+  %  if strcmp(all_tables(i).name,'HUP078') == 1, error('look\n'); end
     
     % Loop through these times without significant signal dev
     for k = 1:length(no_sig_dev_times)
@@ -90,16 +94,16 @@ for j = 1:length(all_tables(i).freq)
         if perm_time < alpha/(length(perm)-1)
             non_spike_change_text = [non_spike_change_text;[all_tables(i).name,' ',...
                 all_tables(i).freq(j).name,' ',curr_time,' perm']];
-            non_spike_change = [non_spike_change;i,j,1];
+            non_spike_change = [non_spike_change;i,j,(curr_time),1];
         end
         
         if nbs_time < alpha/(length(perm)-1)
             non_spike_change_text = [non_spike_change_text;[all_tables(i).name,' ',...
                 all_tables(i).freq(j).name,' ',curr_time,' nbs']];
-            non_spike_change = [non_spike_change;i,j,2];
+            non_spike_change = [non_spike_change;i,j,(curr_time),2];
         end
     end
-    all_tables(i).freq(j).table
+    
     %pause
 end
 end
@@ -133,11 +137,20 @@ for i = 1:length(unique_pts)
     end
 end
 
-fprintf(['\nThe following are patients, frequencies, and method for whom we detected\n'...
+fprintf(['\nThe following are patients, frequencies, times, and method for whom we detected\n'...
     'a significant network change during a time of no signal deviation:\n']);
 for i = 1:size(non_spike_change,1)
-    fprintf('Pt: %s, freq: %s, method %s\n',...
+    fprintf('Pt: %s, freq: %s, time: %1.1f, method %s\n',...
         all_tables(non_spike_change(i,1)).name,...
         all_tables(non_spike_change(i,1)).freq(non_spike_change(i,2)).name,...
-        method{non_spike_change(i,3)});
+        all_tables(non_spike_change(i,1)).freq(non_spike_change(i,2)).table.Time(non_spike_change(i,3)),...
+        method{non_spike_change(i,4)});
+end
+
+end
+
+function y = str_2_num_asterisk(x)
+C = strsplit(x,'*');
+y = C{1};
+y = str2double(y);
 end

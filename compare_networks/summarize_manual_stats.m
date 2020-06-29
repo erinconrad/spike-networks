@@ -137,8 +137,9 @@ for i = 1:length(listing)
     % Get the appropriate times and signal deviation
     window = diff(sig_dev(sig_dev_pt).index_windows,1,2)/fs;
     window = window(1);
-    times = 1:size(sig_dev(sig_dev_pt).index_windows,1);
-    times = times*window-window;
+    %times = 1:size(sig_dev(sig_dev_pt).index_windows,1);
+    %times = times*window-window;
+    times = sig_dev(sig_dev_pt).index_windows(:,1);
     sig_dev_p = (sig_dev(sig_dev_pt).p);
     sig_dev_p_text = arrayfun(@(x) sprintf('%1.3f',x), sig_dev_p,'UniformOutput',false);
     
