@@ -194,7 +194,8 @@ for i = 1:length(listing)
             pt_table = table(times',sig_dev_p_text',nbs_p_text,sim_p_text,ns_p_text,...
                 ge_p_text,'VariableNames',var_names_pt)
             all_tables(i).name = pt_name;
-            all_tables(i).table = pt_table;
+            all_tables(i).freq.name = 'na';
+            all_tables(i).freq.table = pt_table;
         else
             for f = 1:nf
                 freq_text{f}
