@@ -205,7 +205,7 @@ for i = 1:length(listing)
     pt_name
     if isempty(net_stats) == 0
         if simple == 1
-            pt_table = table(times',sig_dev_p_text',nbs_p_text,sim_p_text,ns_p_text,...
+            pt_table = table(times,sig_dev_p_text',nbs_p_text,sim_p_text,ns_p_text,...
                 ge_p_text,'VariableNames',var_names_pt)
             all_tables(i).name = pt_name;
             all_tables(i).freq.name = 'na';
