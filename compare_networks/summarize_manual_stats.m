@@ -148,7 +148,7 @@ for i = 1:length(listing)
     n_chunks = size(sig_dev(sig_dev_pt).index_windows,1);
     times = zeros(n_chunks,1);
     for k = 1:n_chunks
-        times(k) = peak - time_window*n_chunks/2 + time_window*(k-1);
+        times(k) = peak/fs - time_window*n_chunks/2 + time_window*(k-1);
     end
     %times = 1:size(sig_dev(sig_dev_pt).index_windows,1);
     %times = times*window-window;
