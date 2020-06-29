@@ -13,6 +13,7 @@ locations = spike_network_files;
 main_folder = locations.main_folder;
 results_folder = [main_folder,'results/'];
 data_folder = [main_folder,'data/'];
+eeg_folder = [main_folder,'results/eeg_data/'];
 script_folder = locations.script_folder;
 addpath(genpath(script_folder));
 pt_file = [data_folder,'spike_structures/pt.mat'];
@@ -94,6 +95,13 @@ for i = 1:length(listing)
     nbs_stats = load([nbs_folder,pt_name,'_nbs.mat']);
     nbs_stats = nbs_stats.nbs_stats;
     
+    % Load the eeg file (to get times)
+    spike = load([eeg_folder,sprintf('%s_eeg.mat',pt_name)]);
+    spike = spike.spike;
+    values = spike(1).data;
+    peak = round(size(values,1)/2);
+    fs = spike(s).fs;
+    
     % Get an array of p values for nbs
     if simple == 1
         nbs_p = nan;
@@ -137,8 +145,14 @@ for i = 1:length(listing)
     % Get the appropriate times and signal deviation
     window = diff(sig_dev(sig_dev_pt).index_windows,1,2)/fs;
     window = window(1);
-    times = 1:size(sig_dev(sig_dev_pt).index_windows,1);
-    times = times*window-window;
+    n_chunks = size(sig_dev(sig_dev_pt).index_windows,1);
+    times = zeros(n_chunks,1);
+    for k = 1:n_chunks
+        times(k) = peak - time_window*n_chunks/2 + time_window*(k-1);
+    end
+    %times = 1:size(sig_dev(sig_dev_pt).index_windows,1);
+    %times = times*window-window;
+    
     sig_dev_p = (sig_dev(sig_dev_pt).p);
     sig_dev_p_text = arrayfun(@(x) sprintf('%1.3f',x), sig_dev_p,'UniformOutput',false);
     
