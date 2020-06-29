@@ -100,7 +100,7 @@ for i = 1:length(listing)
     spike = spike.spike;
     values = spike(1).data;
     peak = round(size(values,1)/2);
-    fs = spike(s).fs;
+    fs = spike(1).fs;
     
     % Get an array of p values for nbs
     if simple == 1
