@@ -50,15 +50,19 @@ end
 n_windows = count;
 
 %% Initialize arrays to get average z-scores
-z_score_all = zeros(length(sig_dev),length(sig_dev(1).sig_dev),...
-    length(sig_dev(1).sig_dev(1).z_score_dev));
+z_score_all = cell(length(sig_dev),1);
+for k = 1:length(sig_dev)
+    z_score_all{k} = zeros(length(sig_dev(k).sig_dev),...
+    length(sig_dev(k).sig_dev(1).z_score_dev));
+end
+    
 
 %% Initialize figure
 figure
 for k = 1:n_windows
     subplot(1,n_windows,k)
     time_window = sig_dev(k).time_window;
-    time_text = sig_dev(k).time_text;
+    time_text = sig_dev(k).name;
     curr_sig_dev = sig_dev(k).sig_dev;
     
     % Loop through patients and plot z scores at each time for each patient
@@ -68,13 +72,14 @@ for k = 1:n_windows
         hold on
         
         % Add it to array
-        z_score_all(k,i,:) = z_score_temp;
+        z_score_all{k}(i,:) = z_score_temp;
     end
     
     % plot the mean across patients
-    for j = 1:size(z_score_all,3)
+    for j = 1:size(z_score_all{k},2)
+        curr_z_score = z_score_all{k};
         plot([j-0.2 j+0.2],...
-            [mean(z_score_all(k,:,j),2) mean(z_score_all(k,:,j),2)],'k')
+            [nanmean(curr_z_score(:,j)) nanmean(curr_z_score(:,j))],'k')
     end
     
     
