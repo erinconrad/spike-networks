@@ -5,7 +5,6 @@ This function only makes summary tables for the simple correlation case
 %}
 
 %% parameters
-fs = 512;
 alpha = 0.05;
 
 %% Get file locations, load spike times and pt structure

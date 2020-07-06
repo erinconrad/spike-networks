@@ -63,9 +63,9 @@ for i = 1:length(listing)
         data_spike = spike(s).data(:,is_sp_ch);
         
         % get baseline (diff for each ch)
-        baseline = median(data_spike,1); %1 x n_sp_ch
+        baseline = median(data_spike,1); %1 x n_sp_ch (median across all time points)
         
-        % get deviation from baseline
+        % get deviation from baseline (for all time points)
         dev = sqrt((data_spike - repmat(baseline,size(data_spike,1),1)).^2); % ntimes x n_sp_ch 
         
         % get the average deviation across involved channels
@@ -88,6 +88,11 @@ for i = 1:length(listing)
         sig_dev(i).stats(t) = stats;
         
     end
+    
+    % Also get a normalized z-score to combine across patients
+    dev_avg_all_spikes = mean(dev_windows,1); % avg across spikes
+    z_score_dev = (dev_avg_all_spikes - mean(dev_avg_all_spikes))/std(dev_avg_all_spikes);
+    sig_dev(i).z_score_dev = z_score_dev;
     
     % Save the structure
     save([sig_dev_folder,'sig_dev.mat'],'sig_dev')
