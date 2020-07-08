@@ -40,6 +40,7 @@ for i = 1:length(listing)
     % load eeg data
     spike = load([eeg_folder,name,'_eeg.mat']);
     spike = spike.spike;
+    surround_time = spike(1).surround_time;
     
     % load adjacency matrix data (which will allow me to get the index
     % windows
@@ -47,6 +48,7 @@ for i = 1:length(listing)
     meta = meta.meta;
     index_windows = meta(1).spike(1).index_windows;
     sig_dev(i).index_windows = index_windows;
+    sig_dev(i).surround_time = surround_time;
     
     dev_windows = zeros(length(spike),size(index_windows,1));
     
