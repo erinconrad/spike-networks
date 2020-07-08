@@ -105,6 +105,8 @@ for whichPt = whichPts
         spike(s).chLabels = chLabels(chs);
         spike(s).fs = fs;
         spike(s).times = which_times;
+        spike(s).surround_time = surround_time;
+        spike(s).thresh_spike = thresh_spike;
         
         %% Find peak spike time for each channel and which channels I will say are involved in the spike
         

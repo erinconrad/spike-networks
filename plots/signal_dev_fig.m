@@ -1,5 +1,8 @@
 function signal_dev_fig
 
+%% Parameters
+alpha = 0.05;
+
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;
@@ -12,14 +15,14 @@ pt_file = [data_folder,'spike_structures/pt.mat'];
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
 out_folder = [results_folder,'plots/'];
+sig_dev_folder = [results_folder,'signal_deviation/manual/'];
 
 
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
 end
 
-%% Load all signal deviation files (all time scales)
-sig_dev_folder = [results_folder,'signal_deviation/manual/'];
+
 
 % get full directory listing
 listing = dir(sig_dev_folder);
@@ -59,8 +62,10 @@ end
 
 %% Initialize figure
 figure
+set(gcf,'Position',[300 500 1100 300]);
+[ha, pos] = tight_subplot(1, n_windows, [0.05 0.05], [0.2 0.1], [0.1 0.05]);
 for k = 1:n_windows
-    subplot(1,n_windows,k)
+    axes(ha(k));
     time_window = sig_dev(k).time_window;
     time_text = sig_dev(k).name;
     curr_sig_dev = sig_dev(k).sig_dev;
@@ -78,10 +83,21 @@ for k = 1:n_windows
     % plot the mean across patients
     for j = 1:size(z_score_all{k},2)
         curr_z_score = z_score_all{k};
-        plot([j-0.2 j+0.2],...
-            [nanmean(curr_z_score(:,j)) nanmean(curr_z_score(:,j))],'k')
+        plot([j-0.25 j+0.25],...
+            [nanmean(curr_z_score(:,j)) nanmean(curr_z_score(:,j))],...
+            'k','linewidth',2)
     end
     
+    yl = get(gca,'ylim');
+    
+    % Do a t-test comparing the z-scores between the first and subsequent
+    % time points
+    for j = 2:size(z_score_all{k},2)
+        [~,p] = ttest(z_score_all{k}(:,1),z_score_all{k}(:,j));
+        text_out = get_asterisks(p,size(z_score_all{k},2));
+        text(j,yl(2)-0.2,text_out,'fontsize',20,...
+            'HorizontalAlignment','Center')
+    end
     
 end
     
