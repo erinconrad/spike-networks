@@ -80,7 +80,11 @@ for j = 1:length(listing)
     for i = 1:nfreq
 
         adj_avg(i).adj = nan(n_times,nchs*(nchs-1)/2,nspikes);
-        sim(i).name = meta.spike(1).adj(i).name;
+        if isfield(meta.spike(1).adj(i),'name') == 1
+            sim(i).name = meta.spike(1).adj(i).name;
+        else
+            sim(i).name = 'na';
+        end
         sim(i).p = zeros(n_times,1);
         sim(i).F = zeros(n_times,1);
         sim(i).indices = (1:n_times)';
