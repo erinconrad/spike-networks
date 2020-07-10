@@ -35,6 +35,8 @@ surround_time = spike(1).surround_time;
 % Loop through network types
 listing = dir(perm_folder);
 network_count = 0;
+n_freq_abs = 0;
+max_F = 0;
 for l = 1:length(listing)
     name= listing(l).name;
     
@@ -78,12 +80,17 @@ for l = 1:length(listing)
         sim = load([time_folder,pt_listing(1).name]);
         sim = sim.sim;
         nfreq = length(sim);
+        if n_freq_abs < nfreq
+            n_freq_abs = nfreq;
+        end
         
-        stats(network_count).time(time_count).freq(1:nfreq).F_all = ...
-            zeros(length(pt_listing),surround_time*2/time_window);
-        
-        stats(network_count).time(time_count).freq(1:nfreq).p_all = ...
-            zeros(length(pt_listing),surround_time*2/time_window);
+        for f = 1:nfreq
+            stats(network_count).time(time_count).freq(f).F_all = ...
+                zeros(length(pt_listing),surround_time*2/time_window);
+
+            stats(network_count).time(time_count).freq(f).p_all = ...
+                zeros(length(pt_listing),surround_time*2/time_window);
+        end
         
         % loop through pts
         for i = 1:length(pt_listing)
@@ -97,18 +104,117 @@ for l = 1:length(listing)
             sim = sim.sim;
             
             for f = 1:nfreq
-                stats(network_count).time(time_count).freq(f) = sim(f).name;
-                stats(network_count).time(time_count).freq(f).F_all(i,:) = F;
-                stats(network_count).time(time_count).freq(f).p_all(i,:) = p;
+                stats(network_count).time(time_count).freq(f).name = sim(f).name;
+                stats(network_count).time(time_count).freq(f).F_all(i,:) = sim(f).F;
+                stats(network_count).time(time_count).freq(f).p_all(i,:) = sim(f).p;
+                
+                F_curr = stats(network_count).time(time_count).freq(f).F_all;
+                if max_F < max(max(F_curr))
+                    max_F = max(max(F_curr));
+                end
+            
             end
             
             
         end
         
     end
-        
-    
-    
+ 
 end
+
+%% Plot
+% Initialize figure
+%{
+nfreq (coherence) + 1 (simple) columns and 2 (2 time scales) rows
+%}
+figure
+set(gcf,'position',[100 100 1300 500])
+[ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.01 0.01], [0.1 0.05], [0.05 0.01]);
+
+for n = 1:network_count
+
+    net_name = stats(n).name;
+    
+    for t = 1:time_count
+        
+        % change times for x axis
+        nchunks = size(stats(n).time(t).freq(1).F_all,2);
+        times = realign_times(nchunks,surround_time);
+        
+        nfreq = length(stats(n).time(t).freq);
+        for f = 1:nfreq
+            
+            % Get appropriate subplot
+            if strcmp(net_name,'coherence') == 1
+                column_add = 1;
+            else
+                column_add = 0;
+            end
+            % this adds the number of frequencies + 1 if it's on the 2nd
+            % time point (to move down a row), and it adds which frequency
+            % (which is 1 if simple) and adds 1 if coherence, to start with
+            % the 2nd column for coherence
+            sp = (n_freq_abs+1)*(t-1) + f + column_add;
+            axes(ha(sp));
+          
+            F_curr = stats(n).time(t).freq(f).F_all;
+            % loop over patients and plot
+            for i = 1:size(F_curr,1)
+                plot(times,F_curr(i,:),'ko');
+                hold on
+            end
+            
+            % plot mean F across patients
+            for tt = 1:size(F_curr,2)
+                plot([times(tt)-0.25 times(tt)+0.25],...
+                    [mean(F_curr(:,tt)) mean(F_curr(:,tt))],...
+                    'k','linewidth',2);
+            end
+            
+            
+            % Display asterisks if significant combined p-values (by
+            % fisher's method)
+            for tt = 1:size(F_curr,2)
+                curr_p_vals = stats(n).time(t).freq(f).p_all(:,tt);
+                comb_p = fisher_p_value(curr_p_vals);
+                text_out = get_asterisks(comb_p,nchunks*(n_freq_abs+1)); % should I also adjust by nfreq?
+                
+                text(times(tt),max(F_curr(:,tt))+0.5,sprintf('%s',text_out),'fontsize',20,...
+                    'horizontalalignment','center')
+
+            end
+            
+            if t == 2 && f == 4
+                 xlabel('Time relative to spike peak (s)')
+            end 
+           
+            if t == 1 && strcmp(net_name,'coherence') == 1
+                title(sprintf('%s',...
+                    strrep(stats(n).time(t).freq(f).name,'_',' ')))
+            elseif t == 1 && strcmp(net_name,'simple') == 1
+                title('correlation')
+            end
+            
+        end
+        
+        
+        
+    end
+end
+
+for sp = 1:length(ha)
+    axes(ha(sp))
+    % formatting
+    ylim([0 max_F+2]);
+    if mod(sp,n_freq_abs+1) == 1
+        ylabel(sprintf('%s s time window',stats(1).time(floor((sp/n_freq_abs+1))).name));
+    else
+        yticklabels([])
+    end
+    
+    set(gca,'fontsize',15)
+end
+
+print(gcf,[out_folder,'network_change'],'-depsc');
 
 end
