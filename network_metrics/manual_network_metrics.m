@@ -20,14 +20,14 @@ eeg_folder = [results_folder,'eeg_data/'];
 % Adj mat folder
 if simple == 1
     adj_folder = [results_folder,'adj_mat/manual/adj_simple/',time_text];
-    network_folder = [results_folder,'networks/manual/simple/',time_text];
+    metrics_folder = [results_folder,'metrics/manual/simple/',time_text];
 else
     adj_folder = [results_folder,'adj_mat/manual/adj_coherence/',time_text];
-    network_folder = [results_folder,'networks/manual/coherence/',time_text];
+    metrics_folder = [results_folder,'metrics/manual/coherence/',time_text];
 end
 
-if exist(network_folder,'dir') == 0
-    mkdir(network_folder);
+if exist(metrics_folder,'dir') == 0
+    mkdir(metrics_folder);
 end
 
 listing = dir([adj_folder,'*_adj.mat']);
@@ -39,7 +39,7 @@ for i = 1:length(listing)
     name = name_sp{1};
     
     if overwrite == 0
-        if exist([network_folder,name,'_network_stats.mat'],'file') ~= 0
+        if exist([metrics_folder,name,'_network_stats.mat'],'file') ~= 0
             fprintf('Already did %s, skipping...\n',name);
             continue;
         end
@@ -56,17 +56,18 @@ for i = 1:length(listing)
     spike = spike.spike;
     
     % get sizes for matrices
+    n_chs = size(meta.spike(1).adj(1).adj,1);
     n_f = length(meta.spike(1).adj);
     n_times = size(meta.spike(1).index_windows,1);
     n_spikes = length(meta.spike);
     
     % Initialize
     ge = nan(n_f,n_spikes,n_times);
-    ns_seq = nan(n_f,n_spikes,n_times);
+    ns = nan(n_f,n_spikes,n_times,n_chs);
+    bc = nan(n_f,n_spikes,n_times,n_chs);
     
     % Initialize spike count
     s_count = 0;
-    out = [];
     
     for s = 1:length(meta.spike)
 
@@ -75,96 +76,51 @@ for i = 1:length(listing)
         fprintf('Doing spike %d of %d\n',s_count,n_spikes);
         involved = spike(s).involved;
         
-        for which_freq = 1:n_f
-            adj_all_t= meta.spike(s).adj(which_freq).adj;
+        for f = 1:n_f
+            adj_all_t= meta.spike(s).adj(f).adj;
             for tt = 1:size(adj_all_t,1)
                 
                 % Get adj matrix of interest
                 adj = squeeze(adj_all_t(tt,:,:));
                 
                 %% Calculate metrics
-                ge(which_freq,s_count,tt) = efficiency_wei(adj,0); % global efficiency of full matrix
                 
-                % node strength of all chs involved
-                ns_temp = strengths_und(adj); 
-                ns_seq(which_freq,s_count,tt) = mean(ns_temp(involved));
+                % global efficiency of full matrix
+                ge(f,s,tt) = efficiency_wei(adj,0); 
                 
-            end
-            
-        end
-            
-    end
-    
-    %% Turn them into z-scores
-    z_ns = (((ns_seq-mean(ns_seq,3))./std(ns_seq,0,3)));
-    z_ge = (((ge-mean(ge,3))./std(ge,0,3)));
-    avg_z_ns = squeeze(nanmean(z_ns,2));
-    avg_z_ge = squeeze(nanmean(z_ge,2));
-    
-    metrics.metric(1).name = 'ns of involved channels';
-    metrics.metric(2).name = 'ge';
-    metrics.metric(1).val = ns_seq;
-    metrics.metric(2).val = ge;
-    metrics.metric(1).z = z_ns;
-    metrics.metric(2).z = z_ge;
-    
-    
-    %% Significance testing
-    
-    % Loop through the metrics we're testings
-    for m = 1:length(metrics.metric)
-        
-        % alpha is .05 divided by the number of comparisons
-        metrics.metric(m).alpha = 0.05/((size(z_ns,3)-1)*size(z_ns,1));
-            
-        % Loop through times 2:end and compare each to first time
-        for t = 2:size(z_ns,3)
-   
-            % Loop through the frequencies
-            for f = 1:size(metrics.metric(m).z,1)
-            
-                % Do a 2-sample independent t-test to compare the z scores in each
-                [~,p,ci,stats] = ttest2(metrics.metric(m).z(f,:,1),...
-                    metrics.metric(m).z(f,:,t));
-                metrics.metric(m).p(f,t) = p;
+                % node strength of all chs
+                ns(f,s,tt,:) = strengths_und(adj); 
                 
-                metrics.metric(m).ci(f,t,:) = ci;
-                metrics.metric(m).stats(f,t) = stats;
+                % betweenness centrality of all chs
+                bc(f,s,tt,:) = betweenness_wei(adj);
+                
+                
                 
             end
             
         end
-        
-        
+           
     end
     
-    %% Save the output structure
-    save([network_folder,name,'_network_stats.mat'],'metrics');
-    
-    %% Plot z-scores over time
-    if size(z_ns,1) == 1
-        figure
-        subplot(2,1,1)
-        plot(avg_z_ns,'linewidth',2)
-        hold on
-        plot(find((metrics.metric(1).p<metrics.metric(1).alpha)),...
-            avg_z_ns(metrics.metric(1).p<metrics.metric(1).alpha),...
-            'r*');
-        title('node strength','fontsize',20)
-
-        subplot(2,1,2)
-        plot(avg_z_ge,'linewidth',2)
-        hold on
-        plot(find((metrics.metric(2).p<metrics.metric(2).alpha)),...
-            avg_z_ge(metrics.metric(2).p<metrics.metric(2).alpha),...
-            'r*');
-        title('ge','fontsize',20)
-        if exist([network_folder,'plots/'],'dir') == 0
-            mkdir([network_folder,'plots/'])
-        end
-        print(gcf,[network_folder,'plots/',name],'-depsc');       
-        close(gcf)
+    % Average over all spikes
+    avg_ge = mean(ge,2);
+    avg_ns = mean(ns,2);
+    avg_bc = mean(bc,2);
+        
+    % Fill structure
+    for f = 1:n_f
+        metrics.freq(f).name = meta.spike(s).adj(f).name;
+        metrics.freq(f).ge.name = 'global efficiency';
+        metrics.freq(f).ge.data = avg_ge;
+        metrics.freq(f).ns.name = 'node strength';
+        metrics.freq(f).ge.data = avg_ns;
+        metrics.freq(f).bc.name = 'betweenness centrality';
+        metrics.freq(f).bc.data = avg_bc;
     end
+    
+    metrics.involved = involved;
+    
+    save([metrics_folder,name,'_network_stats.mat'],'metrics');
     
 end
 

@@ -163,11 +163,13 @@ for i = 1:length(listing)
         net_stats = load([network_folder,pt_name,'_network_stats.mat']);
     end
     
+    
     if simple == 1
         n_comparisons = nt-1;
     else
         n_comparisons = (nt-1)*nf;
     end
+    
     
     % get metrics
     if isempty(net_stats) == 0
@@ -186,7 +188,9 @@ for i = 1:length(listing)
     end
     
     
+    
     % Add asterixes when appropriate
+    
     if isempty(net_stats) == 0
     ns_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons),ns_p',...
         repmat(sig_dev_p',1,nf),'UniformOutput',false);
