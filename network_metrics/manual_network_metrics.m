@@ -56,7 +56,7 @@ for i = 1:length(listing)
     spike = spike.spike;
     
     % get sizes for matrices
-    n_chs = size(meta.spike(1).adj(1).adj,1);
+    n_chs = size(meta.spike(1).adj(1).adj,3);
     n_f = length(meta.spike(1).adj);
     n_times = size(meta.spike(1).index_windows,1);
     n_spikes = length(meta.spike);
