@@ -109,16 +109,21 @@ for i = 1:length(listing)
         
     % Fill structure
     for f = 1:n_f
-        metrics.freq(f).name = meta.spike(s).adj(f).name;
+        if isfield(meta.spike(1).adj(f),'name') == 1
+            metrics.freq(f).name = meta.spike(1).adj(f).name;
+        else
+            metrics.freq(f).name = 'correlation';
+        end
         metrics.freq(f).ge.name = 'global efficiency';
         metrics.freq(f).ge.data = avg_ge;
         metrics.freq(f).ns.name = 'node strength';
-        metrics.freq(f).ge.data = avg_ns;
+        metrics.freq(f).ns.data = avg_ns;
         metrics.freq(f).bc.name = 'betweenness centrality';
         metrics.freq(f).bc.data = avg_bc;
     end
     
     metrics.involved = involved;
+    metrics.index_windows = meta.spike(1).index_windows;
     
     save([metrics_folder,name,'_network_stats.mat'],'metrics');
     

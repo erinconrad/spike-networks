@@ -83,7 +83,7 @@ for j = 1:length(listing)
         if isfield(meta.spike(1).adj(i),'name') == 1
             sim(i).name = meta.spike(1).adj(i).name;
         else
-            sim(i).name = 'na';
+            sim(i).name = 'correlation';
         end
         sim(i).p = zeros(n_times,1);
         sim(i).F = zeros(n_times,1);
