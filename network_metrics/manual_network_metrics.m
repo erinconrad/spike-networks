@@ -115,11 +115,11 @@ for i = 1:length(listing)
             metrics.freq(f).name = 'correlation';
         end
         metrics.freq(f).ge.name = 'global efficiency';
-        metrics.freq(f).ge.data = avg_ge;
+        metrics.freq(f).ge.data = squeeze(avg_ge(f,:));
         metrics.freq(f).ns.name = 'node strength';
-        metrics.freq(f).ns.data = avg_ns;
+        metrics.freq(f).ns.data = squeeze(avg_ns(f,:,:));
         metrics.freq(f).bc.name = 'betweenness centrality';
-        metrics.freq(f).bc.data = avg_bc;
+        metrics.freq(f).bc.data = squeeze(avg_bc(f,:,:));
     end
     
     metrics.involved = involved;
