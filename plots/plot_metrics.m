@@ -1,4 +1,4 @@
-function plot_metrics(simple,time_window)
+function plot_metrics
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -104,15 +104,18 @@ for l = 1:length(listing)
                 stats(network_count).time(time_count).freq(f).ns.name = metrics.freq(f).ns.name;
                 stats(network_count).time(time_count).freq(f).bc.name = metrics.freq(f).bc.name;
                 
-                % Get ns, bc for involved and uninvolved chs
-                stats(network_count).time(time_count).freq(f).ns.data(i,:,1) = metrics.freq(f).ns.data;
+                % Get ns, bc for involved and uninvolved chs (1 = involved,
+                % 2 = uninvolved)
+                stats(network_count).time(time_count).freq(f).ns.data(i,:,1) = ...
+                    mean(metrics.freq(f).ns.data(:,involved));
+                stats(network_count).time(time_count).freq(f).ns.data(i,:,2) = ...
+                    mean(metrics.freq(f).ns.data(:,~involved));
                 
-                stats(network_count).time(time_count).freq(f).bc.data(i,:,2) = metrics.freq(f).bc.data;
-                
-                F_curr = stats(network_count).time(time_count).freq(f).F_all;
-                if max_F < max(max(F_curr))
-                    max_F = max(max(F_curr));
-                end
+                stats(network_count).time(time_count).freq(f).bc.data(i,:,1) = ...
+                    mean(metrics.freq(f).bc.data(:,involved));
+                stats(network_count).time(time_count).freq(f).bc.data(i,:,2) = ...
+                    mean(metrics.freq(f).bc.data(:,~involved));
+
             
             end
             
@@ -122,6 +125,131 @@ for l = 1:length(listing)
     end
  
 end
+
+%% Plot
+colors = [0, 0.4470, 0.7410;0.8500, 0.3250, 0.0980;0.9290, 0.6940, 0.1250];
+
+% Initialize figure
+%{
+nfreq (coherence) + 1 (simple) columns and 2 (2 time scales) rows
+%}
+figure
+set(gcf,'position',[100 100 1300 500])
+[ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.01 0.01], [0.1 0.05], [0.05 0.01]);
+
+for n = 1:network_count
+
+    net_name = stats(n).name;
+    
+    for t = 1:time_count
+        
+        % change times for x axis
+        nchunks = size(stats(n).time(t).freq(1).ge.data,2);
+        times = realign_times(nchunks,surround_time);
+        
+        nfreq = length(stats(n).time(t).freq);
+        for f = 1:nfreq
+            
+            % Get appropriate subplot
+            if strcmp(net_name,'coherence') == 1
+                column_add = 1;
+            else
+                column_add = 0;
+            end
+            % this adds the number of frequencies + 1 if it's on the 2nd
+            % time point (to move down a row), and it adds which frequency
+            % (which is 1 if simple) and adds 1 if coherence, to start with
+            % the 2nd column for coherence
+            sp = (n_freq_abs+1)*(t-1) + f + column_add;
+            axes(ha(sp));
+          
+            % get mean and std across pts for each of the network metrics
+            ge_mean = mean(stats(n).time(t).freq(f).ge.data,1);
+            ns_in_mean = mean(stats(n).time(t).freq(f).ns.data(:,:,1),1);
+            bc_in_mean = mean(stats(n).time(t).freq(f).ns.data(:,:,1),1);
+            
+            ns_out_mean = mean(stats(n).time(t).freq(f).ns.data(:,:,2),1);
+            bc_out_mean = mean(stats(n).time(t).freq(f).ns.data(:,:,2),1);
+            
+            ge_std = std(stats(n).time(t).freq(f).ge.data,1);
+            ns_in_std = std(stats(n).time(t).freq(f).ns.data(:,:,1),1);
+            bc_in_std = std(stats(n).time(t).freq(f).ns.data(:,:,1),1);
+            
+            ns_out_std = std(stats(n).time(t).freq(f).ns.data(:,:,2),1);
+            bc_out_std = std(stats(n).time(t).freq(f).ns.data(:,:,2),1);
+            
+            max_val = max([ge_mean,ns_in_mean,bc_in_mean,ns_out_mean,bc_out_mean]);
+            
+            % plot means with stds as error bars
+            gep = plot(times,ge_mean,ge_std,'color',colors(1,:));
+            hold on
+            nsip = plot(times,ns_in_mean,ns_in_std,'color',colors(2,:));
+            nsop = plot(times,ns_out_mean,ns_out_std,'--','color',colors(2,:));
+            
+            bcip = plot(times,bc_in_mean,bc_in_std,'color',colors(3,:));
+            bcop = plot(times,nc_out_mean,ns_out_std,'--','color',colors(3,:));
+            
+            
+            % Determine significance by paired t-test comparing first
+            % second to current second
+            ge_p = nan(length(ge_mean),1);
+            ns_p = nan(length(ge_mean),1);
+            bc_p = nan(length(ge_mean),1);
+            for tt = 2:length(ge_mean)
+                
+                [~,ge_p(tt)] = ttest(ge_mean(1),ge_mean(tt));
+                [~,ns_p(tt)] = ttest(ns_in_mean(1),ns_in_mean(tt));
+                [~,bc_p(tt)] = ttest(bc_in_mean(1),bc_in_mean(tt));
+            end
+            
+            % Display asterisks if significant p-values
+            for tt = 2:length(ge_p)
+                text_out = get_asterisks(ge_p(tt),nchunks*(n_freq_abs+1));
+                text(times(tt),ge_mean(tt)+ge_std(tt)+0.5,...
+                    sprintf('%s',text_out),'fontsize',20,'horizontalalignment','center')
+               
+                text_out = get_asterisks(ns_p(tt),nchunks*(n_freq_abs+1));
+                text(times(tt),ns_in_mean(tt)+ns_in_std(tt)+0.5,...
+                    sprintf('%s',text_out),'fontsize',20,'horizontalalignment','center')
+                
+                text_out = get_asterisks(bc_p(tt),nchunks*(n_freq_abs+1));
+                text(times(tt),bc_in_mean(tt)+bc_in_std(tt)+0.5,...
+                    sprintf('%s',text_out),'fontsize',20,'horizontalalignment','center')
+            end
+           
+            
+            if t == 2 && f == 4
+                 xlabel('Time relative to spike peak (s)')
+            end 
+           
+            if t == 1 && strcmp(net_name,'coherence') == 1
+                title(sprintf('%s',...
+                    strrep(stats(n).time(t).freq(f).name,'_',' ')))
+            elseif t == 1 && strcmp(net_name,'simple') == 1
+                title('correlation')
+            end
+            
+        end
+        
+        
+        
+    end
+end
+
+for sp = 1:length(ha)
+    axes(ha(sp))
+    % formatting
+    ylim([0 max_F+2]);
+    if mod(sp,n_freq_abs+1) == 1
+        ylabel(sprintf('%s s time window',stats(1).time(floor((sp/n_freq_abs+1))).name));
+    else
+        yticklabels([])
+    end
+    
+    set(gca,'fontsize',15)
+end
+
+print(gcf,[out_folder,'metric_change'],'-depsc');
 
 
 end
