@@ -1,4 +1,4 @@
-function plot_metrics
+function plot_metrics(t_window)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -13,7 +13,7 @@ bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
 out_folder = [results_folder,'plots/'];
 sig_dev_folder = [results_folder,'signal_deviation/manual/'];
-metrics_folder = [results_folder,'metrics/'];
+metrics_folder = [results_folder,'metrics/manual/'];
 
 
 if exist(out_folder,'dir') == 0
@@ -62,6 +62,11 @@ for l = 1:length(listing)
         % Skip if not a directory
         if time_listing(k).isdir == 0, continue; end
         
+        % skip if not the one i want
+        if t_window ~= time_window
+            continue
+        end
+        
         time_count = time_count + 1;
         stats(network_count).time(time_count).name = time_name;
         stats(network_count).time(time_count).time_window = time_window;
@@ -72,7 +77,7 @@ for l = 1:length(listing)
         % load one to get nfreq
         metrics = load([time_folder,pt_listing(1).name]);
         metrics = metrics.metrics;
-        nfreq = length(metrics);
+        nfreq = length(metrics.freq);
         if n_freq_abs < nfreq
             n_freq_abs = nfreq;
         end
@@ -107,14 +112,14 @@ for l = 1:length(listing)
                 % Get ns, bc for involved and uninvolved chs (1 = involved,
                 % 2 = uninvolved)
                 stats(network_count).time(time_count).freq(f).ns.data(i,:,1) = ...
-                    mean(metrics.freq(f).ns.data(:,involved));
+                    mean(metrics.freq(f).ns.data(:,involved),2);
                 stats(network_count).time(time_count).freq(f).ns.data(i,:,2) = ...
-                    mean(metrics.freq(f).ns.data(:,~involved));
+                    mean(metrics.freq(f).ns.data(:,~involved),2);
                 
                 stats(network_count).time(time_count).freq(f).bc.data(i,:,1) = ...
-                    mean(metrics.freq(f).bc.data(:,involved));
+                    mean(metrics.freq(f).bc.data(:,involved),2);
                 stats(network_count).time(time_count).freq(f).bc.data(i,:,2) = ...
-                    mean(metrics.freq(f).bc.data(:,~involved));
+                    mean(metrics.freq(f).bc.data(:,~involved),2);
 
             
             end
@@ -135,7 +140,7 @@ nfreq (coherence) + 1 (simple) columns and 2 (2 time scales) rows
 %}
 figure
 set(gcf,'position',[100 100 1300 500])
-[ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.01 0.01], [0.1 0.05], [0.05 0.01]);
+[ha, pos] = tight_subplot(3, n_freq_abs+1, [0.01 0.01], [0.1 0.05], [0.05 0.01]);
 
 for n = 1:network_count
 
@@ -156,12 +161,7 @@ for n = 1:network_count
             else
                 column_add = 0;
             end
-            % this adds the number of frequencies + 1 if it's on the 2nd
-            % time point (to move down a row), and it adds which frequency
-            % (which is 1 if simple) and adds 1 if coherence, to start with
-            % the 2nd column for coherence
-            sp = (n_freq_abs+1)*(t-1) + f + column_add;
-            axes(ha(sp));
+            
           
             % get mean and std across pts for each of the network metrics
             ge_mean = mean(stats(n).time(t).freq(f).ge.data,1);
@@ -181,13 +181,24 @@ for n = 1:network_count
             max_val = max([ge_mean,ns_in_mean,bc_in_mean,ns_out_mean,bc_out_mean]);
             
             % plot means with stds as error bars
-            gep = plot(times,ge_mean,ge_std,'color',colors(1,:));
+            sp = f + column_add;
+            axes(ha(sp));
+            gep = errorbar(times,ge_mean,ge_std,'color',colors(1,:));
             hold on
-            nsip = plot(times,ns_in_mean,ns_in_std,'color',colors(2,:));
-            nsop = plot(times,ns_out_mean,ns_out_std,'--','color',colors(2,:));
             
-            bcip = plot(times,bc_in_mean,bc_in_std,'color',colors(3,:));
-            bcop = plot(times,nc_out_mean,ns_out_std,'--','color',colors(3,:));
+            sp = (n_freq_abs+1) + f + column_add;
+            axes(ha(sp));
+            nsip = errorbar(times,ns_in_mean,ns_in_std,'color',colors(2,:));
+            hold on
+            nsop = errorbar(times,ns_out_mean,ns_out_std,'--','color',colors(2,:));
+            
+            
+            sp = (n_freq_abs+1)*2 + f + column_add;
+            axes(ha(sp));
+            bcip = errorbar(times,bc_in_mean,bc_in_std,'color',colors(3,:));
+            hold on
+            bcop = errorbar(times,bc_out_mean,bc_out_std,'--','color',colors(3,:));
+            
             
             
             % Determine significance by paired t-test comparing first

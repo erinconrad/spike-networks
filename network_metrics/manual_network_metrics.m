@@ -103,9 +103,9 @@ for i = 1:length(listing)
     end
     
     % Average over all spikes
-    avg_ge = squeeze(mean(ge,2));
-    avg_ns = squeeze(mean(ns,2));
-    avg_bc = squeeze(mean(bc,2));
+    avg_ge = squeeze(nanmean(ge,2));
+    avg_ns = squeeze(nanmean(ns,2));
+    avg_bc = squeeze(nanmean(bc,2));
         
     % Fill structure
     for f = 1:n_f
