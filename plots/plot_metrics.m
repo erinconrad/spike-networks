@@ -199,6 +199,9 @@ for n = 1:network_count
             hold on
             bcop = errorbar(times,bc_out_mean,bc_out_std,'--','color',colors(3,:));
             
+            if f == 4
+                xlabel('Time relative to spike peak (s)')
+            end 
             
             
             % Determine significance by paired t-test comparing first
@@ -229,9 +232,7 @@ for n = 1:network_count
             end
            
             
-            if t == 2 && f == 4
-                 xlabel('Time relative to spike peak (s)')
-            end 
+            
            
             if t == 1 && strcmp(net_name,'coherence') == 1
                 title(sprintf('%s',...

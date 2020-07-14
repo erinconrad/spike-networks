@@ -103,9 +103,9 @@ for i = 1:length(listing)
     end
     
     % Average over all spikes
-    avg_ge = squeeze(nanmean(ge,2));
-    avg_ns = squeeze(nanmean(ns,2));
-    avg_bc = squeeze(nanmean(bc,2));
+    avg_ge = (nanmean(ge,2));
+    avg_ns = (nanmean(ns,2));
+    avg_bc = (nanmean(bc,2));
         
     % Fill structure
     for f = 1:n_f
@@ -115,11 +115,11 @@ for i = 1:length(listing)
             metrics.freq(f).name = 'correlation';
         end
         metrics.freq(f).ge.name = 'global efficiency';
-        metrics.freq(f).ge.data = squeeze(avg_ge(f,:));
+        metrics.freq(f).ge.data = squeeze(avg_ge(f,:,:));
         metrics.freq(f).ns.name = 'node strength';
-        metrics.freq(f).ns.data = squeeze(avg_ns(f,:,:));
+        metrics.freq(f).ns.data = squeeze(avg_ns(f,:,:,:));
         metrics.freq(f).bc.name = 'betweenness centrality';
-        metrics.freq(f).bc.data = squeeze(avg_bc(f,:,:));
+        metrics.freq(f).bc.data = squeeze(avg_bc(f,:,:,:));
     end
     
     metrics.involved = involved;
