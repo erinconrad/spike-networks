@@ -121,6 +121,7 @@ fprintf(['\nThe following are patients for whom we did not detect a signficant\n
 n_freq = length(all_tables(1).freq);
 % find the patients for whom there are n_freq occurrences (implying no
 % change at any frequency)
+if isempty(no_spike_change) == 0
 unique_pts = unique(no_spike_change(:,1));
 for i = 1:length(unique_pts)
     flag = 0;
@@ -135,6 +136,7 @@ for i = 1:length(unique_pts)
     if flag == 1
         fprintf('%s\n',all_tables(curr_pt).name);
     end
+end
 end
 
 fprintf(['\nThe following are patients, frequencies, times, and method for whom we detected\n'...
