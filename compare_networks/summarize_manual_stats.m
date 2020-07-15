@@ -224,6 +224,24 @@ for i = 1:length(listing)
                 all_tables(i).freq(f).table = pt_table;
             end
         end
+    else
+        if simple == 1
+            pt_table = table(times,sig_dev_p_text',nbs_p_text,sim_p_text,...
+                ge_p_text,'VariableNames',var_names_pt{1:4})
+            all_tables(i).name = pt_name;
+            all_tables(i).freq.name = 'na';
+            all_tables(i).freq.table = pt_table;
+        else
+            for f = 1:nf
+                freq_text{f}
+                pt_table = table(times,sig_dev_p_text',nbs_p_text(:,f),...
+                    sim_p_text(:,f),...
+                ge_p_text(:,f),'VariableNames',var_names_pt{1:4})
+                all_tables(i).name = pt_name;
+                all_tables(i).freq(f).name = freq_text{f};
+                all_tables(i).freq(f).table = pt_table;
+            end
+        end
     end
    
     

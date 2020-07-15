@@ -124,7 +124,6 @@ for l = 1:length(listing)
             
             end
             
-            
         end
         
     end
@@ -164,40 +163,50 @@ for n = 1:network_count
             
           
             % get mean and std across pts for each of the network metrics
-            ge_mean = mean(stats(n).time(t).freq(f).ge.data,1);
-            ns_in_mean = mean(stats(n).time(t).freq(f).ns.data(:,:,1),1);
-            bc_in_mean = mean(stats(n).time(t).freq(f).ns.data(:,:,1),1);
+            ge_mean = nanmean(stats(n).time(t).freq(f).ge.data,1);
+            ns_in_mean = nanmean(stats(n).time(t).freq(f).ns.data(:,:,1),1);
+            bc_in_mean = nanmean(stats(n).time(t).freq(f).ns.data(:,:,1),1);
             
-            ns_out_mean = mean(stats(n).time(t).freq(f).ns.data(:,:,2),1);
-            bc_out_mean = mean(stats(n).time(t).freq(f).ns.data(:,:,2),1);
+            ns_out_mean = nanmean(stats(n).time(t).freq(f).ns.data(:,:,2),1);
+            bc_out_mean = nanmean(stats(n).time(t).freq(f).ns.data(:,:,2),1);
             
-            ge_std = std(stats(n).time(t).freq(f).ge.data,1);
-            ns_in_std = std(stats(n).time(t).freq(f).ns.data(:,:,1),1);
-            bc_in_std = std(stats(n).time(t).freq(f).ns.data(:,:,1),1);
+            ge_std = nanstd(stats(n).time(t).freq(f).ge.data,1);
+            ns_in_std = nanstd(stats(n).time(t).freq(f).ns.data(:,:,1),1);
+            bc_in_std = nanstd(stats(n).time(t).freq(f).ns.data(:,:,1),1);
             
-            ns_out_std = std(stats(n).time(t).freq(f).ns.data(:,:,2),1);
-            bc_out_std = std(stats(n).time(t).freq(f).ns.data(:,:,2),1);
+            ns_out_std = nanstd(stats(n).time(t).freq(f).ns.data(:,:,2),1);
+            bc_out_std = nanstd(stats(n).time(t).freq(f).ns.data(:,:,2),1);
             
             max_val = max([ge_mean,ns_in_mean,bc_in_mean,ns_out_mean,bc_out_mean]);
             
             % plot means with stds as error bars
             sp = f + column_add;
             axes(ha(sp));
+            hold on
             gep = errorbar(times,ge_mean,ge_std,'color',colors(1,:));
             hold on
             
+            if strcmp(net_name,'coherence') == 1
+                title(sprintf('%s',...
+                    strrep(stats(n).time(t).freq(f).name,'_',' ')))
+            elseif strcmp(net_name,'simple') == 1
+                title('correlation')
+            end
+            
             sp = (n_freq_abs+1) + f + column_add;
             axes(ha(sp));
+            hold on
             nsip = errorbar(times,ns_in_mean,ns_in_std,'color',colors(2,:));
             hold on
-            nsop = errorbar(times,ns_out_mean,ns_out_std,'--','color',colors(2,:));
+            %nsop = errorbar(times,ns_out_mean,ns_out_std,'--','color',colors(2,:));
             
             
             sp = (n_freq_abs+1)*2 + f + column_add;
             axes(ha(sp));
+            hold on
             bcip = errorbar(times,bc_in_mean,bc_in_std,'color',colors(3,:));
             hold on
-            bcop = errorbar(times,bc_out_mean,bc_out_std,'--','color',colors(3,:));
+            %bcop = errorbar(times,bc_out_mean,bc_out_std,'--','color',colors(3,:));
             
             if f == 4
                 xlabel('Time relative to spike peak (s)')
@@ -211,35 +220,36 @@ for n = 1:network_count
             bc_p = nan(length(ge_mean),1);
             for tt = 2:length(ge_mean)
                 
-                [~,ge_p(tt)] = ttest(ge_mean(1),ge_mean(tt));
-                [~,ns_p(tt)] = ttest(ns_in_mean(1),ns_in_mean(tt));
-                [~,bc_p(tt)] = ttest(bc_in_mean(1),bc_in_mean(tt));
+                [~,ge_p(tt)] = ttest(stats(n).time(t).freq(f).ge.data(:,1,1),...
+                    stats(n).time(t).freq(f).ge.data(:,tt,1));
+                [~,ns_p(tt)] = ttest(stats(n).time(t).freq(f).ns.data(:,1,1),...
+                    stats(n).time(t).freq(f).ns.data(:,tt,1));
+                [~,bc_p(tt)] = ttest(stats(n).time(t).freq(f).bc.data(:,1,1),...
+                    stats(n).time(t).freq(f).bc.data(:,tt,1));
             end
             
             % Display asterisks if significant p-values
             for tt = 2:length(ge_p)
+                sp = f + column_add;
+                axes(ha(sp));
                 text_out = get_asterisks(ge_p(tt),nchunks*(n_freq_abs+1));
                 text(times(tt),ge_mean(tt)+ge_std(tt)+0.5,...
                     sprintf('%s',text_out),'fontsize',20,'horizontalalignment','center')
                
+                sp = (n_freq_abs+1) + f + column_add;
+                axes(ha(sp));
                 text_out = get_asterisks(ns_p(tt),nchunks*(n_freq_abs+1));
                 text(times(tt),ns_in_mean(tt)+ns_in_std(tt)+0.5,...
                     sprintf('%s',text_out),'fontsize',20,'horizontalalignment','center')
                 
+                sp = (n_freq_abs+1)*2 + f + column_add;
+                axes(ha(sp));
                 text_out = get_asterisks(bc_p(tt),nchunks*(n_freq_abs+1));
                 text(times(tt),bc_in_mean(tt)+bc_in_std(tt)+0.5,...
                     sprintf('%s',text_out),'fontsize',20,'horizontalalignment','center')
             end
            
-            
-            
            
-            if t == 1 && strcmp(net_name,'coherence') == 1
-                title(sprintf('%s',...
-                    strrep(stats(n).time(t).freq(f).name,'_',' ')))
-            elseif t == 1 && strcmp(net_name,'simple') == 1
-                title('correlation')
-            end
             
         end
         
@@ -248,6 +258,7 @@ for n = 1:network_count
     end
 end
 
+%{
 for sp = 1:length(ha)
     axes(ha(sp))
     % formatting
@@ -260,6 +271,7 @@ for sp = 1:length(ha)
     
     set(gca,'fontsize',15)
 end
+%}
 
 print(gcf,[out_folder,'metric_change'],'-depsc');
 
