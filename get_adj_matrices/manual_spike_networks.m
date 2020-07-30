@@ -127,9 +127,8 @@ for whichPt = whichPts
         %old_values = values;
         values = pre_processing(values,do_car,pre_whiten,do_notch,fs);
         nchs = size(values,2);
-        %n_chunks = round(size(values,1)/fs/time_window); % old way, same
-        %total time
-        n_chunks = round(size(values,1)/fs); % new way, change total time so that it's the same number of chunks
+        n_chunks = round(size(values,1)/fs/time_window); % old way, same total time
+        %n_chunks = round(size(values,1)/fs); % alternate way, change total time so that it's the same number of chunks
 
         %% Figure out times for which I will be calculating adjacencies
         % The peak should be the very center of each file
