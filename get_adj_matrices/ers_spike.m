@@ -5,14 +5,14 @@ do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 
-freq_bands = [0 4;... %delta
+freq_bands = [0.5 4;... %delta
     4 8;...%theta
     8 12;...% alpha
     12 24;... %beta
     30 40;... % low gamma
     96 106;... % high gamma
     106 256;... %ultra-high
-    0 256;... %broadband    
+    0.5 256;... %broadband    
     ]; 
 freq_names = {'delta','theta','alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
@@ -91,6 +91,31 @@ for whichPt = whichPts
         %old_values = values;
         values = pre_processing(values,do_car,pre_whiten,do_notch,fs);
         
+        
+        % show spike
+        if 0
+        involved_chs = find(involved);
+        figure
+        set(gcf,'position',[150 450 1000 350])
+        for ich = 1:length(involved_chs)
+            ch = involved_chs(ich);
+            plot(linspace(-spike(1).surround_time,spike(1).surround_time,...
+                size(values,1)),values(:,ch))
+            title(sprintf('Ch %d',ch))
+            pause
+        end
+        end
+        
+
+        
+        if 0
+        % Plot the spectrogram
+        x = values(:,77);
+        spectrogram(x,128,120,128,fs,'yaxis')
+        pause
+        close(gcf)
+        end
+        
          %% Figure out times for which I will be calculating ERS
         % The peak should be the very center of each file
         peak = round(size(values,1)/2);
@@ -132,6 +157,8 @@ for whichPt = whichPts
     ers.powers = ers_array;
     ers.powers_avg_involved = squeeze(nanmean(ers_involved,1));
     ers.powers_involved = ers_involved;
+    ers.freq_names = freq_names;
+    ers.freq_bands = freq_bands;
     
     % save
     save(out_file,'ers');

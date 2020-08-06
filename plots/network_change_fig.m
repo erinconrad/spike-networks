@@ -177,7 +177,7 @@ for n = 1:network_count
             for tt = 1:size(F_curr,2)
                 curr_p_vals = stats(n).time(t).freq(f).p_all(:,tt);
                 comb_p = fisher_p_value(curr_p_vals);
-                text_out = get_asterisks(comb_p,nchunks*(n_freq_abs+1)); % should I also adjust by nfreq?
+                text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1)); % should I also adjust by nfreq?
                 
                 text(times(tt),max(F_curr(:,tt))+0.5,sprintf('%s',text_out),'fontsize',20,...
                     'horizontalalignment','center')
