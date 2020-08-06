@@ -6,6 +6,11 @@ the spike is significantly different from the baseline (first half second).
 This serves as a control for other measures
 %}
 
+%% Parameters
+do_notch = 1; % notch filter?
+do_car = 1; % common average reference?
+pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
+
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;
@@ -51,6 +56,7 @@ for i = 1:length(listing)
     sig_dev(i).surround_time = surround_time;
     
     dev_windows = zeros(length(spike),size(index_windows,1));
+    fs = spike(1).fs;
     
     % loop through spikes
     for s = 1:length(spike)
@@ -58,11 +64,14 @@ for i = 1:length(listing)
         % get eeg data
         data = spike(s).data; % ntimes x nch
         
+        % pre process
+        data = pre_processing(data,do_car,pre_whiten,do_notch,fs);
+        
         % get involved chs
         is_sp_ch = spike(s).involved;
         
         % restrict to involved channels
-        data_spike = spike(s).data(:,is_sp_ch);
+        data_spike = data(:,is_sp_ch);
         
         % get baseline (diff for each ch)
         baseline = median(data_spike,1); %1 x n_sp_ch (median across all time points)

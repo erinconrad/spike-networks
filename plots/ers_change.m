@@ -209,8 +209,8 @@ end
 
 %% Say the patients with significant pre-spike rise
 midpoint = nchunks/2;
-for t = 1:length(time_count)
-    fprintf('\n for time window %s:\n\n',time_name);
+for t = 1:(time_count)
+    fprintf('\n for time window %s:\n\n',time_listing(t).name);
     for i = 1:length(pt_names)
         fprintf('\n%s had significant pre-spike ERS for:',pt_names{i});
         for f = 1:nfreq
