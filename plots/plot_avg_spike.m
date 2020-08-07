@@ -90,7 +90,7 @@ for i = 1:length(listing)
             avg_dev = [avg_dev;...
                 repmat(avg_dev(end),size(dev_all,1)-size(avg_dev,1),1)];
         elseif size(dev_all,1) < size(avg_dev,1)
-            avg_dev(end-(size(avg_dev,1)-size(dev_all,1)):end) = [];
+            avg_dev(end-(size(avg_dev,1)-size(dev_all,1))+1:end) = [];
         end
         
         dev_all(:,s) = avg_dev;
@@ -124,7 +124,7 @@ for i = 1:length(listing)
             d = [d;...
                 repmat(d(end),size(mode_ch_dev,1)-size(d,1),1)];
         elseif size(d,1) > size(mode_ch_dev,1)
-            d(end - (size(d,1)-size(mode_ch_dev,1)):end) = [];
+            d(end - (size(d,1)-size(mode_ch_dev,1))+1:end) = [];
         end
         mode_ch_dev(:,s) = d;
     end
