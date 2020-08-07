@@ -86,7 +86,7 @@ for i = 1:length(listing)
         % avg across spike chs
         avg_dev = mean(dev,2);
         
-        if size(dev_all,1) > size(avg_dev)
+        if size(dev_all,1) > size(avg_dev,1)
             avg_dev = [avg_dev;...
                 repmat(avg_dev(end),size(dev_all,1)-size(avg_dev,1),1)];
         end
@@ -117,7 +117,12 @@ for i = 1:length(listing)
         x = x(:,mode_ch);
         
         bl = median(x,1);
-        mode_ch_dev(:,s) = abs(x-bl);
+        d = abs(x-bl);
+        if size(mode_ch_dev,1) > size(d,1)
+            d = [d;...
+                repmat(d(end),size(mode_ch_dev,1)-size(d,1),1)];
+        end
+        mode_ch_dev(:,s) = d;
     end
     mode_ch_dev = mean(mode_ch_dev,2);
     
