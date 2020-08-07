@@ -101,6 +101,7 @@ for i = 1:length(listing)
     final_dev = mean(dev_all,2);
     
     % take mode channel with biggest dev
+    ch_devs_all(ch_devs_all==0) = [];
     mode_ch = mode(ch_devs_all);
     
     mode_ch_dev = zeros(size(spike(1).data,1),nspikes);
