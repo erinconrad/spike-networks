@@ -1,4 +1,4 @@
-function plot_avg_spike
+function plot_avg_spike(overwrite)
 
 %% Parameters
 do_notch = 1; % notch filter?
@@ -40,6 +40,16 @@ for i = 1:length(listing)
     if contains(fname,'_eeg.mat') == 0, continue; end
     pt_name = strsplit(fname,'_');
     pt_name = pt_name{1};
+    
+    if overwrite == 0
+        if exist([out_folder,pt_name,'.eps'],'file') ~= 0
+            fprintf('\nSkipping %s...\n',pt_name);
+            continue
+        else
+            fprintf('\nDoing %s...\n',pt_name);
+        end
+    end
+    
     pt_names = [pt_names;pt_name];
     
     % Load the file
