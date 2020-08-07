@@ -88,7 +88,7 @@ for i = 1:length(listing)
         
         if size(dev_all,1) > size(avg_dev)
             avg_dev = [avg_dev;...
-                repmat(avg_dev(end),size(dev_all,1)-size(avg_dev),1];
+                repmat(avg_dev(end),size(dev_all,1)-size(avg_dev),1)];
         end
         
         dev_all(:,s) = avg_dev;
