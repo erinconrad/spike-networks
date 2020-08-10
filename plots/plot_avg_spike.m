@@ -175,7 +175,7 @@ for i = 1:length(listing)
     set(gca,'fontsize',20)
     subplot(2,1,2)
     plot(linspace(-surround,surround,length(final_dev)),mode_ch_dev)
-    title(sprintf('Biggest dev ch %s: %d',mode_ch,soz_text));
+    title(sprintf('Biggest dev ch %s: %d',soz_text,mode_ch));
     set(gca,'fontsize',20)
     print([out_folder,pt_name],gcf,'-depsc');
     close(gcf)
