@@ -157,6 +157,9 @@ for whichPt = whichPts
         spike(s).rel_dev = zeros(nch,1);
         spike(s).involved = zeros(nch,1);
         
+        % store deviations for all channels
+        all_devs = zeros(nch,1);
+        
         for ich = 1:nch
             
             % Find the deviation from the baseline
@@ -175,7 +178,9 @@ for whichPt = whichPts
             
             % Decide if the channel is involved in the spike
             involved = rel_dev > thresh_spike;
-
+            
+            % all devs
+            all_devs(ich) = rel_dev;
             
             % Store this
             spike(s).rel_dev(ich) = rel_dev;
@@ -206,6 +211,11 @@ for whichPt = whichPts
         [sorted_times,I] = sort(spike(s).peak_time(spike(s).involved));
         spike(s).ordered_chs = [in_chs(I),sorted_times];
         
+        %% Find the biggest deviation channel
+        [~,biggest_dev_ch] = max(all_devs);
+        spike(s).biggest_dev = biggest_dev_ch;
+        
+        
         % Plot
         if 0
             figure
@@ -216,6 +226,14 @@ for whichPt = whichPts
                 hold on
                 offset = offset - 400;
             end
+            pause
+            close(gcf)
+        end
+        
+        if 0
+            figure
+            set(gcf,'position',[100 100 1000 500])
+            plot(data(:,spike(s).biggest_dev))
             pause
             close(gcf)
         end
