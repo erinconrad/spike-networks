@@ -13,7 +13,6 @@ freq_bands = [0 4;... %delta
     ]; 
 freq_names = {'delta','theta','alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
-n_f = size(freq_bands,1);
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -159,7 +158,7 @@ nfreq columns and 2 (2 time scales) rows
 %}
 figure
 set(gcf,'position',[100 100 1300 500])
-[ha, pos] = tight_subplot(time_count, n_freq_abs, [0.01 0.01], [0.1 0.05], [0.05 0.01]);
+[ha, pos] = tight_subplot(time_count, n_freq_abs, [0.01 0.01], [0.12 0.07], [0.07 0.01]);
 
 for t = 1:time_count
     % change times for x axis
@@ -200,12 +199,26 @@ for t = 1:time_count
              xlabel('Time relative to spike peak (s)')
         end 
         
+        if t == 1
         title(sprintf('%s',...
                 strrep(stats.time(t).freq(f).name,'_',' ')))
+        end
+        
+        if f == 1 && t == 1
+            ylabel(sprintf('Power in specified\nfrequency band'));
+        end
+            
+        if t == 1, xticklabels([]); end
+        yticklabels([])
+            
+        set(gca,'fontsize',20);
 
     end
-    
+
 end
+
+print([out_folder,'ers_change'],gcf,'-depsc');
+    
 
 %% Say the patients with significant pre-spike rise
 midpoint = nchunks/2;

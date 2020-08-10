@@ -144,7 +144,7 @@ for whichPt = whichPts
         end
         
         ers.spike(s).involved = involved;
-        ers.spikes(s).index_windows = index_windows;
+        ers.spike(s).index_windows = index_windows;
         ers.spike(s).ers_involved = nanmean(ers_array(s,:,:,involved),4);
         ers_involved(s,:,:) = nanmean(ers_array(s,:,:,involved),4);
         

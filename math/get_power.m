@@ -2,8 +2,8 @@ function powers = get_power(X,fs,freq_bands)
 
 powers = nan(size(freq_bands,1),1);
 
-% subtract mean???
-%X = X - mean(X);
+% subtract baseline
+X = X - median(X);
 
 %% fft approach
 
