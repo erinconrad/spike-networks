@@ -86,6 +86,7 @@ for i = 1:length(listing)
         
         % get the average deviation across involved channels
         %dev_avg_ch = mean(dev,2); % ntimes x 1
+        dev_avg_ch = dev;
         
         % now, get the average deviation in each time window for that spike
         for t = 1:size(index_windows,1)
