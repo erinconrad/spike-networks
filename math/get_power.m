@@ -2,8 +2,9 @@ function powers = get_power(X,fs,freq_bands)
 
 powers = nan(size(freq_bands,1),1);
 
-% subtract baseline
-X = X - median(X);
+% subtract baseline (I do this earlier at the level of the full spike time
+% period rather than individual windows)
+%X = X - median(X);
 
 %% fft approach
 

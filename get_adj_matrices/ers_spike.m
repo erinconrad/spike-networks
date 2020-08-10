@@ -132,12 +132,15 @@ for whichPt = whichPts
         % Fix the first and the last to make sure they don't become
         % negative or beyond the total size
         index_windows(1,1) = max(index_windows(1,1),1);
-        index_windows(end,2) = min(index_windows(end,2),size(values,1));
-        
+
         % Get ERS
         for ich = 1:nchs
+            
+            % subtract baseline
+            X = values(:,ich) - median(values(:,ich));
+            
             for t = 1:n_windows
-                X = values(round(index_windows(t,1)):round(index_windows(t,2)),ich);
+                X = X(round(index_windows(t,1)):round(index_windows(t,2)));
                 powers = get_power(X,fs,freq_bands);
                 ers_array(s,t,:,ich) = powers;
             end
