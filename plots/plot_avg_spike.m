@@ -29,6 +29,9 @@ spike = load([eeg_folder,'HUP074_eeg.mat']);
 spike = spike.spike;
 surround_time = spike(1).surround_time;
 
+pt = load(pt_file);
+pt = pt.pt;
+
 % get full directory listing
 listing = dir(eeg_folder);
 count = 0;
@@ -51,6 +54,18 @@ for i = 1:length(listing)
     end
     
     pt_names = [pt_names;pt_name];
+    
+    % Find corresponding patient in pt struct
+    pt_id = 0;
+    for k = 1:length(pt)
+        if strcmp(pt(k).name,pt_name) == 1
+            pt_id = k;
+            break
+        end
+    end
+    if pt_id == 0
+        fprintf('\nWarning, cannot find id for %s.\n',pt_name);
+    end
     
     % Load the file
     spike = load([eeg_folder,fname]);
@@ -112,6 +127,28 @@ for i = 1:length(listing)
     mode_ch = mode(ch_devs_all);
     
     mode_ch_dev = zeros(size(spike(1).data,1),nspikes);
+    
+    soz_text = '';
+    
+    if pt_id ~= 0
+        if isfield(pt(pt_id),'newSOZChs')
+            if ~isempty(pt(pt_id).newSOZChs)
+                soz = pt(pt_id).newSOZChs;
+                
+                if strcmp(spike(1).chLabels{mode_ch},...
+                        pt(pt_id).new_elecs.names{mode_ch}) == 0
+                    error('Ch names do not line up for %s\n',pt_name);
+                end
+                
+                if ismember(mode_ch,soz) == 1
+                    soz_text = '(is soz)';
+                else
+                    soz_text = '(is not soz)';
+                end
+            end
+        end
+    end
+    
     % get avg dev for that ch
     for s = 1:length(spike)
         x = spike(s).data;
@@ -138,7 +175,7 @@ for i = 1:length(listing)
     set(gca,'fontsize',20)
     subplot(2,1,2)
     plot(linspace(-surround,surround,length(final_dev)),mode_ch_dev)
-    title(sprintf('Biggest dev ch: %d',mode_ch));
+    title(sprintf('Biggest dev ch %s: %d',mode_ch,soz_text));
     set(gca,'fontsize',20)
     print([out_folder,pt_name],gcf,'-depsc');
     close(gcf)

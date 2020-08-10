@@ -78,6 +78,7 @@ for i = 1:length(listing)
         
         % get deviation from baseline (for all time points)
         dev = sqrt((data_spike - repmat(baseline,size(data_spike,1),1)).^2); % ntimes x n_sp_ch 
+        % taking signal power?
         
         % get the average deviation across involved channels
         dev_avg_ch = mean(dev,2); % ntimes x 1
