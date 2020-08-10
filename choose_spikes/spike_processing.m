@@ -45,6 +45,8 @@ end
 % Loop through patients
 for whichPt = whichPts
     
+    clear spike
+    
     name = sp(whichPt).name;
     
     if isempty(name) == 1
