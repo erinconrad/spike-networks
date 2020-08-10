@@ -140,8 +140,8 @@ for whichPt = whichPts
             X = values(:,ich) - median(values(:,ich));
             
             for t = 1:n_windows
-                X = X(round(index_windows(t,1)):round(index_windows(t,2)));
-                powers = get_power(X,fs,freq_bands);
+                Xtemp = X(round(index_windows(t,1)):round(index_windows(t,2)));
+                powers = get_power(Xtemp,fs,freq_bands);
                 ers_array(s,t,:,ich) = powers;
             end
         end
