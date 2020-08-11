@@ -101,13 +101,13 @@ for k = 1:length(time_listing)
 
         for f = 1:nfreq
             stats(network_count).time(time_count).freq(f).name = ers.freq_names{f};
-            stats(network_count).time(time_count).freq(f).avg_ers_involved(i,:) = ers.powers_avg_involved(:,f);
+            stats(network_count).time(time_count).freq(f).ers = ers.powers(:,:,f);
 
-            ers_involved = ers.powers_involved(:,:,f);
+            ers_temp = ers.powers(:,:,f);
             
             % Do t-test
-            for t = 2:size(ers_involved,2)
-                [~,p,~,stats1] = ttest(ers_involved(:,1),ers_involved(:,t));
+            for t = 2:size(ers_temp,2)
+                [~,p,~,stats1] = ttest(ers_temp(:,1),ers_temp(:,t));
                 stats(network_count).time(time_count).freq(f).t_all(i,t) = stats1.tstat;
                 stats(network_count).time(time_count).freq(f).p_all(i,t) = p;
             end
@@ -157,7 +157,7 @@ end
 nfreq columns and 2 (2 time scales) rows
 %}
 figure
-set(gcf,'position',[100 100 1300 500])
+set(gcf,'position',[1 100 1399 500])
 [ha, pos] = tight_subplot(time_count, n_freq_abs, [0.01 0.01], [0.12 0.07], [0.07 0.01]);
 
 for t = 1:time_count
@@ -173,27 +173,59 @@ for t = 1:time_count
         sp = (n_freq_abs)*(t-1) + f;
         axes(ha(sp));
         
-        ers_curr = stats.time(t).freq(f).avg_ers_involved;
+        ers_curr = stats.time(t).freq(f).ers;
+        z_curr = (ers_curr-mean(ers_curr,2))./std(ers_curr,0,2);
+        
         % loop over patients and plot
         for i = 1:size(ers_curr,1)
-            plot(times,ers_curr(i,:),'ko');
+            
+           
+            plot(times,z_curr(i,:),'ko');
             hold on
         end
         
+        p = stats.time(t).freq(f).group_p;
+
+        
         % plot mean ers across patients
         for tt = 1:size(ers_curr,2)
-            plot([times(tt)-0.25 times(tt)+0.25],...
-                [mean(ers_curr(:,tt)) mean(ers_curr(:,tt))],...
-                'k','linewidth',2);
+            
+            text_out = get_asterisks(p(tt),(nchunks-1)*(n_freq_abs));
+            
+            if strcmp(text_out,'')==1
+                plot([times(tt)-0.25 times(tt)+0.25],...
+                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    'k','linewidth',4);
+            else
+                plot([times(tt)-0.25 times(tt)+0.25],...
+                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    'g','linewidth',4);
+            end
+            
+            %{
+            if strcmp(text_out,'')==1
+                plot([times(tt)-0.25 times(tt)+0.25],...
+                    [mean(ers_curr(:,tt)) mean(ers_curr(:,tt))],...
+                    'k','linewidth',3);
+            else
+                plot([times(tt)-0.25 times(tt)+0.25],...
+                    [mean(ers_curr(:,tt)) mean(ers_curr(:,tt))],...
+                    'g','linewidth',3);
+            end
+            %}
         end
         
         % asterisks
-        p = stats.time(t).freq(f).group_p;
+        %{
         for tt = 2:length(p)
-            text_out = get_asterisks(p(tt),(nchunks-1)*(n_freq_abs)); % should I also adjust by nfreq?
+             % should I also adjust by nfreq?
             text(times(tt),max(ers_curr(:,tt))+0.5,sprintf('%s',text_out),'fontsize',20,...
                     'horizontalalignment','center')
         end
+        %}
+        
+        ylim([-2 4])
+            
         
         if t == 2 && f == 4
              xlabel('Time relative to spike peak (s)')
@@ -209,7 +241,7 @@ for t = 1:time_count
         end
             
         if t == 1, xticklabels([]); end
-        yticklabels([])
+        if f~=1, yticklabels([]); end
             
         set(gca,'fontsize',20);
 

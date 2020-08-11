@@ -37,6 +37,8 @@ listing = dir(perm_folder);
 network_count = 0;
 n_freq_abs = 0;
 max_F = 0;
+max_z = 0;
+min_z = 0;
 for l = 1:length(listing)
     name= listing(l).name;
     
@@ -90,6 +92,9 @@ for l = 1:length(listing)
 
             stats(network_count).time(time_count).freq(f).p_all = ...
                 zeros(length(pt_listing),surround_time*2/time_window);
+            
+            stats(network_count).time(time_count).freq(f).z_all = ...
+                zeros(length(pt_listing),surround_time*2/time_window);
         end
         
         % loop through pts
@@ -112,7 +117,20 @@ for l = 1:length(listing)
                 if max_F < max(max(F_curr))
                     max_F = max(max(F_curr));
                 end
+                
+                
+                
+                % convert F stats to z scores to compare across time points
+                stats(network_count).time(time_count).freq(f).z_all(i,:) = (sim(f).F-nanmean(sim(f).F))./nanstd(sim(f).F);
             
+                if max_z < max(max(stats(network_count).time(time_count).freq(f).z_all))
+                    max_z = max(max(stats(network_count).time(time_count).freq(f).z_all));
+                end
+                
+                if min_z > min(min(stats(network_count).time(time_count).freq(f).z_all))
+                    min_z = min(min(stats(network_count).time(time_count).freq(f).z_all));
+                end
+                
             end
             
             
@@ -128,7 +146,7 @@ end
 nfreq (coherence) + 1 (simple) columns and 2 (2 time scales) rows
 %}
 figure
-set(gcf,'position',[100 100 1300 500])
+set(gcf,'position',[1 100 1399 500])
 [ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.01 0.01], [0.1 0.05], [0.05 0.01]);
 
 for n = 1:network_count
@@ -157,32 +175,32 @@ for n = 1:network_count
             sp = (n_freq_abs+1)*(t-1) + f + column_add;
             axes(ha(sp));
           
-            F_curr = stats(n).time(t).freq(f).F_all;
+            z_curr = stats(n).time(t).freq(f).z_all;
             % loop over patients and plot
-            for i = 1:size(F_curr,1)
-                plot(times,F_curr(i,:),'ko');
+            for i = 1:size(z_curr,1)
+                plot(times,z_curr(i,:),'ko');
                 hold on
             end
             
             % plot mean F across patients
-            for tt = 1:size(F_curr,2)
-                plot([times(tt)-0.25 times(tt)+0.25],...
-                    [mean(F_curr(:,tt)) mean(F_curr(:,tt))],...
-                    'k','linewidth',2);
-            end
-            
-            
-            % Display asterisks if significant combined p-values (by
-            % fisher's method)
-            for tt = 1:size(F_curr,2)
+            for tt = 1:size(z_curr,2)
+                
                 curr_p_vals = stats(n).time(t).freq(f).p_all(:,tt);
                 comb_p = fisher_p_value(curr_p_vals);
                 text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1)); % should I also adjust by nfreq?
                 
-                text(times(tt),max(F_curr(:,tt))+0.5,sprintf('%s',text_out),'fontsize',20,...
-                    'horizontalalignment','center')
-
+                if strcmp(text_out,'') == 1
+                    plot([times(tt)-0.25 times(tt)+0.25],...
+                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    'k','linewidth',4);
+                else
+                    plot([times(tt)-0.25 times(tt)+0.25],...
+                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    'g','linewidth',4);
+                end
             end
+            
+
             
             if t == 2 && f == 4
                  xlabel('Time relative to spike peak (s)')
@@ -205,7 +223,7 @@ end
 for sp = 1:length(ha)
     axes(ha(sp))
     % formatting
-    ylim([0 max_F+2]);
+    ylim([min_z-1 max_z+1]);
     if mod(sp,n_freq_abs+1) == 1
         ylabel(sprintf('%s s time window',stats(1).time(floor((sp/n_freq_abs+1))).name));
     else

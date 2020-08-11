@@ -54,8 +54,12 @@ n_windows = count;
 
 %% Initialize arrays to get average z-scores
 z_score_all = cell(length(sig_dev),1);
+t_score_all = cell(length(sig_dev),1);
 for k = 1:length(sig_dev)
     z_score_all{k} = zeros(length(sig_dev(k).sig_dev),...
+    length(sig_dev(k).sig_dev(1).z_score_dev));
+
+    t_score_all{k} = nan(length(sig_dev(k).sig_dev),...
     length(sig_dev(k).sig_dev(1).z_score_dev));
 end
     
@@ -82,14 +86,36 @@ for k = 1:n_windows
         
         % Add it to array
         z_score_all{k}(i,:) = z_score_temp;
+        
+        % Get t score and add this
+        temp_temp_t = nan(length(curr_sig_dev(i).stats),1);
+        for j = 2:length(curr_sig_dev(i).stats)
+            temp_temp_t(j) = curr_sig_dev(i).stats(j).tstat;
+        end
+        t_score_all{k}(i,:) = temp_temp_t;
     end
     
     % plot the mean across patients
+    curr_z_score = z_score_all{k};
     for j = 1:length(times)
-        curr_z_score = z_score_all{k};
-        plot([times(j)-0.25*time_window times(j)+0.25*time_window],...
-            [nanmean(curr_z_score(:,j)) nanmean(curr_z_score(:,j))],...
-            'k','linewidth',2)
+        if j > 1
+            [~,p] = ttest(t_score_all{k}(:,j)); % ttest looking at individual pt t stats
+            text_out = get_asterisks(p,size(z_score_all{k},2)-1);
+            if strcmp(text_out,'') == 1
+                plot([times(j)-0.25*time_window times(j)+0.25*time_window],...
+                [nanmean(curr_z_score(:,j)) nanmean(curr_z_score(:,j))],...
+                'k','linewidth',4)
+            else
+                plot([times(j)-0.25*time_window times(j)+0.25*time_window],...
+                [nanmean(curr_z_score(:,j)) nanmean(curr_z_score(:,j))],...
+                'g','linewidth',4)
+            end
+        else
+        
+            plot([times(j)-0.25*time_window times(j)+0.25*time_window],...
+                [nanmean(curr_z_score(:,j)) nanmean(curr_z_score(:,j))],...
+                'k','linewidth',4)
+        end
     end
     
     
@@ -106,15 +132,6 @@ for k = 1:n_windows
     ylim([min(min(z_score_all{k})) max(max(z_score_all{k}))+0.5])
     yl = get(gca,'ylim');
     
-    
-    % Do a t-test comparing the z-scores between the first and subsequent
-    % time points
-    for j = 2:length(times)
-        [~,p] = ttest(z_score_all{k}(:,1),z_score_all{k}(:,j));
-        text_out = get_asterisks(p,size(z_score_all{k},2));
-        text(times(j),yl(1)+(yl(2)-yl(1))*0.95,text_out,'fontsize',20,...
-            'HorizontalAlignment','Center')
-    end
     
 end
     
