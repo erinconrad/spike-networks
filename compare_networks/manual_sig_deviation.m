@@ -91,7 +91,8 @@ for i = 1:length(listing)
         
         % now, get the average deviation in each time window for that spike
         for t = 1:size(index_windows,1)
-            dev_windows(s,t) = mean(dev_avg_ch(round(index_windows(t,1)):round(index_windows(t,2))));
+            dev_windows(s,t) = mean(dev_avg_ch(max(1,round(index_windows(t,1)))...
+                :min(length(dev_avg_ch),round(index_windows(t,2)))));
         end
         
     end
