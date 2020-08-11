@@ -83,5 +83,3 @@ for i = 1:length(listing)
 end
 
 end
-
-end
