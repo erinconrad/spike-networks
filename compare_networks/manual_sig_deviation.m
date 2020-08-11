@@ -111,6 +111,7 @@ for i = 1:length(listing)
     dev_avg_all_spikes = nanmean(dev_windows,1); % avg across spikes
     z_score_dev = (dev_avg_all_spikes - mean(dev_avg_all_spikes))/std(dev_avg_all_spikes);
     sig_dev(i).z_score_dev = z_score_dev;
+    sig_dev(i).avg_dev = dev_avg_all_spikes;
     
     % Save the structure
     save([sig_dev_folder,'sig_dev.mat'],'sig_dev')
