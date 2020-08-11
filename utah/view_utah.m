@@ -10,6 +10,8 @@ pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
+script_folder = locations.script_folder;
+addpath(genpath(script_folder));
 columbia_folder = locations.columbia_folder;
 grid_folder = [columbia_folder,'Patient1_grid/'];
 sleep_utah_folder = [grid_folder,'interictal_sleep_utah_0160_043647/'];
