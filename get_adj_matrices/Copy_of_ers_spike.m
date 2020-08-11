@@ -76,7 +76,8 @@ for whichPt = whichPts
     end
     
     % Initialize array of ERS
-    ers_array = nan(n_spikes,n_windows,n_f);
+    ers_array = nan(n_spikes,n_windows,n_f,nchs);
+    ers_involved = nan(n_spikes,n_windows,n_f);
     
     for s = 1:length(spike)
         if isempty(spike(s).time) == 1, continue; end
@@ -132,26 +133,26 @@ for whichPt = whichPts
         % Fix the first and the last to make sure they don't become
         % negative or beyond the total size
         index_windows(1,1) = max(index_windows(1,1),1);
-        
-        % Restrict to biggest dev ch
-        values = values(:,biggest_dev);
-        
-        % subtract baseline
-        X = values-median(values);
-        
-        % Get ERS
-        for t = 1:n_windows
-            Xtemp = X(max(1,round(index_windows(t,1))):...
-                min(length(X),round(index_windows(t,2))));
-            powers = get_power(Xtemp,fs,freq_bands);
-            ers_array(s,t,:) = powers;
-        end
 
+        % Get ERS
+        for ich = 1:nchs
+            
+            % subtract baseline
+            X = values(:,ich) - median(values(:,ich));
+            
+            for t = 1:n_windows
+                Xtemp = X(max(1,round(index_windows(t,1))):...
+                    min(length(X),round(index_windows(t,2))));
+                powers = get_power(Xtemp,fs,freq_bands);
+                ers_array(s,t,:,ich) = powers;
+            end
+        end
         
-        ers.spike(s).biggest_dev = biggest_dev;
+        ers.spike(s).involved = involved;
         ers.spike(s).index_windows = index_windows;
-        ers.spike(s).ers = squeeze(ers_array(s,:,:));
- 
+        ers.spike(s).ers_involved = nanmean(ers_array(s,:,:,involved),4);
+        ers_involved(s,:,:) = nanmean(ers_array(s,:,:,involved),4);
+        ers.spike(s).biggest_dev = 
         
     end
     
@@ -160,6 +161,8 @@ for whichPt = whichPts
     ers.time_window = time_window;
     ers.n_windows = n_windows;
     ers.powers = ers_array;
+    ers.powers_avg_involved = squeeze(nanmean(ers_involved,1));
+    ers.powers_involved = ers_involved;
     ers.freq_names = freq_names;
     ers.freq_bands = freq_bands;
     
