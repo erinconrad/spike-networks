@@ -106,6 +106,7 @@ for i = 1:length(listing)
         % get dev
         dev = (abs(x-bl)).^2;
         dev_involved = (abs(y-bly)).^2;
+        dev_involved = nanmean(dev_involved,2); % avg across involved chs
                 
         
         if size(dev_all,1) > size(dev,1)
@@ -123,7 +124,7 @@ for i = 1:length(listing)
         end
         
         dev_all(:,s) = dev;
-        dev_all_involved(:,s) = mean(dev_involved,2);
+        dev_all_involved(:,s) = dev_involved;
 
         ch_devs_all(s) = biggest_dev;
         
