@@ -99,7 +99,7 @@ for k = 1:n_windows
     set(gca,'fontsize',20);
     xlabel('Time relative to spike peak (s)');
     if k == 1
-        ylabel('Signal deviation (z-score)');
+        ylabel('Signal power (z-score)');
     end
     xlim([-surround_time-0.25*time_window,surround_time-1+0.25*time_window]);
     title(sprintf('Time window %s s',time_text))

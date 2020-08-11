@@ -74,8 +74,8 @@ for i = 1:length(listing)
         biggest_dev = spike(s).biggest_dev;
         
         % restrict to involved channels
-        %data_spike = data(:,is_sp_ch);
-        data_spike = data(:,biggest_dev);
+        data_spike = data(:,is_sp_ch);
+        %data_spike = data(:,biggest_dev);
         
         % get baseline (diff for each ch)
         baseline = median(data_spike,1); %1 x n_sp_ch (median across all time points)
@@ -86,12 +86,12 @@ for i = 1:length(listing)
 
         
         % get the average deviation across involved channels
-        %dev_avg_ch = mean(dev,2); % ntimes x 1
-        dev_avg_ch = dev;
+        dev_avg_ch = mean(dev,2); % ntimes x 1
+        %dev_avg_ch = dev;
         
         % now, get the average deviation in each time window for that spike
         for t = 1:size(index_windows,1)
-            dev_windows(s,t) = mean(dev_avg_ch(index_windows(t,1):index_windows(t,2)));
+            dev_windows(s,t) = mean(dev_avg_ch(round(index_windows(t,1)):round(index_windows(t,2))));
         end
         
     end
