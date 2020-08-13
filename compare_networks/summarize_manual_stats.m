@@ -192,6 +192,7 @@ for i = 1:length(listing)
     else
         n_comparisons = (nt-1)*nf;
     end
+    n_dev_comparisons = nt-1;
     
     
     % get metrics
@@ -215,14 +216,14 @@ for i = 1:length(listing)
     % Add asterixes when appropriate
     
     if isempty(net_stats) == 0
-    ns_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons),ns_p',...
+    ns_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons,alpha/n_dev_comparisons),ns_p',...
         repmat(sig_dev_p',1,nf),'UniformOutput',false);
-    ge_p_text=arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons),ge_p',...
+    ge_p_text=arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons,alpha/n_dev_comparisons),ge_p',...
         repmat(sig_dev_p',1,nf),'UniformOutput',false);
     end
-    nbs_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons),nbs_p,...
+    nbs_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons,alpha/n_dev_comparisons),nbs_p,...
         repmat(sig_dev_p',1,nf),'UniformOutput',false);
-    sim_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons),sim_p,...
+    sim_p_text = arrayfun(@(x,y) get_asterixes(x,y,alpha/n_comparisons,alpha/n_dev_comparisons),sim_p,...
         repmat(sig_dev_p',1,nf),'UniformOutput',false);
 
     
@@ -277,10 +278,10 @@ save([out_folder,'stats_sum.mat'],'all_tables');
 end
 
 
-function out = get_asterixes(p,dev_p,alpha)
+function out = get_asterixes(p,dev_p,alpha,sig_dev_alpha)
     %alpha = 0.05;
     out = sprintf('%1.3f',p);
-    if p < alpha && dev_p > alpha
+    if p < alpha && dev_p > sig_dev_alpha
         out = [out,'***'];
     end
 
