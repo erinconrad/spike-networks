@@ -61,6 +61,7 @@ for i = 1:length(listing)
     
     % Load the adjacency matrix to get frequency bands (for coherence
     % measurements)
+    %{
     if simple == 0
         meta = load([adj_folder,pt_name,'_adj.mat']);
         meta = meta.meta;
@@ -74,6 +75,7 @@ for i = 1:length(listing)
         nf = 1;
         
     end
+    %}
     
     
     % Load the permutation file and get perm stats
@@ -82,17 +84,30 @@ for i = 1:length(listing)
     if simple == 1
         sim_p = sim.p;
         nt = length(sim_p);
+        nf = 1;
     else
+        nf = length(sim);
+        freq_text = cell(nf,1);
+        nt = length(sim(1).indices);
         sim_p = nan(nt,nf);
         for f = 1:length(sim)
+            freq_text{f} = sim(f).name;
             sim_p(:,f) = sim(f).p;
         end
     end
          
     
     % Load the nbs stats file
-    nbs_stats = load([nbs_folder,pt_name,'_nbs.mat']);
-    nbs_stats = nbs_stats.nbs_stats;
+    if exist(nbs_folder,'dir') ~=0
+        if exist([nbs_folder,pt_name,'_nbs.mat'],'file') ~= 0
+            nbs_stats = load([nbs_folder,pt_name,'_nbs.mat']);
+            nbs_stats = nbs_stats.nbs_stats;
+        else
+            nbs_stats = [];
+        end
+    else
+        nbs_stats = [];
+    end
     
     % Load the eeg file (to get times)
     spike = load([eeg_folder,sprintf('%s_eeg.mat',pt_name)]);
@@ -102,30 +117,38 @@ for i = 1:length(listing)
     fs = spike(1).fs;
     
     % Get an array of p values for nbs
-    if simple == 1
-        nbs_p = nan;
-        for it = 2:length(nbs_stats.freq.time)
-            nbs_curr = nbs_stats.freq.time(it).nbs;
-            if nbs_curr.n == 0
-                nbs_p = [nbs_p;nan];
-            else
-                % take the smallest p value of however many significant graphs
-                % there are
-                nbs_p = [nbs_p;min(nbs_curr.pval)];
-            end
-
-        end
-    else
-        nbs_p = nan(nt,nf);
-        for f = 1:nf
-            for t = 2:nt
-                nbs_curr = nbs_stats.freq(f).time(t).nbs;
+    if isempty(nbs_stats) == 0
+        if simple == 1
+            nbs_p = nan;
+            for it = 2:length(nbs_stats.freq.time)
+                nbs_curr = nbs_stats.freq.time(it).nbs;
                 if nbs_curr.n == 0
-                    nbs_p(t,f) = nan;
+                    nbs_p = [nbs_p;nan];
                 else
-                    nbs_p(t,f) = min(nbs_curr.pval);
+                    % take the smallest p value of however many significant graphs
+                    % there are
+                    nbs_p = [nbs_p;min(nbs_curr.pval)];
+                end
+
+            end
+        else
+            nbs_p = nan(nt,nf);
+            for f = 1:nf
+                for t = 2:nt
+                    nbs_curr = nbs_stats.freq(f).time(t).nbs;
+                    if nbs_curr.n == 0
+                        nbs_p(t,f) = nan;
+                    else
+                        nbs_p(t,f) = min(nbs_curr.pval);
+                    end
                 end
             end
+        end
+    else
+        if simple == 1
+            nbs_p = nan;
+        else
+            nbs_p = nan(nt,nf);
         end
     end
      

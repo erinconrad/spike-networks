@@ -1,5 +1,14 @@
 function view_utah
 
+%{
+spikes on AST 4-5 and MST 4-5 (subtemporal strips)
+
+utah array under temporal grid, between MTG15 and MTG16
+
+I don't see spikes by MTG 15 or 16, and so I don't think we would expect to
+see epileptiform discharges on the Utah array!
+%}
+
 plot_time = 15; % time to plot in seconds
 goal_fs = 500;
 
@@ -15,8 +24,10 @@ addpath(genpath(script_folder));
 columbia_folder = locations.columbia_folder;
 grid_folder = [columbia_folder,'Patient1_grid/'];
 sleep_utah_folder = [grid_folder,'interictal_sleep_utah_0160_043647/'];
+sleep_macro_folder = [grid_folder,'interictal_sleep_macro/'];
 
 listing = dir(sleep_utah_folder);
+%listing = dir(sleep_macro_folder);
 
 figure
 set(gcf,'position',[75 53 1311 752]);
@@ -24,8 +35,10 @@ set(gcf,'position',[75 53 1311 752]);
 for i = 1:length(listing)
     if contains(listing(i).name,'.mat') == 0, continue; end
     fname = listing(i).name;
-    data = load([sleep_utah_folder,fname]);
-    data = data.data;
+    data = load([listing(i).folder,'/',fname]);
+    struct_name = fieldnames(data);
+    struct_name = struct_name{1};
+    data = data.(struct_name);
     
     %% Grab basic info
     old_fs = data.MetaTags.SamplingFreq;
@@ -61,6 +74,8 @@ for i = 1:length(listing)
             plot(linspace(0,plot_time,length(plot_idx)),...
                 values(plot_idx,ich)+offset);
             hold on
+            text(plot_time + 0.2,median(values(plot_idx,ich)+offset),...
+                sprintf('%s',elecs(ich).Label))
             if ich ~= nchs
                 offset = offset - abs((prctile(values(plot_idx,ich+1),98) - prctile(values(plot_idx,ich),2)));
                 %offset = offset - abs((max(values(ich+1,plot_idx)) - min(values(ich,plot_idx))));
