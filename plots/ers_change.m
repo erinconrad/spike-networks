@@ -158,7 +158,7 @@ nfreq columns and 2 (2 time scales) rows
 %}
 figure
 set(gcf,'position',[1 100 1399 500])
-[ha, pos] = tight_subplot(time_count, n_freq_abs, [0.01 0.01], [0.12 0.07], [0.07 0.01]);
+[ha, pos] = tight_subplot(time_count, n_freq_abs, [0.04 0.01], [0.13 0.07], [0.06 0.01]);
 
 for t = 1:time_count
     % change times for x axis
@@ -226,19 +226,25 @@ for t = 1:time_count
         
         ylim([-2 4])
             
-        
+        %{
         if t == 2 && f == 4
              xlabel('Time relative to spike peak (s)')
         end 
+        %}
         
         if t == 1
         title(sprintf('%s',...
                 strrep(stats.time(t).freq(f).name,'_',' ')))
         end
         
+        
         if f == 1 && t == 1
-            ylabel(sprintf('Power in specified\nfrequency band'));
+            text(-0.35,-0.15,sprintf('Power in specified\nfrequency band'),...
+                'HorizontalAlignment','Center','FontSize',20,'rotation',90,...
+                'Units','normalized')
+           % ylabel(sprintf('Power in specified\nfrequency band'));
         end
+        %}
             
         if t == 1, xticklabels([]); end
         if f~=1, yticklabels([]); end
@@ -248,6 +254,14 @@ for t = 1:time_count
     end
 
 end
+
+
+annotation('textbox',[0.48 0.03 0.05 0.05],'string',...
+    sprintf('Time relative to spike peak (s)'),...
+    'HorizontalAlignment','Center','FontSize',20,'linestyle','none',...
+    'fitboxtotext','on')
+
+
 
 print([out_folder,'ers_change'],gcf,'-depsc');
     

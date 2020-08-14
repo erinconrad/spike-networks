@@ -38,7 +38,7 @@ meta = meta.meta;
 
 figure
 set(gcf,'position',[1 300 900 800]);
-[ha, pos] = tight_subplot(2, 2, [0.15 0.01], [0.05 0.05], [0.03 0]);
+[ha, pos] = tight_subplot(2, 2, [0.15 0.01], [0.05 0.05], [0.03 0.04]);
 
 % Example spikes
 axes(ha(1))
@@ -127,6 +127,14 @@ for t = 1:length(which_times)
     elseif t == 11
         arrow_end_x = x_offset;
         arrow_end_y = y_offset+size(adj_all_t,3)+20;
+        
+    elseif t == 12
+        x_ch_arrow_l = [x_offset x_offset+size(adj_all_t,2)];
+        y_ch_arrow_l = [y_offset+size(adj_all_t,3) y_offset+size(adj_all_t,3)];
+
+        
+        x_ch_arrow_r = [x_offset+size(adj_all_t,2) x_offset+size(adj_all_t,2)];
+        y_ch_arrow_r = [y_offset+size(adj_all_t,3) y_offset];
     end
     if t < length(which_times)
         y_offset = y_offset + size(adj_all_t,2)*0.2;
@@ -141,16 +149,32 @@ yl = get(gca,'ylim');
 y = yl(2) - y;
 myarrow([arrow_start_x arrow_end_x],y);
 
+axpos = get(gca, 'Position');
+
+text(mean(x_ch_arrow_l),mean(y_ch_arrow_l)+26,'Electrode number',...
+    'fontsize',17,'HorizontalAlignment','Center')
+ang2 = atan2((y_ch_arrow_r(2) - y_ch_arrow_r(1))*axpos(4), (x_ch_arrow_r(2) - x_ch_arrow_r(1))*axpos(3)) * 180 / pi;
+text(mean(x_ch_arrow_r)+21,mean(y_ch_arrow_r),'Electrode number',...
+    'fontsize',17,'HorizontalAlignment','Center','rotation',-ang2)
+
+y_ch_arrow_l = yl(2)-y_ch_arrow_l;
+myarrow(x_ch_arrow_l,y_ch_arrow_l-11);
+y_ch_arrow_r = yl(2)-y_ch_arrow_r;
+myarrow(x_ch_arrow_r+9,y_ch_arrow_r);
+
 %X = get(gca,'XLim');
 %Y = get(gca,'YLim'); 
 %difX = X(2) - X(1);
 %difY = Y(2) - Y(1);
-axpos = get(gca, 'Position');
+
 
 ang = atan2((arrow_end_y - arrow_start_y)*axpos(4), (arrow_end_x - arrow_start_x)*axpos(3)) * 180 / pi;
 
 text(mean([arrow_start_x,arrow_end_x]), mean([arrow_start_y arrow_end_y])+30,...
     'Time','fontsize',25,'rotation',-ang,'HorizontalAlignment','Center')
+
+
+
 title('Calculate network for each time window')
 set(gca,'fontsize',20)
 ha(4).Visible = 'Off';
@@ -239,6 +263,7 @@ myarrow([5 5],y);
 xl = get(gca,'xlim');
 
 text(mean(xl)-30,mean(yl),'vs.','fontsize',20);
+%colormap(ha(3),'spring')
 
 ha(3).Visible = 'Off';    
 set(findall(gca, 'type', 'text'), 'visible', 'on')
