@@ -1,4 +1,4 @@
-function manual_nbs(overwrite,simple,time_window)
+function manual_nbs(overwrite,simple,time_window,graph_method)
 
 %% Parameters
 plot_graphs = 0; % show graphs?
@@ -7,7 +7,7 @@ nbs_method = 'Run NBS'; %'Run FDR' 'Run NBS'
 NBS_test_threshold = '3.5';
 test_method = 't-test';
 alpha = '0.05';
-graph_method = 'Extent'; %'Intensity' 'Extent'
+%graph_method = 'Extent'; %'Intensity' 'Extent'
 time_text = sprintf('%1.1f/',time_window);
 
 % this specifically tests whether the group modeled by the first column is
@@ -35,11 +35,17 @@ if exist(plot_folder,'dir') == 0
     mkdir(plot_folder);
 end
 
+if strcmp(graph_method,'Extent') == 1
+    main_folder_text = 'nbs_stats';
+elseif strcmp(graph_method,'Intensity') == 1
+    main_folder_text = 'nbs_stats_intensity';
+end
+
 if simple == 1
-    out_folder = [results_folder,'nbs_stats/simple/',time_text];
+    out_folder = [results_folder,main_folder_text,'/simple/',time_text];
     adj_folder = [results_folder,'adj_mat/manual/adj_simple/',time_text];
 elseif simple == 0
-    out_folder = [results_folder,'nbs_stats/coherence/',time_text];
+    out_folder = [results_folder,main_folder_text,'/coherence/',time_text];
     adj_folder = [results_folder,'adj_mat/manual/adj_coherence/',time_text];
 end
 if exist(out_folder,'dir') == 0
@@ -87,12 +93,20 @@ for j = 1:length(listing)
     n_times = size(meta.spike(1).adj(1).adj,1);
     nchs = size(meta.spike(1).adj(1).adj,2);
     
+    
+    
     %% Get arrays of non-flattened adjacency matrices
     
     % Loop over spikes
     for s = 1:length(meta.spike)
         
         for which_freq = 1:nfreq
+            
+            if nfreq == 1
+                nbs_stats.freq(which_freq).name = meta.spike(1).adj(which_freq).name;
+            else
+                nbs_stats.freq(which_freq).name = 'correlation';
+            end
         
             adj_all_t= meta.spike(s).adj(which_freq).adj;
 
@@ -188,7 +202,7 @@ for j = 1:length(listing)
             nbs_stats.freq(which_freq).time(i_time).parameters.test_method = test_method;
             nbs_stats.freq(which_freq).time(i_time).parameters.alpha = alpha;
             nbs_stats.freq(which_freq).time(i_time).parameters.graph_method = graph_method;
-            
+            nbs_stats.freq(which_freq).name
         end
         
     end

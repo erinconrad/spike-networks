@@ -1,4 +1,4 @@
-function network_change_fig
+function nbs_change_fig(graph_method)
 
 %{
 I am not sure how to plot the NBS statistics, not sure what to show other
@@ -19,8 +19,17 @@ bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
 out_folder = [results_folder,'plots/'];
 sig_dev_folder = [results_folder,'signal_deviation/manual/'];
-perm_folder = [results_folder,'perm_stats/'];
-nbs_folder = [results_folder,'nbs_stats/'];
+
+freq_names = {'delta','theta','alpha','beta','low_gamma',...
+    'high_gamma','ultra_high','broadband'};
+
+if strcmp(graph_method,'Extent') == 1
+    main_folder_text = 'nbs_stats';
+elseif strcmp(graph_method,'Intensity') == 1
+    main_folder_text = 'nbs_stats_intensity';
+end
+
+perm_folder = [results_folder,main_folder_text,'/'];
 
 
 if exist(out_folder,'dir') == 0
@@ -81,8 +90,8 @@ for l = 1:length(listing)
         
         % load one to get nfreq
         sim = load([time_folder,pt_listing(1).name]);
-        sim = sim.sim;
-        nfreq = length(sim);
+        sim = sim.nbs_stats;
+        nfreq = length(sim.freq);
         if n_freq_abs < nfreq
             n_freq_abs = nfreq;
         end
@@ -90,14 +99,11 @@ for l = 1:length(listing)
        
         
         for f = 1:nfreq
-            stats(network_count).time(time_count).freq(f).F_all = ...
+            stats(network_count).time(time_count).freq(f).n_all = ...
                 zeros(length(pt_listing),surround_time*2/time_window);
 
             stats(network_count).time(time_count).freq(f).p_all = ...
-                zeros(length(pt_listing),surround_time*2/time_window);
-            
-            stats(network_count).time(time_count).freq(f).z_all = ...
-                zeros(length(pt_listing),surround_time*2/time_window);
+                ones(length(pt_listing),surround_time*2/time_window);
             
         end
         
@@ -110,32 +116,37 @@ for l = 1:length(listing)
             
             % load pt file
             sim = load([time_folder,pt_name]);
-            sim = sim.sim;
+            sim = sim.nbs_stats;
             
             
             for f = 1:nfreq
-                stats(network_count).time(time_count).freq(f).name = sim(f).name;
-                stats(network_count).time(time_count).freq(f).F_all(i,:) = sim(f).F;
-                stats(network_count).time(time_count).freq(f).p_all(i,:) = sim(f).p;
                 
-                F_curr = stats(network_count).time(time_count).freq(f).F_all;
-                if max_F < max(max(F_curr))
-                    max_F = max(max(F_curr));
+                
+                if isfield(sim.freq(f),'name')
+                    stats(network_count).time(time_count).freq(f).name = sim.freq(f).name;
+                else
+                    fprintf('\nWarning, frequency not specified, using backup info.\n');
+                    if nfreq == 1
+                        stats(network_count).time(time_count).freq(f).name = 'correlation';
+                    else
+                        stats(network_count).time(time_count).freq(f).name = freq_names{f};
+                    end
                 end
                 
-                
-                
-                % convert F stats to z scores to compare across time points
-                stats(network_count).time(time_count).freq(f).z_all(i,:) = (sim(f).F-nanmean(sim(f).F))./nanstd(sim(f).F);
+                    for tt = 2:length(sim.freq(f).time)
+                        stats(network_count).time(time_count).freq(f).n_all(i,tt) = sim.freq(f).time(tt).nbs.n;
+                        if isempty(sim.freq(f).time(tt).nbs.pval) == 1
+                            stats(network_count).time(time_count).freq(f).p_all(i,tt) = 1;
+                        else
+                            temp_p = min(sim.freq(f).time(tt).nbs.pval);
+                            if temp_p == 0
+                                temp_p = 1/str2double(sim.freq(f).time(tt).parameters.nperms);
+                            end
+                            stats(network_count).time(time_count).freq(f).p_all(i,tt) = temp_p;
+                        end
+                    
+                    end
             
-                if max_z < max(max(stats(network_count).time(time_count).freq(f).z_all))
-                    max_z = max(max(stats(network_count).time(time_count).freq(f).z_all));
-                end
-                
-                if min_z > min(min(stats(network_count).time(time_count).freq(f).z_all))
-                    min_z = min(min(stats(network_count).time(time_count).freq(f).z_all));
-                end
-                
             end
             
             
@@ -161,7 +172,7 @@ for n = 1:network_count
     for t = 1:time_count
         
         % change times for x axis
-        nchunks = size(stats(n).time(t).freq(1).F_all,2);
+        nchunks = size(stats(n).time(t).freq(1).n_all,2);
         times = realign_times(nchunks,surround_time);
         
         nfreq = length(stats(n).time(t).freq);
@@ -180,28 +191,27 @@ for n = 1:network_count
             sp = (n_freq_abs+1)*(t-1) + f + column_add;
             axes(ha(sp));
           
-            z_curr = stats(n).time(t).freq(f).z_all;
-            % loop over patients and plot
-            for i = 1:size(z_curr,1)
-                plot(times,z_curr(i,:),'ko');
-                hold on
-            end
-            
+            n_curr = stats(n).time(t).freq(f).n_all;
+
             % plot mean F across patients
-            for tt = 1:size(z_curr,2)
+            for tt = 1:size(n_curr,2)
                 
                 curr_p_vals = stats(n).time(t).freq(f).p_all(:,tt);
                 comb_p = fisher_p_value(curr_p_vals);
                 text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1)); % should I also adjust by nfreq?
                 
                 if strcmp(text_out,'') == 1
-                    plot([times(tt)-0.25 times(tt)+0.25],...
-                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    errorbar(times(tt),...
+                    mean(n_curr(:,tt)),...
+                    std(n_curr(:,tt)),...
                     'k','linewidth',4);
+                    hold on
                 else
-                    plot([times(tt)-0.25 times(tt)+0.25],...
-                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    errorbar(times(tt),...
+                    mean(n_curr(:,tt)),...
+                    std(n_curr(:,tt)),...
                     'g','linewidth',4);
+                    hold on
                 end
             end
             
@@ -238,6 +248,6 @@ for sp = 1:length(ha)
     set(gca,'fontsize',15)
 end
 
-print(gcf,[out_folder,'network_change'],'-depsc');
+print(gcf,[out_folder,'nbs_change'],'-depsc');
 
 end
