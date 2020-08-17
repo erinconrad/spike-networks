@@ -103,9 +103,10 @@ for j = 1:length(listing)
         for which_freq = 1:nfreq
             
             if nfreq == 1
-                nbs_stats.freq(which_freq).name = meta.spike(1).adj(which_freq).name;
-            else
                 nbs_stats.freq(which_freq).name = 'correlation';
+            else
+                nbs_stats.freq(which_freq).name = meta.spike(1).adj(which_freq).name;
+                
             end
         
             adj_all_t= meta.spike(s).adj(which_freq).adj;
