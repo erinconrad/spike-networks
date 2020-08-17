@@ -101,7 +101,7 @@ for k = 1:length(time_listing)
 
         for f = 1:nfreq
             stats(network_count).time(time_count).freq(f).name = ers.freq_names{f};
-            stats(network_count).time(time_count).freq(f).ers = ers.powers(:,:,f);
+            stats(network_count).time(time_count).freq(f).ers(i,:) = squeeze(mean(ers.powers(:,:,f),1));
 
             ers_temp = ers.powers(:,:,f);
             
