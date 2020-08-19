@@ -91,13 +91,13 @@ for l = 1:length(listing)
         
         for f = 1:nfreq
             stats(network_count).time(time_count).freq(f).F_all = ...
-                zeros(length(pt_listing),surround_time*2/time_window);
+                nan(length(pt_listing),surround_time*2/time_window);
 
             stats(network_count).time(time_count).freq(f).p_all = ...
-                zeros(length(pt_listing),surround_time*2/time_window);
+                nan(length(pt_listing),surround_time*2/time_window);
             
             stats(network_count).time(time_count).freq(f).z_all = ...
-                zeros(length(pt_listing),surround_time*2/time_window);
+                nan(length(pt_listing),surround_time*2/time_window);
             
         end
         

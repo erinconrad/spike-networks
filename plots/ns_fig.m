@@ -135,6 +135,8 @@ for l = 1:length(listing)
                     p_all(tt) = p;
                     
                 end
+                stats(network_count).time(time_count).freq(f).t_all(i,:) = t_all;
+                stats(network_count).time(time_count).freq(f).p_all(i,:) = p_all;
                 
             end
             
@@ -194,13 +196,15 @@ for n = 1:network_count
                 [~,comb_p] = ttest(curr_t_stats);
                 text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1)); % should I also adjust by nfreq?
                 
+              %  if n == 1 && f == 5 && t == 1 && tt == 7, error('look\n'); end
+                
                 if strcmp(text_out,'') == 1
                     plot([times(tt)-0.25 times(tt)+0.25],...
-                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
                     'k','linewidth',4);
                 else
                     plot([times(tt)-0.25 times(tt)+0.25],...
-                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
                     'g','linewidth',4);
                 end
             end
