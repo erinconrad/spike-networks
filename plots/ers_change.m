@@ -278,7 +278,7 @@ for t = 1:(time_count)
                 % Get the p-value
                 p = stats.time(t).freq(f).p_all(i,tt);
                 
-                if p < 0.05/nfreq/(nchunks-1)
+                if p < 0.05/n_freq_abs/(nchunks-1)/length(pt_names)
                     fprintf('\n%s time %d.\n',freq_names{f},tt);
                 end
 

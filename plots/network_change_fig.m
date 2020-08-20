@@ -22,6 +22,8 @@ sig_dev_folder = [results_folder,'signal_deviation/manual/'];
 perm_folder = [results_folder,'perm_stats/'];
 nbs_folder = [results_folder,'nbs_stats/'];
 
+freq_names = {'delta','theta','alpha','beta','low_gamma',...
+    'high_gamma','ultra_high','broadband'};
 
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
@@ -101,12 +103,15 @@ for l = 1:length(listing)
             
         end
         
+        pt_names = {};
+        
         % loop through pts
         for i = 1:length(pt_listing)
             
             pt_name = pt_listing(i).name;
             pt_name_pt = strsplit(pt_name,'_');
             pt_name_pt = pt_name_pt{1};
+            pt_names = [pt_names;pt_name_pt];
             
             % load pt file
             sim = load([time_folder,pt_name]);
@@ -239,5 +244,30 @@ for sp = 1:length(ha)
 end
 
 print(gcf,[out_folder,'network_change'],'-depsc');
+
+%% Say the patients with significant pre-spike rise
+midpoint = nchunks/2;
+for n = 1:network_count
+    fprintf('\n for %s:\n\n',listing(n).name);
+for t = 1:(time_count)
+    fprintf('\n for time window %s:\n\n',time_listing(t).name);
+    for i = 1:length(pt_names)
+        fprintf('\n%s had significant pre-spike network change for:',pt_names{i});
+        for f = 1:nfreq
+            for tt = 1:midpoint - 1
+            
+                % Get the p-value
+                p = stats(n).time(t).freq(f).p_all(i,tt);
+                
+                if p < 0.05/(n_freq_abs+1)/length(pt_names)/(nchunks-1)
+                    fprintf('\n%s time %d.\n',freq_names{f},tt);
+                end
+
+            end
+        end
+        fprintf('\n\n\n');
+    end
+end
+end
 
 end

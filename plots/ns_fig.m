@@ -16,6 +16,10 @@ sig_dev_folder = [results_folder,'signal_deviation/manual/'];
 perm_folder = [results_folder,'perm_stats/'];
 ns_folder = [results_folder,'metrics/manual/'];
 
+freq_names = {'delta','theta','alpha','beta','low_gamma',...
+    'high_gamma','ultra_high','broadband'};
+
+
 
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
@@ -33,16 +37,19 @@ network_count = 0;
 n_freq_abs = 0;
 max_z = 0;
 min_z = 0;
+network_names = {};
 for l = 1:length(listing)
     name= listing(l).name;
     
     % Skip if . or ..
-    if strcmp(name,'.') == 1 || strcmp(name,'..') == 1
+    if strcmp(name,'.') == 1 || strcmp(name,'..') == 1|| strcmp(name,'.DS_Store') == 1
         continue
     end
     
     % Skip if not a directory
     if listing(l).isdir == 0, continue; end
+    
+    network_names = [network_names;name];
     
     network_count = network_count + 1;
     stats(network_count).name = name;
@@ -52,18 +59,21 @@ for l = 1:length(listing)
     % Loop through time scales
     time_listing = dir(network_folder);
     time_count = 0;
+    time_names = {};
     
     for k = 1:length(time_listing)
         time_name= time_listing(k).name;
         time_window = str2num(time_name);
         
         % Skip if . or ..
-        if strcmp(time_name,'.') == 1 || strcmp(time_name,'..') == 1
+        if strcmp(time_name,'.') == 1 || strcmp(time_name,'..') == 1|| strcmp(name,'.DS_Store') == 1
             continue
         end
 
         % Skip if not a directory
         if time_listing(k).isdir == 0, continue; end
+        
+        time_names = [time_names;time_name];
         
         time_count = time_count + 1;
         stats(network_count).time(time_count).name = time_name;
@@ -93,6 +103,8 @@ for l = 1:length(listing)
                 nan(length(pt_listing),surround_time*2/time_window);
         end
         
+        
+        pt_names = {};
         % loop through pts
         for i = 1:length(pt_listing)
             
@@ -102,6 +114,7 @@ for l = 1:length(listing)
             
             pt_name_pt = strsplit(pt_name,'_');
             pt_name_pt = pt_name_pt{1};
+            pt_names = [pt_names;pt_name_pt];
             
             % load pt file
             sim = load([time_folder,pt_name]);
@@ -243,5 +256,32 @@ for sp = 1:length(ha)
 end
 
 print(gcf,[out_folder,'ns'],'-depsc');
+
+
+%% Say the patients with significant pre-spike rise
+midpoint = nchunks/2;
+for n = 1:length(network_names)
+    fprintf('\n for %s:\n\n',network_names{n});
+for t = 1:length(time_names)
+    fprintf('\n for time window %s:\n\n',time_names{t});
+    for i = 1:length(pt_names)
+        fprintf('\n%s had significant pre-spike ns change for:',pt_names{i});
+        for f = 1:nfreq
+            for tt = 1:midpoint - 1
+            
+                if i>size(stats(n).time(t).freq(f).p_all,1), continue; end
+                % Get the p-value
+                p = stats(n).time(t).freq(f).p_all(i,tt);
+                
+                if p < 0.05/(n_freq_abs+1)/length(pt_names)/(nchunks-1)
+                    fprintf('\n%s time %d.\n',freq_names{f},tt);
+                end
+
+            end
+        end
+        fprintf('\n\n\n');
+    end
+end
+end
 
 end

@@ -21,7 +21,14 @@ freq_bands = [0 4;... %delta
     ]; 
 freq_names = {'delta','theta','alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
-time_text = sprintf('%1.1f/',time_window);
+if length(time_window) == 1
+    time_text = sprintf('%1.1f/',time_window);
+else
+    ntimes = length(time_window);
+    all_times = time_window;
+    true_window = all_times(2)-all_times(1);
+    time_text = sprintf('%1.1f/',true_window);
+end
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -127,7 +134,12 @@ for whichPt = whichPts
         %old_values = values;
         values = pre_processing(values,do_car,pre_whiten,do_notch,fs);
         nchs = size(values,2);
-        n_chunks = round(size(values,1)/fs/time_window); % old way, same total time
+        
+        if length(time_window) == 1
+            n_chunks = round(size(values,1)/fs/time_window); % old way, same total time
+        else
+            n_chunks = ntimes;
+        end
         %n_chunks = round(size(values,1)/fs); % alternate way, change total time so that it's the same number of chunks
 
         %% Figure out times for which I will be calculating adjacencies
@@ -135,12 +147,21 @@ for whichPt = whichPts
         peak = round(size(values,1)/2);
 
         % Get index windows
-        index_windows = zeros(n_chunks,2);
-        tick_window = time_window*fs;
-        
-        for i = 1:n_chunks
-            index_windows(i,1) = peak - tick_window*n_chunks/2 + tick_window*(i-1);
-            index_windows(i,2) = peak - tick_window*n_chunks/2 + tick_window*(i);
+        if length(time_window) == 1
+            index_windows = zeros(n_chunks,2);
+            tick_window = time_window*fs;
+
+            for i = 1:n_chunks
+                index_windows(i,1) = peak - tick_window*n_chunks/2 + tick_window*(i-1);
+                index_windows(i,2) = peak - tick_window*n_chunks/2 + tick_window*(i);
+            end
+        else
+            index_windows = zeros(n_chunks,2);
+            
+            for i = 1:n_chunks
+                index_windows(i,1) = peak + round(time_window(i)*fs);
+                index_windows(i,2) = peak + round(time_window(i)*fs) + round(true_window*fs);
+            end
         end
         
         % Fix the first and the last to make sure they don't become

@@ -49,13 +49,15 @@ n_freq_abs = 0;
 max_F = 0;
 max_z = 0;
 min_z = 0;
+network_names = {};
 for l = 1:length(listing)
     name= listing(l).name;
     
     % Skip if . or ..
-    if strcmp(name,'.') == 1 || strcmp(name,'..') == 1
+    if strcmp(name,'.') == 1 || strcmp(name,'..') == 1 || strcmp(name,'.DS_Store') == 1
         continue
     end
+    network_names = [network_names;name];
     
     % Skip if not a directory
     if listing(l).isdir == 0, continue; end
@@ -68,15 +70,17 @@ for l = 1:length(listing)
     % Loop through time scales
     time_listing = dir(network_folder);
     time_count = 0;
+    time_names = {};
     
     for k = 1:length(time_listing)
         time_name= time_listing(k).name;
         time_window = str2num(time_name);
         
         % Skip if . or ..
-        if strcmp(time_name,'.') == 1 || strcmp(time_name,'..') == 1
+        if strcmp(time_name,'.') == 1 || strcmp(time_name,'..') == 1 || strcmp(time_name,'.DS_Store') == 1
             continue
         end
+        time_names = [time_names;time_name];
 
         % Skip if not a directory
         if time_listing(k).isdir == 0, continue; end
@@ -107,12 +111,14 @@ for l = 1:length(listing)
             
         end
         
+        pt_names = {};
         % loop through pts
         for i = 1:length(pt_listing)
             
             pt_name = pt_listing(i).name;
             pt_name_pt = strsplit(pt_name,'_');
             pt_name_pt = pt_name_pt{1};
+            pt_names = [pt_names;pt_name_pt];
             
             % load pt file
             sim = load([time_folder,pt_name]);
@@ -249,5 +255,31 @@ for sp = 1:length(ha)
 end
 
 print(gcf,[out_folder,'nbs_change'],'-depsc');
+
+%% Say the patients with significant pre-spike rise
+midpoint = nchunks/2;
+for n = 1:length(network_names)
+    fprintf('\n for %s:\n\n',network_names{n});
+for t = 1:length(time_names)
+    fprintf('\n for time window %s:\n\n',time_names{t});
+    for i = 1:length(pt_names)
+        fprintf('\n%s had significant pre-spike network change for:',pt_names{i});
+        for f = 1:nfreq
+            for tt = 1:midpoint - 1
+            
+                if i>size(stats(n).time(t).freq(f).p_all,1), continue; end
+                % Get the p-value
+                p = stats(n).time(t).freq(f).p_all(i,tt);
+                
+                if p < 0.05/(n_freq_abs+1)/length(pt_names)/(nchunks-1)
+                    fprintf('\n%s time %d.\n',freq_names{f},tt);
+                end
+
+            end
+        end
+        fprintf('\n\n\n');
+    end
+end
+end
 
 end
