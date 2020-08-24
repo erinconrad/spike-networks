@@ -54,18 +54,17 @@ for i = 1:length(listing)
     spike = load([eeg_folder,name,'_eeg.mat']);
     spike = spike.spike;
     surround_time = spike(1).surround_time;
-    n_spikes = length(spike);
-    values = spike(1).data;
-    nchs = size(values,2);
+    
+    % load adjacency matrix data (which will allow me to get the index
+    % windows
+    meta = load([adj_folder,name,'_adj.mat']);
+    meta = meta.meta;
+    index_windows = meta(1).spike(1).index_windows;
+    sig_dev(i).index_windows = index_windows;
+    sig_dev(i).surround_time = surround_time;
+    
+    dev_windows = zeros(length(spike),size(index_windows,1));
     fs = spike(1).fs;
-    
-    if length(time_window) == 1
-        n_windows = round(size(values,1)/fs/time_window); % old way, same total time
-    else
-        n_windows = ntimes;
-    end
-    
-    dev_windows = zeros(length(spike),n_windows);
     
     % loop through spikes
     for s = 1:length(spike)
@@ -97,32 +96,6 @@ for i = 1:length(listing)
         % get the average deviation across involved channels
         %dev_avg_ch = mean(dev,2); % ntimes x 1
         dev_avg_ch = dev;
-        
-        % The peak should be the very center of each file
-        peak = round(size(values,1)/2);
-
-        % Get index windows
-        if length(time_window) == 1
-            index_windows = zeros(n_windows,2);
-            tick_window = time_window*fs;
-
-            for i = 1:n_windows
-                index_windows(i,1) = peak - tick_window*n_windows/2 + tick_window*(i-1);
-                index_windows(i,2) = peak - tick_window*n_windows/2 + tick_window*(i);
-            end
-        else
-            index_windows = zeros(n_windows,2);
-            
-            for i = 1:n_windows
-                index_windows(i,1) = peak + round(time_window(i)*fs);
-                index_windows(i,2) = peak + round(time_window(i)*fs) + round(true_window*fs);
-            end
-        end
-        
-        % Fix the first and the last to make sure they don't become
-        % negative or beyond the total size
-        index_windows(1,1) = max(index_windows(1,1),1);
-        index_windows(end,2) = min(index_windows(end,2),size(values,1));
         
         % now, get the average deviation in each time window for that spike
         for t = 1:size(index_windows,1)
