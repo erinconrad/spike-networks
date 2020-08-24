@@ -136,17 +136,17 @@ for whichPt = whichPts
 
         % Get index windows
         if length(time_window) == 1
-            index_windows = zeros(n_chunks,2);
+            index_windows = zeros(n_windows,2);
             tick_window = time_window*fs;
 
-            for i = 1:n_chunks
-                index_windows(i,1) = peak - tick_window*n_chunks/2 + tick_window*(i-1);
-                index_windows(i,2) = peak - tick_window*n_chunks/2 + tick_window*(i);
+            for i = 1:n_windows
+                index_windows(i,1) = peak - tick_window*n_windows/2 + tick_window*(i-1);
+                index_windows(i,2) = peak - tick_window*n_windows/2 + tick_window*(i);
             end
         else
-            index_windows = zeros(n_chunks,2);
+            index_windows = zeros(n_windows,2);
             
-            for i = 1:n_chunks
+            for i = 1:n_windows
                 index_windows(i,1) = peak + round(time_window(i)*fs);
                 index_windows(i,2) = peak + round(time_window(i)*fs) + round(true_window*fs);
             end
