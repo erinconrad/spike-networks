@@ -163,6 +163,7 @@ set(gcf,'position',[1 100 1399 500])
 for t = 1:time_count
     % change times for x axis
     nchunks = size(stats.time(t).freq(1).t_all,2);
+    
     times = realign_times(nchunks,surround_time);
     
     nfreq = length(stats.time(t).freq);

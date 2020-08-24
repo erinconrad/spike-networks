@@ -74,7 +74,7 @@ for k = 1:n_windows
     time_text = sig_dev(k).name;
     curr_sig_dev = sig_dev(k).sig_dev;
     nchunks = size(curr_sig_dev(1).index_windows,1);
-    
+    if k == 3, error('look\n'); end
     % change times for x axis
     times = realign_times(nchunks,surround_time);
     
