@@ -61,7 +61,9 @@ for k = 1:length(time_listing)
 
     time_count = time_count + 1;
     stats(network_count).time(time_count).name = time_name;
+    
     stats(network_count).time(time_count).time_window = time_window;
+    
     time_folder = [ers_folder,time_name,'/'];
 
     pt_listing = dir([time_folder,'*.mat']);
@@ -72,6 +74,10 @@ for k = 1:length(time_listing)
     nfreq = size(ers.freq_bands,1);
     if n_freq_abs < nfreq
         n_freq_abs = nfreq;
+    end
+    
+    if isfield(ers,'time_window') == 1
+        stats(network_count).time(time_count).all_windows = ers.time_window;
     end
 
     for f = 1:nfreq
@@ -164,7 +170,15 @@ for t = 1:time_count
     % change times for x axis
     nchunks = size(stats.time(t).freq(1).t_all,2);
     
-    times = realign_times(nchunks,surround_time);
+    if isfield(stats.time(t),'all_windows') == 1
+        if length(stats.time(t).all_windows) > 1
+            times = realign_times(stats.time(t).all_windows,surround_time);
+        else
+            times = realign_times(nchunks,surround_time);
+        end
+    else
+        times = realign_times(nchunks,surround_time);
+    end
     
     nfreq = length(stats.time(t).freq);
     for f = 1:nfreq
@@ -175,7 +189,7 @@ for t = 1:time_count
         axes(ha(sp));
         
         ers_curr = stats.time(t).freq(f).ers;
-        z_curr = (ers_curr-mean(ers_curr,2))./std(ers_curr,0,2);
+        z_curr = (ers_curr-nanmean(ers_curr,2))./nanstd(ers_curr,0,2);
         
         % loop over patients and plot
         for i = 1:size(ers_curr,1)
@@ -226,7 +240,7 @@ for t = 1:time_count
         %}
         
         ylim([-2 4])
-            
+        xlim([-3 3])    
         %{
         if t == 2 && f == 4
              xlabel('Time relative to spike peak (s)')

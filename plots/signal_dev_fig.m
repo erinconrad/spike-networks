@@ -70,11 +70,23 @@ set(gcf,'Position',[300 500 1100 300]);
 [ha, pos] = tight_subplot(1, n_windows, [0.05 0.05], [0.2 0.12], [0.05 0.05]);
 for k = 1:n_windows
     axes(ha(k));
-    time_window = sig_dev(k).time_window;
+    if isfield(sig_dev(k).sig_dev(1),'time_window') == 1
+        time_window = sig_dev(k).sig_dev(1).time_window;
+        if length(time_window) >1
+            nchunks = time_window;
+            time_window = diff(time_window);
+            time_window = time_window(1);
+        else
+            nchunks = size(sig_dev(k).sig_dev(1).index_windows,1);
+        end
+    else
+        time_window = sig_dev(k).time_window;
+        nchunks = size(sig_dev(k).sig_dev(1).index_windows,1);
+    end
     time_text = sig_dev(k).name;
     curr_sig_dev = sig_dev(k).sig_dev;
-    nchunks = size(curr_sig_dev(1).index_windows,1);
-    if k == 3, error('look\n'); end
+    
+   
     % change times for x axis
     times = realign_times(nchunks,surround_time);
     
@@ -127,12 +139,12 @@ for k = 1:n_windows
     if k == 1
         ylabel('Signal power (z-score)');
     end
-    xlim([-surround_time-0.25*time_window,surround_time-1+0.25*time_window]);
+    xlim([times(1)-0.25*time_window,times(end)+0.25*time_window]);
     title(sprintf('Time window %s s',time_text))
     ylim([min(min(z_score_all{k})) max(max(z_score_all{k}))+0.5])
     yl = get(gca,'ylim');
     
-    
+     %if k == 2, error('look\n'); end
 end
     
 
