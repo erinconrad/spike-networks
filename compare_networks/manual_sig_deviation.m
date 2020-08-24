@@ -106,16 +106,16 @@ for i = 1:length(listing)
             index_windows = zeros(n_windows,2);
             tick_window = time_window*fs;
 
-            for i = 1:n_windows
-                index_windows(i,1) = peak - tick_window*n_windows/2 + tick_window*(i-1);
-                index_windows(i,2) = peak - tick_window*n_windows/2 + tick_window*(i);
+            for tt = 1:n_windows
+                index_windows(tt,1) = peak - tick_window*n_windows/2 + tick_window*(tt-1);
+                index_windows(tt,2) = peak - tick_window*n_windows/2 + tick_window*(tt);
             end
         else
             index_windows = zeros(n_windows,2);
             
-            for i = 1:n_windows
-                index_windows(i,1) = peak + round(time_window(i)*fs);
-                index_windows(i,2) = peak + round(time_window(i)*fs) + round(true_window*fs);
+            for tt = 1:n_windows
+                index_windows(tt,1) = peak + round(time_window(tt)*fs);
+                index_windows(tt,2) = peak + round(time_window(tt)*fs) + round(true_window*fs);
             end
         end
         
