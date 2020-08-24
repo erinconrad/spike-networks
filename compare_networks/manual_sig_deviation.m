@@ -22,7 +22,15 @@ addpath(genpath(locations.BCT));
 pt_file = [data_folder,'spike_structures/pt.mat'];
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
-time_text = sprintf('%1.1f/',time_window);
+
+if length(time_window) == 1
+    time_text = sprintf('%1.1f/',time_window);
+else
+    ntimes = length(time_window);
+    all_times = time_window;
+    true_window = all_times(2)-all_times(1);
+    time_text = sprintf('%1.1f/',true_window);
+end
 
 % Folders
 eeg_folder = [results_folder,'eeg_data/'];

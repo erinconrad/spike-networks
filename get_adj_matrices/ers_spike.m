@@ -17,7 +17,15 @@ freq_bands = [0.5 4;... %delta
 freq_names = {'delta','theta','alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
 n_f = size(freq_bands,1);
-time_text = sprintf('%1.1f/',time_window);
+
+if length(time_window) == 1
+    time_text = sprintf('%1.1f/',time_window);
+else
+    ntimes = length(time_window);
+    all_times = time_window;
+    true_window = all_times(2)-all_times(1);
+    time_text = sprintf('%1.1f/',true_window);
+end
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -64,7 +72,13 @@ for whichPt = whichPts
     values = spike(1).data;
     nchs = size(values,2);
     fs = spike(1).fs;
-    n_windows = round(size(values,1)/fs/time_window);
+    
+    if length(time_window) == 1
+        n_windows = round(size(values,1)/fs/time_window); % old way, same total time
+    else
+        n_windows = ntimes;
+    end
+
     
     out_file = [output_folder,sprintf('%s_ers.mat',name)];
     % Load it if it exists to see how much we've already done
@@ -121,17 +135,27 @@ for whichPt = whichPts
         peak = round(size(values,1)/2);
 
         % Get index windows
-        index_windows = zeros(n_windows,2);
-        tick_window = time_window*fs;
-        
-        for i = 1:n_windows
-            index_windows(i,1) = peak - tick_window*n_windows/2 + tick_window*(i-1);
-            index_windows(i,2) = peak - tick_window*n_windows/2 + tick_window*(i);
+        if length(time_window) == 1
+            index_windows = zeros(n_chunks,2);
+            tick_window = time_window*fs;
+
+            for i = 1:n_chunks
+                index_windows(i,1) = peak - tick_window*n_chunks/2 + tick_window*(i-1);
+                index_windows(i,2) = peak - tick_window*n_chunks/2 + tick_window*(i);
+            end
+        else
+            index_windows = zeros(n_chunks,2);
+            
+            for i = 1:n_chunks
+                index_windows(i,1) = peak + round(time_window(i)*fs);
+                index_windows(i,2) = peak + round(time_window(i)*fs) + round(true_window*fs);
+            end
         end
         
         % Fix the first and the last to make sure they don't become
         % negative or beyond the total size
         index_windows(1,1) = max(index_windows(1,1),1);
+        index_windows(end,2) = min(index_windows(end,2),size(values,1));
         
         % Restrict to biggest dev ch
         values = values(:,biggest_dev);
@@ -158,6 +182,7 @@ for whichPt = whichPts
     % Fill struct
     ers.name = name;
     ers.time_window = time_window;
+    ers.index_windows = index_windows;
     ers.n_windows = n_windows;
     ers.powers = ers_array;
     ers.freq_names = freq_names;

@@ -254,7 +254,7 @@ for sp = 1:length(ha)
     set(gca,'fontsize',15)
 end
 
-print(gcf,[out_folder,'nbs_change'],'-depsc');
+print(gcf,[out_folder,'nbs_change_',graph_method],'-depsc');
 
 %% Say the patients with significant pre-spike rise
 midpoint = nchunks/2;
