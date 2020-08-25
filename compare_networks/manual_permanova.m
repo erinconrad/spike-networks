@@ -94,7 +94,7 @@ for j = 1:length(listing)
         sim(i).F(1) = nan;
         
         
-        sim(i).index_windows = meta.spike(1).ndex_windows;
+        sim(i).index_windows = meta.spike(1).index_windows;
         sim(i).fs = meta.fs;
        
     end
