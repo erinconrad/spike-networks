@@ -93,6 +93,8 @@ for j = 1:length(listing)
     n_times = size(meta.spike(1).adj(1).adj,1);
     nchs = size(meta.spike(1).adj(1).adj,2);
     
+    nbs_stats.index_windows = meta.spike(1).index_windows;
+    nbs_stats.fs = meta.fs;
     
     
     %% Get arrays of non-flattened adjacency matrices

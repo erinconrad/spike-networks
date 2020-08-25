@@ -106,6 +106,7 @@ for i = 1:length(listing)
     
     metrics.biggest_dev = biggest_dev;
     metrics.index_windows = meta.spike(1).index_windows;
+    metrics.fs = meta.fs;
     
     save([metrics_folder,name,'_ns.mat'],'metrics');
     
