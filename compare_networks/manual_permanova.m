@@ -92,6 +92,11 @@ for j = 1:length(listing)
         % First second is the control
         sim(i).p(1) = nan;
         sim(i).F(1) = nan;
+        
+        
+        sim(i).index_windows = meta.spike(1).ndex_windows;
+        sim(i).fs = meta.fs;
+       
     end
     
     % Loop over spikes

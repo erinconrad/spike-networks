@@ -5,7 +5,7 @@ do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 
-freq_bands = [0.5 4;... %delta
+freq_bands = [0 4;... %delta
     4 8;...%theta
     8 12;...% alpha
     12 24;... %beta
