@@ -91,19 +91,21 @@ for l = 1:length(listing)
         
         
        if isfield(sim,'index_windows')
-           stats(network_count).time(time_count).index_windows = sim.index_windows;
-           stats(network_count).time(time_count).fs = sim.fs;
+           
 
            
            for f = 1:nfreq
+                stats(network_count).time(time_count).index_windows = sim(f).index_windows;
+                stats(network_count).time(time_count).fs = sim(f).fs;
+               
                 stats(network_count).time(time_count).freq(f).F_all = ...
-                    nan(length(pt_listing),size(sim.index_windows,1));
+                    nan(length(pt_listing),size(sim(f).index_windows,1));
 
                 stats(network_count).time(time_count).freq(f).p_all = ...
-                    nan(length(pt_listing),size(sim.index_windows,1));
+                    nan(length(pt_listing),size(sim(f).index_windows,1));
 
                 stats(network_count).time(time_count).freq(f).z_all = ...
-                    nan(length(pt_listing),size(sim.index_windows,1));
+                    nan(length(pt_listing),size(sim(f).index_windows,1));
 
             end
        else
@@ -190,7 +192,7 @@ for n = 1:network_count
         % change times for x axis
         nchunks = size(stats(n).time(t).freq(1).F_all,2);
         
-        if isfield(stats(n).time(t),'index_windows') & isempty(stats(n).time(t).index_windows) == 0
+        if isfield(stats(n).time(t),'index_windows') && isempty(stats(n).time(t).index_windows) == 0
             temp_times = stats(n).time(t).index_windows(:,1)/stats(n).time(t).fs-3;
             times = realign_times(temp_times,surround_time);
         else
