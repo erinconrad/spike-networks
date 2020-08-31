@@ -1,4 +1,4 @@
-function sp = get_manual_times_from_excel
+function sp = get_manual_times_from_excel(not_a_spike)
 
 %{
 This takes manual spike times from excel and fills a structure with spike
@@ -19,8 +19,11 @@ pt_folder = [main_folder,'data/spike_structures/'];
 pt = load([pt_folder,'pt.mat']);
 pt = pt.pt;
 
-
-T = readtable([sp_folder,'manual spikes.xlsx']);
+if not_a_spike == 1
+    T = readtable([sp_folder,'not spikes.xlsx']);
+else
+    T = readtable([sp_folder,'manual spikes.xlsx']);
+end
 
 % Loop through variable names
 for i = 1:length(T.Properties.VariableNames)

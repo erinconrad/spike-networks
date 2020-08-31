@@ -1,4 +1,4 @@
-function manual_spike_networks(whichPts,overwrite,do_simple_corr,time_window)
+function manual_spike_networks(whichPts,overwrite,do_simple_corr,time_window,not_a_spike)
 
 %{
 This function calculates functional networks for EEG data surrounding
@@ -28,6 +28,12 @@ else
     all_times = time_window;
     true_window = all_times(2)-all_times(1);
     time_text = sprintf('%1.1f/',true_window);
+end
+
+if not_a_spike
+    not_a_spike_text = '_not_spike_';
+else
+    not_a_spike_text = '_';
 end
 
 %% Get file locations, load spike times and pt structure
@@ -84,11 +90,12 @@ for whichPt = whichPts
         mkdir(out_folder);
     end
  
-    spike = load([eeg_folder,sprintf('%s_eeg.mat',name)]);
+    
+    spike = load([eeg_folder,sprintf('%s%seeg.mat',name,not_a_spike_text)]);
     spike = spike.spike;
 
     % Initialize output data
-    meta_file = [out_folder,sprintf('%s_adj.mat',name)];
+    meta_file = [out_folder,sprintf('%s%sadj.mat',name,not_a_spike_text)];
 
     % Load it if it exists to see how much we've already done
     if overwrite == 0

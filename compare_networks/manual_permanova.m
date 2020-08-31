@@ -1,4 +1,4 @@
-function manual_permanova(overwrite,simple,time_window)
+function manual_permanova(overwrite,simple,time_window,not_a_spike)
 
 %{
 This function compares adjacency matrices across time periods surrounding
@@ -33,6 +33,12 @@ elseif simple == 0
     adj_folder = [results_folder,'adj_mat/manual/adj_coherence/',time_text];
 end
 
+if not_a_spike
+    not_a_spike_text = '_not_spike_';
+else
+    not_a_spike_text = '_';
+end
+
 if exist(out_folder,'dir') == 0
     mkdir(out_folder)
 end
@@ -60,14 +66,14 @@ for j = 1:length(listing)
     name = name_sp{1};
     
     if overwrite == 0
-        if exist([out_folder,name,'_perm.mat'],'file') ~= 0
+        if exist([out_folder,name,not_a_spike_text,'perm.mat'],'file') ~= 0
             fprintf('%s already exists, skipping...\n',name);
             continue;
         end
     end
     
     %% Load adjacency matrices 
-    meta = load([adj_folder,name,'_adj.mat']);
+    meta = load([adj_folder,name,not_a_spike_text,'adj.mat']);
     meta = meta.meta;
     
     % Get number of spikes, frequencies, times, channels
@@ -197,7 +203,7 @@ for j = 1:length(listing)
     end
         
 %% Save the sim structure
-save([out_folder,name,'_perm.mat'],'sim');
+save([out_folder,name,not_a_spike_text,'perm.mat'],'sim');
 
 end
 

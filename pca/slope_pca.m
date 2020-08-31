@@ -1,10 +1,4 @@
-function network_change_fig
-
-%{
-I am not sure how to plot the NBS statistics, not sure what to show other
-than a p-value which is kind of lame. Thinking I will just show the
-permanova statistic.
-%}
+function slope_pca
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -172,40 +166,23 @@ for l = 1:length(listing)
  
 end
 
-%% Plot
-% Initialize figure
-%{
-nfreq (coherence) + 1 (simple) columns and 2 (2 time scales) rows
-%}
+
+%% Do PCA on F statistic data
 figure
 set(gcf,'position',[1 100 1399 500])
-[ha, pos] = tight_subplot(1, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
-%[ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
-
-for n = 1:network_count
-
-    net_name = stats(n).name;
-    
-    for t = 1%:time_count
-        
-        if t>size(stats(n).time), continue; end
-        
-        % change times for x axis
-        nchunks = size(stats(n).time(t).freq(1).F_all,2);
-        
-        if isfield(stats(n).time(t),'index_windows') && isempty(stats(n).time(t).index_windows) == 0
-            temp_times = stats(n).time(t).index_windows(:,1)/stats(n).time(t).fs-3;
-            times = realign_times(temp_times,surround_time);
-        else
-
-            times = realign_times(nchunks,surround_time);
+[ha, pos] = tight_subplot(2, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
+for n = 1:length(stats)
+    for t = 1:2
+        if t == 1
+            F_times = [2:8];
+        elseif t == 2
+            F_times = [2:5];
         end
         
-        nfreq = length(stats(n).time(t).freq);
-        for f = 1:nfreq
+        for f = 1:length(stats(n).time(t).freq)
             
             % Get appropriate subplot
-            if strcmp(net_name,'coherence') == 1
+            if strcmp(stats(n).name,'coherence') == 1
                 column_add = 1;
             else
                 column_add = 0;
@@ -216,102 +193,43 @@ for n = 1:network_count
             % the 2nd column for coherence
             sp = (n_freq_abs+1)*(t-1) + f + column_add;
             axes(ha(sp));
-          
-            z_curr = stats(n).time(t).freq(f).z_all;
-            % loop over patients and plot
-            for i = 1:size(z_curr,1)
-                plot(times,z_curr(i,:),'ko');
-                hold on
-            end
             
-            % plot mean F across patients
-            for tt = 1:size(z_curr,2)
-                
-                curr_p_vals = stats(n).time(t).freq(f).p_all(:,tt);
-                comb_p = fisher_p_value(curr_p_vals);
-                text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1)); % should I also adjust by nfreq?
-                
-                if strcmp(text_out,'') == 1
-                    plot([times(tt)-0.25 times(tt)+0.25],...
-                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
-                    'k','linewidth',4);
-                else
-                    plot([times(tt)-0.25 times(tt)+0.25],...
-                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
-                    'g','linewidth',4);
-                end
-            end
+            F = stats(n).time(t).freq(f).F_all; % n_patients x n_times
             
-
+            % only take times 2:before signficant signal deviation
+            F = F(:,F_times);
+            
+            % Take a look at correlation coefficient
+            %R = corrcoef(F);
+            
+            % Do PCA
+            [coeff,score,latent] = pca(F);
+            
+            % Plot the coefficients of the first component
+            plot(coeff(:,1))
+            hold on
             
             if t == 3 && f == 4
-                 xlabel('Time relative to spike peak (s)')
+                 xlabel('Time period')
             end 
-           
-            if t == 1 && strcmp(net_name,'coherence') == 1
+            
+            if t == 2 && f == 1 && n == 2
+                ylabel('Coefficient of first component')
+            end
+            
+            xticklabels([])
+            yticklabels([])
+            
+            if t == 1 && strcmp(stats(n).name,'coherence') == 1
                 title(sprintf('%s',...
                     strrep(stats(n).time(t).freq(f).name,'_',' ')))
-            elseif t == 1 && strcmp(net_name,'simple') == 1
+            elseif t == 1 && strcmp(stats(n).name,'simple') == 1
                 title('correlation')
             end
-            
-         %   xlim([-3 3]) 
-            
+
         end
-        
-        
-        
     end
 end
 
-for sp = 1:length(ha)
-    axes(ha(sp))
-    % formatting
-    ylim([min_z-1 max_z+1]);
-    if mod(sp,n_freq_abs+1) == 1
-        %ylabel(sprintf('%s s time window',stats(1).time(floor((sp/n_freq_abs+1))).name));
-        if ceil(sp/(n_freq_abs+1)) == 2
-            ylabel('z-score')
-        end
-    else
-        yticklabels([])
-    end
-    
-    set(gca,'fontsize',20)
-end
-
-annotation('textbox',[0.01 0.78 0.2 0.2],'String','A','Fontsize',30,...
-    'linestyle','none');
-annotation('textbox',[0.01 0.5 0.2 0.2],'String','B','Fontsize',30,...
-    'linestyle','none');
-annotation('textbox',[0.01 0.19 0.17 0.2],'String','C','Fontsize',30,...
-    'linestyle','none');
-
-print(gcf,[out_folder,'network_change'],'-depsc');
-
-%% Say the patients with significant pre-spike rise
-midpoint = nchunks/2;
-for n = 1:network_count
-    fprintf('\n for %s:\n\n',listing(n).name);
-for t = 1:(time_count)
-    fprintf('\n for time window %s:\n\n',time_listing(t).name);
-    for i = 1:length(pt_names)
-        fprintf('\n%s had significant pre-spike network change for:',pt_names{i});
-        for f = 1:nfreq
-            for tt = 1:midpoint - 1
-            
-                % Get the p-value
-                p = stats(n).time(t).freq(f).p_all(i,tt);
-                
-                if p < 0.05/(n_freq_abs+1)/length(pt_names)/(nchunks-1)
-                    fprintf('\n%s time %d.\n',freq_names{f},tt);
-                end
-
-            end
-        end
-        fprintf('\n\n\n');
-    end
-end
-end
 
 end

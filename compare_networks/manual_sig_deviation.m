@@ -1,4 +1,4 @@
-function manual_sig_deviation(time_window)
+function manual_sig_deviation(time_window,not_a_spike)
 
 %{
 This function determines the time periods in which the EEG data surrounding
@@ -32,6 +32,12 @@ else
     time_text = sprintf('%1.1f/',true_window);
 end
 
+if not_a_spike
+    not_a_spike_text = '_not_spike';
+else
+    not_a_spike_text = '';
+end
+
 % Folders
 eeg_folder = [results_folder,'eeg_data/'];
 sig_dev_folder = [results_folder,'signal_deviation/manual/',time_text];
@@ -51,7 +57,7 @@ for i = 1:length(listing)
     sig_dev(i).name = name;
     
     % load eeg data
-    spike = load([eeg_folder,name,'_eeg.mat']);
+    spike = load([eeg_folder,name,not_a_spike_text,'_eeg.mat']);
     spike = spike.spike;
     surround_time = spike(1).surround_time;
     n_spikes = length(spike);
@@ -151,7 +157,7 @@ for i = 1:length(listing)
     sig_dev(i).time_window = time_window;
     
     % Save the structure
-    save([sig_dev_folder,'sig_dev.mat'],'sig_dev')
+    save([sig_dev_folder,'sig_dev',not_a_spike_text,'.mat'],'sig_dev')
     
 end
 

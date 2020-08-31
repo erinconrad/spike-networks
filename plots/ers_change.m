@@ -253,15 +253,17 @@ for t = 1:time_count
         end
         
         
-        if f == 1 && t == 1
+        if f == 1 && t == 2
+            %{
             text(-0.35,-0.15,sprintf('Power in specified\nfrequency band'),...
                 'HorizontalAlignment','Center','FontSize',20,'rotation',90,...
                 'Units','normalized')
-           % ylabel(sprintf('Power in specified\nfrequency band'));
+            %}
+            ylabel('z-score');
         end
         %}
             
-        if t == 1, xticklabels([]); end
+        if t == 1 || t == 2, xticklabels([]); end
         if f~=1, yticklabels([]); end
             
         set(gca,'fontsize',20);
@@ -276,6 +278,12 @@ annotation('textbox',[0.48 0.03 0.05 0.05],'string',...
     'HorizontalAlignment','Center','FontSize',20,'linestyle','none',...
     'fitboxtotext','on')
 
+annotation('textbox',[0.01 0.78 0.2 0.2],'String','A','Fontsize',30,...
+    'linestyle','none');
+annotation('textbox',[0.01 0.5 0.2 0.2],'String','B','Fontsize',30,...
+    'linestyle','none');
+annotation('textbox',[0.01 0.19 0.17 0.2],'String','C','Fontsize',30,...
+    'linestyle','none');
 
 
 print([out_folder,'ers_change'],gcf,'-depsc');
