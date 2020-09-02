@@ -47,7 +47,7 @@ pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
 sp_folder = [main_folder,'data/manual_spikes/'];
-sp = get_manual_times_from_excel;
+sp = get_manual_times_from_excel(not_a_spike);
 
 %{
 % old spikes
