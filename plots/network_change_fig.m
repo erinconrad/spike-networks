@@ -1,4 +1,4 @@
-function network_change_fig
+function network_change_fig(which_times)
 
 %{
 I am not sure how to plot the NBS statistics, not sure what to show other
@@ -40,8 +40,7 @@ listing = dir(perm_folder);
 network_count = 0;
 n_freq_abs = 0;
 max_F = 0;
-max_z = 0;
-min_z = 0;
+
 for l = 1:length(listing)
     name= listing(l).name;
     
@@ -73,6 +72,9 @@ for l = 1:length(listing)
 
         % Skip if not a directory
         if time_listing(k).isdir == 0, continue; end
+        
+        % Skip if not one of the ones I asked for
+        if ismember(time_window,which_times) == 0, continue; end
         
         time_count = time_count + 1;
         stats(network_count).time(time_count).name = time_name;
@@ -155,13 +157,7 @@ for l = 1:length(listing)
                 % convert F stats to z scores to compare across time points
                 stats(network_count).time(time_count).freq(f).z_all(i,:) = (sim(f).F-nanmean(sim(f).F))./nanstd(sim(f).F);
             
-                if max_z < max(max(stats(network_count).time(time_count).freq(f).z_all))
-                    max_z = max(max(stats(network_count).time(time_count).freq(f).z_all));
-                end
                 
-                if min_z > min(min(stats(network_count).time(time_count).freq(f).z_all))
-                    min_z = min(min(stats(network_count).time(time_count).freq(f).z_all));
-                end
                 
             end
             
@@ -179,14 +175,14 @@ nfreq (coherence) + 1 (simple) columns and 2 (2 time scales) rows
 %}
 figure
 set(gcf,'position',[1 100 1399 500])
-[ha, pos] = tight_subplot(1, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
-%[ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
+%[ha, pos] = tight_subplot(1, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
+[ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
 
 for n = 1:network_count
 
     net_name = stats(n).name;
     
-    for t = 1%:time_count
+    for t = 1:time_count
         
         if t>size(stats(n).time), continue; end
         
@@ -214,6 +210,7 @@ for n = 1:network_count
             % time point (to move down a row), and it adds which frequency
             % (which is 1 if simple) and adds 1 if coherence, to start with
             % the 2nd column for coherence
+            %sp = f + column_add;
             sp = (n_freq_abs+1)*(t-1) + f + column_add;
             axes(ha(sp));
           
@@ -255,7 +252,7 @@ for n = 1:network_count
                 title('correlation')
             end
             
-         %   xlim([-3 3]) 
+            xlim([-3 0]) 
             
         end
         
@@ -264,10 +261,28 @@ for n = 1:network_count
     end
 end
 
+for t = 1:time_count
+    max_z = 0;
+    min_z = 0;
+    for n = 1:network_count
+        nfreq = length(stats(n).time(t).freq);
+        for f = 1:nfreq
+            if max_z < max(max(stats(n).time(t).freq(f).z_all))
+                max_z = max(max(stats(n).time(t).freq(f).z_all));
+            end
+
+            if min_z > min(min(stats(n).time(t).freq(f).z_all))
+                min_z = min(min(stats(n).time(t).freq(f).z_all));
+            end
+        end
+    end
+    ylim([min_z max_z]);
+end
+
 for sp = 1:length(ha)
     axes(ha(sp))
     % formatting
-    ylim([min_z-1 max_z+1]);
+    %ylim([min_z-1 max_z+1]);
     if mod(sp,n_freq_abs+1) == 1
         %ylabel(sprintf('%s s time window',stats(1).time(floor((sp/n_freq_abs+1))).name));
         if ceil(sp/(n_freq_abs+1)) == 2
@@ -277,15 +292,21 @@ for sp = 1:length(ha)
         yticklabels([])
     end
     
+    if sp <= (n_freq_abs+1)*(time_count-1)
+        xticklabels([])
+    end
+    
     set(gca,'fontsize',20)
 end
 
+%{
 annotation('textbox',[0.01 0.78 0.2 0.2],'String','A','Fontsize',30,...
     'linestyle','none');
 annotation('textbox',[0.01 0.5 0.2 0.2],'String','B','Fontsize',30,...
     'linestyle','none');
 annotation('textbox',[0.01 0.19 0.17 0.2],'String','C','Fontsize',30,...
     'linestyle','none');
+%}
 
 print(gcf,[out_folder,'network_change'],'-depsc');
 

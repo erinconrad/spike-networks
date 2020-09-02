@@ -1,4 +1,4 @@
-function ers_spike(overwrite,time_window)
+function ers_spike(overwrite,time_window,not_a_spike)
 
 %% Parameters
 do_notch = 1; % notch filter?
@@ -27,6 +27,12 @@ else
     time_text = sprintf('%1.1f/',true_window);
 end
 
+if not_a_spike
+    not_a_spike_text = '_not_spike_';
+else
+    not_a_spike_text = '_';
+end
+
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;
@@ -45,7 +51,7 @@ pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
 %% Get manual spike times
-sp = get_manual_times_from_excel;
+sp = get_manual_times_from_excel(not_a_spike);
 
 whichPts = [];
 for i = 1:length(sp)
@@ -66,7 +72,7 @@ for whichPt = whichPts
     name = pt(whichPt).name;
     fprintf('\nDoing %s\n',name);
     
-    spike = load([eeg_folder,sprintf('%s_eeg.mat',name)]);
+    spike = load([eeg_folder,sprintf('%s%seeg.mat',name,not_a_spike_text)]);
     spike = spike.spike;
     n_spikes = length(spike);
     values = spike(1).data;
@@ -80,7 +86,7 @@ for whichPt = whichPts
     end
 
     
-    out_file = [output_folder,sprintf('%s_ers.mat',name)];
+    out_file = [output_folder,sprintf('%s%sers.mat',name,not_a_spike_text)];
     % Load it if it exists to see how much we've already done
     if overwrite == 0
         if exist(out_file,'file') ~= 0
