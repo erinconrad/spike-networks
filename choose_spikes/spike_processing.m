@@ -28,6 +28,12 @@ pt_folder = [main_folder,'data/spike_structures/'];
 pt = load([pt_folder,'pt.mat']);
 pt = pt.pt;
 
+if not_a_spike
+    not_a_spike_text = '_not_spike_';
+else
+    not_a_spike_text = '_';
+end
+
 %% Get the spike times
 sp_folder = [main_folder,'data/manual_spikes/'];
 sp = get_manual_times_from_excel(not_a_spike);
@@ -59,7 +65,7 @@ for whichPt = whichPts
     
     % Skip if I already did it
     if overwrite == 0
-        if exist([results_folder,name,'_eeg.mat'],'file') ~= 0
+        if exist([results_folder,name,not_a_spike_text,'_eeg.mat'],'file') ~= 0
             fprintf('Already did %s, skipping...\n',name);
             continue;
         end
@@ -246,11 +252,10 @@ for whichPt = whichPts
         
     end
     if do_save == 1
-        if not_a_spike
-            save([results_folder,name,'_not_spike_eeg.mat'],'spike');
-        else
-            save([results_folder,name,'_eeg.mat'],'spike');
-        end
+        
+        save([results_folder,name,not_a_spike_text,'eeg.mat'],'spike');
+        
+            
     end
     
 end
