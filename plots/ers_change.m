@@ -1,4 +1,4 @@
-function ers_change
+function ers_change(which_times)
 
 %% Parameters
 
@@ -58,6 +58,9 @@ for k = 1:length(time_listing)
 
     % Skip if not a directory
     if time_listing(k).isdir == 0, continue; end
+    
+    % Skip if not one of the ones I asked for
+    if ismember(time_window,which_times) == 0, continue; end
 
     time_count = time_count + 1;
     stats(network_count).time(time_count).name = time_name;
@@ -240,7 +243,7 @@ for t = 1:time_count
         %}
         
         ylim([-2 4])
-        xlim([-3 3])    
+        xlim([-3 0])    
         %{
         if t == 2 && f == 4
              xlabel('Time relative to spike peak (s)')

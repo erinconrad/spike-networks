@@ -20,7 +20,7 @@ pt = load([pt_folder,'pt.mat']);
 pt = pt.pt;
 
 if not_a_spike == 1
-    T = readtable([sp_folder,'not spikes.xlsx']);
+    T = readtable([sp_folder,'not a spike.xlsx']);
 else
     T = readtable([sp_folder,'manual spikes.xlsx']);
 end
