@@ -1,4 +1,4 @@
-function slope_pca(sd,not_a_spike)
+function slope_pca(sd,windows)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -18,6 +18,11 @@ nbs_folder = [results_folder,'nbs_stats/'];
 
 freq_names = {'delta','theta','alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
+
+F_times = [0.1 2 8;...
+    0.2 2 9;...
+    0.5 2 5;...
+    1 2 2];
 
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
@@ -69,10 +74,8 @@ if sd == 0
             % Skip if not a directory
             if time_listing(k).isdir == 0, continue; end
             
-            % Skip if not 0.5 or 0.2
-            if contains(time_name,'0.5') == 0 && contains(time_name,'0.2')== 0
-                continue
-            end
+            % Skip if not the time window we want
+            if ismember(time_window,windows) == 0, continue; end
 
             time_count = time_count + 1;
             stats(network_count).time(time_count).name = time_name;
@@ -89,80 +92,35 @@ if sd == 0
                 n_freq_abs = nfreq;
             end
 
-
-           if isfield(sim,'index_windows')
-
-
-
-               for f = 1:nfreq
-                    stats(network_count).time(time_count).index_windows = sim(f).index_windows;
-                    stats(network_count).time(time_count).fs = sim(f).fs;
-
-                    stats(network_count).time(time_count).freq(f).F_all = ...
-                        nan(length(pt_listing),size(sim(f).index_windows,1));
-
-                    stats(network_count).time(time_count).freq(f).p_all = ...
-                        nan(length(pt_listing),size(sim(f).index_windows,1));
-
-                    stats(network_count).time(time_count).freq(f).z_all = ...
-                        nan(length(pt_listing),size(sim(f).index_windows,1));
-
-                end
-           else
-
-               for f = 1:nfreq
-                    stats(network_count).time(time_count).freq(f).F_all = ...
-                        nan(length(pt_listing),surround_time*2/time_window);
-
-                    stats(network_count).time(time_count).freq(f).p_all = ...
-                        nan(length(pt_listing),surround_time*2/time_window);
-
-                    stats(network_count).time(time_count).freq(f).z_all = ...
-                        nan(length(pt_listing),surround_time*2/time_window);
-
-                end
-           end
-
-
-
-            pt_names = {};
-
+            all_names = {};
             % loop through pts
             for i = 1:length(pt_listing)
 
-                pt_name = pt_listing(i).name;
-                pt_name_pt = strsplit(pt_name,'_');
-                pt_name_pt = pt_name_pt{1};
-                pt_names = [pt_names;pt_name_pt];
+                fname = pt_listing(i).name;
+                pt_name = strsplit(fname,'_');
+                pt_name = pt_name{1};
+                
+                [a,b] = ismember(pt_name,all_names);
+                if a == 1
+                    pt_idx = b;
+                else
+                    all_names = [all_names;pt_name];
+                    pt_idx = length(all_names);
+                end
 
                 % load pt file
-                sim = load([time_folder,pt_name]);
+                sim = load([time_folder,fname]);
                 sim = sim.sim;
 
 
                 for f = 1:nfreq
                     stats(network_count).time(time_count).freq(f).name = sim(f).name;
-                    stats(network_count).time(time_count).freq(f).F_all(i,:) = sim(f).F;
-                    stats(network_count).time(time_count).freq(f).p_all(i,:) = sim(f).p;
-
-                    F_curr = stats(network_count).time(time_count).freq(f).F_all;
-                    if max_F < max(max(F_curr))
-                        max_F = max(max(F_curr));
+                    
+                    if contains(fname,'not') == 0
+                        stats(network_count).time(time_count).freq(f).F_all(pt_idx,:,1) = sim(f).F;
+                    else
+                    	stats(network_count).time(time_count).freq(f).F_all(pt_idx,:,2) = sim(f).F;
                     end
-
-
-
-                    % convert F stats to z scores to compare across time points
-                    stats(network_count).time(time_count).freq(f).z_all(i,:) = (sim(f).F-nanmean(sim(f).F))./nanstd(sim(f).F);
-
-                    if max_z < max(max(stats(network_count).time(time_count).freq(f).z_all))
-                        max_z = max(max(stats(network_count).time(time_count).freq(f).z_all));
-                    end
-
-                    if min_z > min(min(stats(network_count).time(time_count).freq(f).z_all))
-                        min_z = min(min(stats(network_count).time(time_count).freq(f).z_all));
-                    end
-
                 end
 
 
@@ -190,10 +148,8 @@ else
         % Skip if not a directory
         if time_listing(k).isdir == 0, continue; end
         
-        % Skip if not 0.5 or 0.2
-            if contains(time_name,'0.5') == 0 && contains(time_name,'0.2')== 0
-                continue
-            end
+        % Skip if not the time window we want
+        if ismember(time_window,windows) == 0, continue; end
 
         time_count = time_count + 1;
         stats.time(time_count).name = time_name;
@@ -202,19 +158,17 @@ else
 
         pt_listing = dir([time_folder,'*.mat']);
         
-        for i = 1:length(pt_listing)
-            if contains(pt_listing(i).name,'not_spike') == 1
-                if not_a_spike == 0, continue; end
-            else
-                if not_a_spike == 1, continue; end
-            end
-            
+        for i = 1:length(pt_listing)            
             % load pt file
             sig_dev = load([time_folder,pt_listing(i).name]);
             sig_dev = sig_dev.sig_dev;
             
             for p = 1:length(sig_dev)
-                stats.time(time_count).freq.z_all(p,:) = sig_dev(i).z_score_dev;
+                if contains(pt_listing(i).name,'not') == 1
+                    stats.time(time_count).freq.z_all(p,:,2) = sig_dev(p).z_score_dev;
+                else
+                    stats.time(time_count).freq.z_all(p,:,1) = sig_dev(p).z_score_dev;
+                end
             end
             
         end
@@ -226,78 +180,108 @@ end
 
 
 %% Do PCA on F statistic data
-figure
-set(gcf,'position',[1 100 1399 500])
-[ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
-for n = 1:length(stats)
-    for t = 1:time_count
-        if t == 1
-            F_times = [2:8];
-        elseif t == 2
-            F_times = [2:5];
-        end
-        
+for t = 1:time_count
+    figure
+    set(gcf,'position',[1 100 1399 500])
+    [ha, pos] = tight_subplot(2, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
+    for n = 1:length(stats)
+
         for f = 1:length(stats(n).time(t).freq)
-            
+
             % Get appropriate subplot
             if sd == 0
-            if strcmp(stats(n).name,'coherence') == 1
-                column_add = 1;
+                if strcmp(stats(n).name,'coherence') == 1
+                    column_add = 1;
+                else
+                    column_add = 0;
+                end
             else
                 column_add = 0;
             end
-            else
-                column_add = 0;
-            end
-            % this adds the number of frequencies + 1 if it's on the 2nd
-            % time point (to move down a row), and it adds which frequency
-            % (which is 1 if simple) and adds 1 if coherence, to start with
-            % the 2nd column for coherence
-            sp = (n_freq_abs+1)*(t-1) + f + column_add;
-            axes(ha(sp));
             
-            if sd == 0
-                F = stats(n).time(t).freq(f).F_all; % n_patients x n_times
-            else
-                F = stats(n).time(t).freq(f).z_all;
-            end
+            for s = 1:2
+                % this adds the number of frequencies + 1 if it's on the 2nd
+                % time point (to move down a row), and it adds which frequency
+                % (which is 1 if simple) and adds 1 if coherence, to start with
+                % the 2nd column for coherence
+                sp = (n_freq_abs+1)*(s-1) + f + column_add;
+                axes(ha(sp));
+
+                
+                if sd == 0
+                    if ndims(stats(n).time(t).freq(f).F_all) < s+1, continue; end
+                    F = squeeze(stats(n).time(t).freq(f).F_all(:,:,s)); % n_patients x n_times
+                else
+                    if ndims(stats(n).time(t).freq(f).z_all) < s+1, continue; end
+                    F = squeeze(stats(n).time(t).freq(f).z_all(:,:,s));
+                end
+
+                [a,b] = ismember(stats(n).time(time_count).time_window,F_times);
+                
+                
+                % only take times 1:before signficant signal deviation
+                F = F(:,F_times(b,2):F_times(b,end));
+
+                % Take a look at correlation coefficient
+                R = corrcoef(F);
+
+                % Do PCA
+                [coeff,score,latent] = pca(F);
+
+                % Plot the coefficients of the first component
+                plot(coeff(:,1))
+                hold on
+
+                
+                if s == 2 && f == 4
+                     xlabel('Time period')
+                end 
+
+                if s == 2 && f == 1 && n == 2
+                    ylabel('Coefficient of first component')
+                end
+                %}
+
+                xticklabels([])
+                yticklabels([])
+
+                if sd == 0
+                if t == 1 && strcmp(stats(n).name,'coherence') == 1
+                    title(sprintf('%s',...
+                        strrep(stats(n).time(t).freq(f).name,'_',' ')))
+                elseif t == 1 && strcmp(stats(n).name,'simple') == 1
+                    title('correlation')
+                end
+                end
             
-            % only take times 2:before signficant signal deviation
-            F = F(:,F_times);
             
-            % Take a look at correlation coefficient
-            %R = corrcoef(F);
-            
-            % Do PCA
-            [coeff,score,latent] = pca(F);
-            
-            % Plot the coefficients of the first component
-            plot(coeff(:,1))
-            hold on
-            
-            if t == 3 && f == 4
-                 xlabel('Time period')
-            end 
-            
-            if t == 2 && f == 1 && n == 2
-                ylabel('Coefficient of first component')
-            end
-            
-            xticklabels([])
-            yticklabels([])
-            
-            if sd == 0
-            if t == 1 && strcmp(stats(n).name,'coherence') == 1
-                title(sprintf('%s',...
-                    strrep(stats(n).time(t).freq(f).name,'_',' ')))
-            elseif t == 1 && strcmp(stats(n).name,'simple') == 1
-                title('correlation')
-            end
             end
 
         end
     end
 end
+
+%% Test if the scores for spike are higher than the scores for not a spike
+for t = 1:time_count
+    for n = 1:length(stats)
+        for f = 1:length(stats(n).time(t).freq)
+           
+            if sd == 0
+                F = (stats(n).time(t).freq(f).F_all); %n_patients x n_time periods x 2 (spike and not a spike)
+            else
+                F = (stats(n).time(t).freq(f).z_all);
+            end
+            
+            % Concatenate spike and not a spike
+            is_spike_idx = [ones(size(F,1),1);zeros(size(F,1),1)];       
+            F_cat = [squeeze(F(:,:,1));squeeze(F(:,:,2))];
+            
+            
+            
+        end
+    end
+end
+
 
 
 end

@@ -49,12 +49,22 @@ if exist(sig_dev_folder,'dir') == 0
     mkdir(sig_dev_folder);
 end
 
+all_names = {};
+
 for i = 1:length(listing)
     
     filename = listing(i).name;
     name_sp = split(filename,'_');
     name = name_sp{1};
+    
     sig_dev(i).name = name;
+    [a,b] = ismember(name,all_names);
+    if a == 1
+        pt_idx = b;
+    else
+        all_names = [all_names;name];
+        pt_idx = length(all_names);
+    end
     
     % load eeg data
     spike = load([eeg_folder,name,not_a_spike_text,'_eeg.mat']);
@@ -143,18 +153,18 @@ for i = 1:length(listing)
         
         % Do a two-sample t-test
         [~,p,ci,stats] = ttest2(dev_windows(:,1),dev_windows(:,t));
-        sig_dev(i).p(t) = p;
-        sig_dev(i).ci(t,:) = ci;
-        sig_dev(i).stats(t) = stats;
+        sig_dev(pt_idx).p(t) = p;
+        sig_dev(pt_idx).ci(t,:) = ci;
+        sig_dev(pt_idx).stats(t) = stats;
         
     end
     
     % Also get a normalized z-score to combine across patients
     dev_avg_all_spikes = nanmean(dev_windows,1); % avg across spikes
     z_score_dev = (dev_avg_all_spikes - mean(dev_avg_all_spikes))/std(dev_avg_all_spikes);
-    sig_dev(i).z_score_dev = z_score_dev;
-    sig_dev(i).avg_dev = dev_avg_all_spikes;
-    sig_dev(i).time_window = time_window;
+    sig_dev(pt_idx).z_score_dev = z_score_dev;
+    sig_dev(pt_idx).avg_dev = dev_avg_all_spikes;
+    sig_dev(pt_idx).time_window = time_window;
     
     % Save the structure
     save([sig_dev_folder,'sig_dev',not_a_spike_text,'.mat'],'sig_dev')
