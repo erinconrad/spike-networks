@@ -43,7 +43,7 @@ eeg_folder = [results_folder,'eeg_data/'];
 sig_dev_folder = [results_folder,'signal_deviation/manual/',time_text];
 adj_folder = [results_folder,'adj_mat/manual/adj_simple/',time_text];
 
-listing = dir([adj_folder,'*_adj.mat']);
+listing = dir([eeg_folder,'*',not_a_spike_text,'_eeg.mat']);
 
 if exist(sig_dev_folder,'dir') == 0
     mkdir(sig_dev_folder);
