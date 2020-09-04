@@ -1,4 +1,4 @@
-function signal_dev_fig
+function signal_dev_fig(not_a_spike)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -14,6 +14,11 @@ addpath(genpath(bct_folder));
 out_folder = [results_folder,'plots/'];
 sig_dev_folder = [results_folder,'signal_deviation/manual/'];
 
+if not_a_spike
+    not_a_spike_text = '_not_spike';
+else
+    not_a_spike_text = '';
+end
 
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
@@ -37,18 +42,31 @@ for i = 1:length(listing)
         continue
     end
     
+    
+    
     % assume all other things are directories with different time windows
-    count = count+1;
+    
     time_text = listing(i).name;
     time_window = str2num(time_text);
     time_window_folder = [sig_dev_folder,time_text,'/'];
     
     % load the file
-    temp_sig_dev = load([time_window_folder,'sig_dev.mat']);
-    sig_dev(count).name = time_text;
-    sig_dev(count).time_window = time_window;
-    sig_dev(count).sig_dev = temp_sig_dev.sig_dev;
-    
+    sub_listing = dir(time_window_folder);
+    for k = 1:length(sub_listing)
+        
+        if contains(sub_listing(k).name,'.mat') == 0, continue; end
+        
+        if not_a_spike == 1
+            if contains(sub_listing(k).name,'not_spike') == 0, continue; end
+        else
+            if contains(sub_listing(k).name,'not_spike') == 1, continue; end
+        end
+        count = count+1;
+        temp_sig_dev = load([time_window_folder,sub_listing(k).name]);
+        sig_dev(count).name = time_text;
+        sig_dev(count).time_window = time_window;
+        sig_dev(count).sig_dev = temp_sig_dev.sig_dev;
+    end
 end
 n_windows = count;
 
@@ -149,6 +167,6 @@ end
     
 
 
-print(gcf,[out_folder,'sig_dev'],'-depsc')
+print(gcf,[out_folder,'sig_dev',not_a_spike_text],'-depsc')
 
 end
