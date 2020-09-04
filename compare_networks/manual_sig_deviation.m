@@ -1,4 +1,4 @@
-function manual_sig_deviation(time_window,not_a_spike)
+function manual_sig_deviation(overwrite,time_window,not_a_spike)
 
 %{
 This function determines the time periods in which the EEG data surrounding
@@ -50,6 +50,7 @@ if exist(sig_dev_folder,'dir') == 0
 end
 
 all_names = {};
+     
 
 for i = 1:length(listing)
     
@@ -170,9 +171,11 @@ for i = 1:length(listing)
     sig_dev(pt_idx).avg_dev = dev_avg_all_spikes;
     sig_dev(pt_idx).time_window = time_window;
     
-    % Save the structure
-    save([sig_dev_folder,'sig_dev',not_a_spike_text,'.mat'],'sig_dev')
+    length(sig_dev)
     
 end
+
+% Save the structure
+    save([sig_dev_folder,'sig_dev',not_a_spike_text,'.mat'],'sig_dev')
 
 end
