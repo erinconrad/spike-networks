@@ -5,6 +5,25 @@ This function calculates functional networks for EEG data surrounding
 manually detected spikes
 %}
 
+%{
+Pt names
+6 HUP074
+7 HUP075
+8 HUP078
+9 HUP080
+10 HUP082
+11 HUP083
+15 HUP094
+16 HUP105
+17 HUP106
+18 HUP107
+20 HUP116
+23 Study017
+24 Study019
+30 Study028
+
+%}
+
 %% Parameters
 do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
