@@ -66,10 +66,7 @@ for i = 1:length(listing)
         all_names = [all_names;name];
         pt_idx = length(all_names);
     end
-    i
-    
-    pt_idx
-    name
+
     
     if not_a_spike == 1
         if contains(filename,'not') == 0, continue; end
@@ -177,7 +174,6 @@ for i = 1:length(listing)
     sig_dev(pt_idx).avg_dev = dev_avg_all_spikes;
     sig_dev(pt_idx).time_window = time_window;
     
-    length(sig_dev)
     
 end
 
