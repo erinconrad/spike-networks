@@ -65,6 +65,10 @@ for i = 1:length(listing)
         all_names = [all_names;name];
         pt_idx = length(all_names);
     end
+    i
+    
+    pt_idx
+    name
     
     % load eeg data
     spike = load([eeg_folder,name,not_a_spike_text,'_eeg.mat']);
