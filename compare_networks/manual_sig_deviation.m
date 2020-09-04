@@ -1,4 +1,4 @@
-function manual_sig_deviation(overwrite,time_window,not_a_spike)
+function manual_sig_deviation(time_window,not_a_spike)
 
 %{
 This function determines the time periods in which the EEG data surrounding
