@@ -50,7 +50,7 @@ pt = load(pt_file); % will create a structure called "pt"
 pt = pt.pt;
 
 %% Get manual spike times
-sp = get_manual_times_from_excel;
+sp = get_manual_times_from_excel(not_a_spike);
 
 %{
 % old spikes
