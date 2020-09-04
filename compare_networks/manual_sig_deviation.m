@@ -71,8 +71,14 @@ for i = 1:length(listing)
     pt_idx
     name
     
+    if not_a_spike == 1
+        if contains(filename,'not') == 0, continue; end
+    else
+        if contains(filename,'not') == 1, continue; end
+    end
+    
     % load eeg data
-    spike = load([eeg_folder,name,not_a_spike_text,'_eeg.mat']);
+    spike = load([eeg_folder,filename]);
     spike = spike.spike;
     surround_time = spike(1).surround_time;
     n_spikes = length(spike);
