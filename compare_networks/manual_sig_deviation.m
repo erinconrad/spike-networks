@@ -58,7 +58,13 @@ for i = 1:length(listing)
     name_sp = split(filename,'_');
     name = name_sp{1};
     
-    sig_dev(i).name = name;
+    if not_a_spike == 1
+        if contains(filename,'not') == 0, continue; end
+    else
+        if contains(filename,'not') == 1, continue; end
+    end
+    
+    
     [a,b] = ismember(name,all_names);
     if a == 1
         pt_idx = b;
@@ -67,12 +73,8 @@ for i = 1:length(listing)
         pt_idx = length(all_names);
     end
 
+    sig_dev(pt_idx).name = name;
     
-    if not_a_spike == 1
-        if contains(filename,'not') == 0, continue; end
-    else
-        if contains(filename,'not') == 1, continue; end
-    end
     
     fprintf('\nDoing %s...\n',name);
     
