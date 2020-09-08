@@ -1,4 +1,4 @@
-function network_change_fig(which_times)
+function network_change_fig(which_times,only_simple)
 
 %{
 I am not sure how to plot the NBS statistics, not sure what to show other
@@ -51,6 +51,10 @@ for l = 1:length(listing)
     
     % Skip if not a directory
     if listing(l).isdir == 0, continue; end
+    
+    if only_simple == 1
+        if contains(name,'coherence') == 1,continue;end
+    end
     
     network_count = network_count + 1;
     stats(network_count).name = name;
@@ -132,6 +136,8 @@ for l = 1:length(listing)
         % loop through pts
         for i = 1:length(pt_listing)
             
+            if contains(pt_listing(i).name,'not'),continue;end
+            
             pt_name = pt_listing(i).name;
             pt_name_pt = strsplit(pt_name,'_');
             pt_name_pt = pt_name_pt{1};
@@ -156,9 +162,7 @@ for l = 1:length(listing)
                 
                 % convert F stats to z scores to compare across time points
                 stats(network_count).time(time_count).freq(f).z_all(i,:) = (sim(f).F-nanmean(sim(f).F))./nanstd(sim(f).F);
-            
-                
-                
+                            
             end
             
             
@@ -174,9 +178,13 @@ end
 nfreq (coherence) + 1 (simple) columns and 2 (2 time scales) rows
 %}
 figure
-set(gcf,'position',[1 100 1399 500])
+set(gcf,'position',[1 100 1399 600])
 %[ha, pos] = tight_subplot(1, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
-[ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
+if only_simple == 1
+    [ha, pos] = tight_subplot(time_count, 1, [0.1 0.01], [0.12 0.07], [0.05 0.01]);
+else
+    [ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.1 0.01], [0.12 0.07], [0.05 0.01]);
+end
 
 for n = 1:network_count
 
@@ -220,14 +228,18 @@ for n = 1:network_count
                 plot(times,z_curr(i,:),'ko');
                 hold on
             end
-            
+                        
             % plot mean F across patients
             for tt = 1:size(z_curr,2)
                 
                 curr_p_vals = stats(n).time(t).freq(f).p_all(:,tt);
                 comb_p = fisher_p_value(curr_p_vals);
-                text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1)); % should I also adjust by nfreq?
                 
+
+                text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1));
+                %if f == 8, error('look\n'); end
+                
+                %{
                 if strcmp(text_out,'') == 1
                     plot([times(tt)-0.25 times(tt)+0.25],...
                     [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
@@ -237,6 +249,7 @@ for n = 1:network_count
                     [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
                     'g','linewidth',4);
                 end
+                %}
             end
             
 
@@ -252,7 +265,10 @@ for n = 1:network_count
                 title('correlation')
             end
             
-            xlim([-3 0]) 
+          %  xlim([-3 0]) 
+          xl = get(gca,'xlim');
+          xl(2) = 0;
+          set(gca,'xlim',xl);
             
         end
         
@@ -293,7 +309,7 @@ for sp = 1:length(ha)
     end
     
     if sp <= (n_freq_abs+1)*(time_count-1)
-        xticklabels([])
+      %  xticklabels([])
     end
     
     set(gca,'fontsize',20)

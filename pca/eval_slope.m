@@ -1,4 +1,4 @@
-function slope_pca(sd,windows)
+function eval_slope(sd,not_a_spike,windows)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -180,133 +180,48 @@ else
 end
 
 
-%% Do PCA on F statistic data
-for t = 1:time_count
-    figure
-    set(gcf,'position',[1 100 1399 500])
-    [ha, pos] = tight_subplot(2, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
-    for n = 1:length(stats)
-
+for n = 1:length(stats)
+    for t = 1:length(stats(n).time)
+        time_window = stats(n).time(time_count).time_window;
         for f = 1:length(stats(n).time(t).freq)
-
-            % Get appropriate subplot
-            if sd == 0
-                if strcmp(stats(n).name,'coherence') == 1
-                    column_add = 1;
-                else
-                    column_add = 0;
-                end
+            if sd == 1
+                F_all = stats(n).time(t).freq(f).z_all;
             else
-                column_add = 0;
+                F_all = stats(n).time(t).freq(f).F_all;
             end
             
-            for s = 1:2
-                % this adds the number of frequencies + 1 if it's on the 2nd
-                % time point (to move down a row), and it adds which frequency
-                % (which is 1 if simple) and adds 1 if coherence, to start with
-                % the 2nd column for coherence
-                sp = (n_freq_abs+1)*(s-1) + f + column_add;
-                axes(ha(sp));
-
-                
-                if sd == 0
-                    if ndims(stats(n).time(t).freq(f).F_all) < s+1, continue; end
-                    F = squeeze(stats(n).time(t).freq(f).F_all(:,:,s)); % n_patients x n_times
-                else
-                    if ndims(stats(n).time(t).freq(f).z_all) < s+1, continue; end
-                    F = squeeze(stats(n).time(t).freq(f).z_all(:,:,s));
-                end
-
-                [a,b] = ismember(stats(n).time(t).time_window,F_times);
-                
-                
-                % only take times 1:before signficant signal deviation
-                F = F(:,F_times(b,2):F_times(b,end));
-                
-                % Take zscore (so PCA isn't just getting difference in
-                % amplitude)
-                F = (F-mean(F,2))./(std(F,0,2));
-
-                % Take a look at correlation coefficient
-                R = corrcoef(F);
-
-                % Do PCA
-                [coeff,score,latent] = pca(F);
-
-                % Plot the coefficients of the first component
-                plot(coeff(:,1))
-                %plot(score(:,1))
-                hold on
-                
-                if s == 1
-                    title('Spikes')
-                elseif s == 2
-                    title('Not spikes')
-                end
-                
-                if s == 2 && f == floor((n_freq_abs+1)/2)
-                     xlabel('Time period')
-                end 
-
-                if mod(sp,(n_freq_abs+1)) == 1
-                    ylabel('Coefficient of first component')
-                end
-                %}
-
-                xticklabels([])
-                yticklabels([])
-
-                if sd == 0
-                if t == 1 && strcmp(stats(n).name,'coherence') == 1
-                    title(sprintf('%s',...
-                        strrep(stats(n).time(t).freq(f).name,'_',' ')))
-                elseif t == 1 && strcmp(stats(n).name,'simple') == 1
-                    title('correlation')
-                end
-                end
-            
-            
+            if not_a_spike == 1
+                F_all = F_all(:,:,2);
+            else
+                F_all = F_all(:,:,1);
             end
-
+            
+            n_patients = size(F_all,1);
+            slopes = zeros(n_patients,1);
+            
+            % restrict times to only those pre-spike
+            [~,b] = ismember(time_window,F_times);
+            F_res = squeeze(F_all(:,F_times(b,2):F_times(b,end),1));
+            
+            for i = 1:n_patients
+                
+                
+                y = F_res(i,:)';
+                y = (y-nanmean(y))./nanstd(y);
+                x = [ones(length(y),1), (1:length(y))'];
+                b = x\y;
+                
+                % do regression to find best fit line through the F stats
+                % for that patient
+                slopes(i) = b(2);
+                
+            end
+            
+            all_slopes(n).time(t).freq(f).slope = slopes;
+            [~,p] = ttest(slopes);
+            all_slopes(n).time(t).freq(f).p = p;
         end
     end
 end
-
-%% Test if the scores for spike are higher than the scores for not a spike
-for t = 1:time_count
-    for n = 1:length(stats)
-        for f = 7%1:length(stats(n).time(t).freq)
-           
-            if sd == 0
-                F = (stats(n).time(t).freq(f).F_all); %n_patients x n_time periods x 2 (spike and not a spike)
-            else
-                F = (stats(n).time(t).freq(f).z_all);
-            end
-            
-            % Concatenate spike and not a spike
-            is_spike_idx = logical([ones(size(F,1),1);zeros(size(F,1),1)]); 
-            
-            [a,b] = ismember(stats(n).time(t).time_window,F_times);
-            F_spike = squeeze(F(:,F_times(b,2):F_times(b,end),1));
-            F_not_a_spike = squeeze(F(:,F_times(b,2):F_times(b,end),2));
-            
-            % Convert to z-scores (separately for spike and not a spike)
-            F_spike = (F_spike - mean(F_spike,2))./std(F_spike,0,2);
-            F_not_a_spike = (F_not_a_spike - mean(F_not_a_spike,2))./std(F_not_a_spike,0,2);
-            
-            % Concatenate
-            F_cat = [F_spike;F_not_a_spike];
-            
-            % Do PCA
-            [coeff,score,latent] = pca(F_cat);
-            
-            % ttest comparing scores of first component for the spike to not-a-spike
-           [~,p] = ttest2(score(is_spike_idx,1),score(~is_spike_idx,1));
-            
-        end
-    end
-end
-
-
 
 end
