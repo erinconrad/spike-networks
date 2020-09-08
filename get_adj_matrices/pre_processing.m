@@ -7,12 +7,15 @@ if do_car == 1
     data = data - avg;
 end
 
+
+
 %% Notch filter
 if do_notch == 1
     f = designfilt('bandstopiir','FilterOrder',2, ...
                    'HalfPowerFrequency1',59,'HalfPowerFrequency2',61, ...
                    'DesignMethod','butter','SampleRate',fs);
     for i = 1:size(data,2)
+       data(isnan(data)) = 0;
        data(:,i) = filtfilt(f,data(:,i));   
     end
 end
