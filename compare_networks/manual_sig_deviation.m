@@ -74,6 +74,8 @@ for i = 1:length(listing)
         if contains(filename,'not') == 1, continue; end
     end
     
+    fprintf('\nDoing %s...\n',name);
+    
     % load eeg data
     spike = load([eeg_folder,filename]);
     spike = spike.spike;
