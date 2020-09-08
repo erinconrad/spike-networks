@@ -65,7 +65,7 @@ for whichPt = whichPts
     
     % Skip if I already did it
     if overwrite == 0
-        if exist([results_folder,name,not_a_spike_text,'_eeg.mat'],'file') ~= 0
+        if exist([results_folder,name,not_a_spike_text,'eeg.mat'],'file') ~= 0
             fprintf('Already did %s, skipping...\n',name);
             continue;
         end
