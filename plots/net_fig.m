@@ -1,4 +1,21 @@
-function net_fig(windows)
+function net_fig(windows, not_a_spike)
+
+%{
+This plots normalized pseudo-F statistics from a PermANOVA to examine
+network changes in the time periods approaching spikes.
+
+It first looks for significant changes in power and removes those time
+periods (so as to ignore time periods with clear spike-related signal
+deviation).
+
+It then takes the normalized pseudo-F statistics from the remaining times
+and fits a line for each patient. It tests whether the slopes across
+patients are significantly different from zero (as would be expected under
+my hypothesis that networks gradually change approaching spikes).
+
+Finally, it then does the same analysis on the power change. I would not
+expect a consistent slope in the power change across patients.
+%}
 
 %% Parameters
 alpha = 0.05;
@@ -46,10 +63,6 @@ for i = 1:length(listing)
         continue
     end
     
-    
-    
-    % assume all other things are directories with different time windows
-    
     time_text = listing(i).name;
     time_window = str2num(time_text);
     time_window_folder = [sig_dev_folder,time_text,'/'];
@@ -60,9 +73,11 @@ for i = 1:length(listing)
         
         if contains(sub_listing(k).name,'.mat') == 0, continue; end
         
-        
-        if contains(sub_listing(k).name,'not_spike') == 1, continue; end
-
+        if not_a_spike == 0
+            if contains(sub_listing(k).name,'not_spike') == 1, continue; end
+        else
+            if contains(sub_listing(k).name,'not_spike') == 0, continue; end
+        end
         count = count+1;
         temp_sig_dev = load([time_window_folder,sub_listing(k).name]);
         sig_dev(count).name = time_text;
@@ -87,6 +102,8 @@ for t = 1:n_windows
     sig_dev(t).p_all = nan(size(sig_dev(t).t_stat_all,2),1);
     sig_dev(t).sig = zeros(size(sig_dev(t).t_stat_all,2),1);
     for tt = 2:size(sig_dev(t).t_stat_all,2)
+        
+        % One sample ttest on the t-statistics across patients
         [~,p] = ttest(sig_dev(t).t_stat_all(:,tt));
         sig_dev(t).p_all(tt) = p;
         if p < alpha/(size(sig_dev(t).t_stat_all,2)-1)
@@ -94,8 +111,8 @@ for t = 1:n_windows
             break
         end
     end
-    sig_dev(t).sig(1) = 1; % to ignore the first time
-    sig_dev(t).sig = logical(sig_dev(t).sig);
+    sig_dev(t).sig = logical(sig_dev(t).sig); % indices of significant power changes
+    sig_dev(t).times = sig_dev(t).sig_dev(1).time_window'; % all times
 end
 
 %% Now get F statistics for network differences
@@ -174,6 +191,7 @@ for l = 1:length(listing)
             sim = load([time_folder,fname]);
             sim = sim.sim;
             
+            
             if isfield(sim(1),'index_windows') == 1 && isempty(sim(1).index_windows) == 0
                 stats(network_count).time(time_count).index_windows = sim.index_windows;
                 stats(network_count).time(time_count).fs = sim.fs;
@@ -183,6 +201,8 @@ for l = 1:length(listing)
             for f = 1:nfreq
                 stats(network_count).time(time_count).freq(f).name = sim(f).name;
 
+                
+                % spike vs not a spike
                 if contains(fname,'not') == 0
                     stats(network_count).time(time_count).freq(f).F_all(pt_idx,:,1) = sim(f).F;
                 else
@@ -199,8 +219,8 @@ end
 
 %% Now plot network change over time and look for significant slope
 figure
-set(gcf,'position',[1 100 1399 600])
-[ha, ~] = tight_subplot(time_count, n_freq_abs+1, [0.1 0.01], [0.12 0.07], [0.05 0.01]);
+set(gcf,'position',[1 100 1500 600])
+[ha, ~] = tight_subplot(time_count, n_freq_abs+1, [0.08 0.02], [0.12 0.07], [0.06 0.005]);
 z_range = zeros(time_count,2);
 for n = 1:network_count
 
@@ -220,8 +240,27 @@ for n = 1:network_count
 
             times = realign_times(nchunks,surround_time);
         end
-        sig_power_change_times = sig_dev(t).sig;
-        times = times(~sig_power_change_times);
+        
+        % Fix rounding error
+        times = round(times*1e2)/(1e2);
+        
+        % Find the corresponding sig_dev time
+        for tt = 1:length(sig_dev)
+            if strcmp(sig_dev(tt).name,stats(n).time(t).name) == 1
+                sig_dev_idx = tt;
+                break
+            end
+        end
+        
+        % only include times without significant power change
+        sig_power_change_bin = sig_dev(sig_dev_idx).sig;
+        not_sig_power_change_times = sig_dev(sig_dev_idx).times(~sig_power_change_bin);
+        not_sig_power_change_times = round(not_sig_power_change_times*1e2)/(1e2);
+        [F_not_power_change] = ismember(times,not_sig_power_change_times);
+        F_not_power_change(1) = 0; % ignore first time
+        times = times(F_not_power_change);
+        
+        %if t == 2, error('look\n'); end
         
         nfreq = length(stats(n).time(t).freq);
         for f = 1:nfreq
@@ -241,10 +280,14 @@ for n = 1:network_count
             axes(ha(sp));
             
             % Get F stats
-            F = stats(n).time(t).freq(f).F_all;
+            if not_a_spike == 1
+                F = stats(n).time(t).freq(f).F_all(:,:,2);
+            else
+                F = stats(n).time(t).freq(f).F_all(:,:,1);
+            end
             
             % Just take times without significant power change
-            F_curr = F(:,~sig_power_change_times);
+            F_curr = F(:,F_not_power_change);
             
             
             % z score to normalize within pt
@@ -280,17 +323,19 @@ for n = 1:network_count
             
             if p < alpha/(n_freq_abs+1)
                 %plot(times',b(1)+b(2)*(1:size(z_curr,2)),'g','linewidth',2);
-                plot(times',b(1)+b(2)*times,'g','linewidth',2);
+                plot(times',b(1)+b(2)*times,'g','linewidth',3);
             else
                 %plot(times',b(1)+b(2)*(1:size(z_curr,2)),'k','linewidth',2);
-                plot(times',b(1)+b(2)*times,'k','linewidth',2);
+                plot(times',b(1)+b(2)*times,'k','linewidth',3);
             end
+            
+           % if t == 2, error('look\n'); end
             
             set(gca,'fontsize',20)
             if f == 4 && t == time_count
                 xlabel('Time relative to spike peak (s)')
             end 
-            if n == 2
+            if n == 2 && t == 2
                 ylabel(sprintf('Network distance from\nfirst time (z-score)'))
             end
             
@@ -301,6 +346,13 @@ for n = 1:network_count
 
             if min(min(z_curr)) < z_range(t,1)
                 z_range(t,1) = min(min(z_curr));
+            end
+            
+            if t == 1 && strcmp(net_name,'coherence') == 1
+                title(sprintf('%s',...
+                    strrep(stats(n).time(t).freq(f).name,'_',' ')))
+            elseif t == 1 && strcmp(net_name,'simple') == 1
+                title('correlation')
             end
             
         end
@@ -318,10 +370,12 @@ for sp = 1:length(ha)
     end
 end
 
+print(gcf,[out_folder,'net_change'],'-depsc');
+if 0
 %% Now, do the same thing for the power change (should not have a slope)
 figure
 set(gcf,'position',[1 100 1399 600])
-[ha, ~] = tight_subplot(time_count, 1, [0.1 0.01], [0.12 0.07], [0.05 0.01]);
+[ha, ~] = tight_subplot(time_count, 1, [0.1 0.01], [0.12 0.07], [0.06 0.01]);
 n = 1;
 for t = 1:time_count
     % change times for x axis
@@ -334,16 +388,33 @@ for t = 1:time_count
 
         times = realign_times(nchunks,surround_time);
     end
-    sig_power_change_times = sig_dev(t).sig;
-    times = times(~sig_power_change_times);
+
+    % Fix rounding error
+    times = round(times*1e2)/(1e2);
+
+    % Find the correct sig_dev
+    sig_dev_idx = 0;
+    for tt = 1:length(sig_dev)
+        if strcmp(sig_dev(tt).name,stats(n).time(t).name) == 1
+            sig_dev_idx = tt;
+            break
+        end
+    end
+
+    sig_power_change_bin = sig_dev(sig_dev_idx).sig;
+    not_sig_power_change_times = sig_dev(sig_dev_idx).times(~sig_power_change_bin);
+    not_sig_power_change_times = round(not_sig_power_change_times*1e2)/(1e2);
+    [F_not_power_change] = ismember(times,not_sig_power_change_times);
+    F_not_power_change(1) = 0; % ignore first time
+    times = times(F_not_power_change);
     
     axes(ha(t));
     
     % get t-stats
-    t_stats = sig_dev(t).t_stat_all;
+    t_stats = sig_dev(sig_dev_idx).t_stat_all;
     
     % Just take times without significant power change           
-    t_curr = t_stats(:,~sig_power_change_times);
+    t_curr = t_stats(:,F_not_power_change);
     
     % z score to normalize within pt
     z_curr = (t_curr-nanmean(t_curr,2))./nanstd(t_curr,0,2); %nan because first time is nans
@@ -375,17 +446,18 @@ for t = 1:time_count
     b = x\y;
 
     if p < alpha
-        plot(times,b(1)+b(2)*times,'g','linewidth',2);
+        plot(times,b(1)+b(2)*times,'g','linewidth',3);
     else
-        plot(times,b(1)+b(2)*times,'k','linewidth',2);
+        plot(times,b(1)+b(2)*times,'k','linewidth',3);
     end
     
     set(gca,'fontsize',20)
     
     xlabel('Time relative to spike peak (s)')
     
-    ylabel(sprintf('Network distance from\nfirst time (z-score)'))
+    ylabel(sprintf('Power change from\nfirst time (z-score)'))
     
+end
 end
 
 end

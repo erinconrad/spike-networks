@@ -283,7 +283,6 @@ for t = 1:time_count
                 F = (stats(n).time(t).freq(f).z_all);
             end
             
-            % Concatenate spike and not a spike
             is_spike_idx = logical([ones(size(F,1),1);zeros(size(F,1),1)]); 
             
             [a,b] = ismember(stats(n).time(t).time_window,F_times);

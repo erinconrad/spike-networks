@@ -160,8 +160,9 @@ for k = 1:n_windows
     xlim([times(1)-0.25*time_window,times(end)+0.25*time_window]);
     title(sprintf('Time window %s s',time_text))
     ylim([min(min(z_score_all{k})) max(max(z_score_all{k}))+0.5])
-    yl = get(gca,'ylim');
-    
+    xl = get(gca,'xlim');
+    xl(2) = 0.1;
+    set(gca,'xlim',xl);
      %if k == 2, error('look\n'); end
 end
     

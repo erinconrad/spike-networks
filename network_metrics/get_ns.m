@@ -62,6 +62,7 @@ for i = 1:length(listing)
     
     % Initialize
     ns = nan(n_f,n_spikes,n_times);
+    ge = nan(n_f,n_spikes,n_times);
 
     % Initialize spike count
     s_count = 0;
@@ -81,9 +82,12 @@ for i = 1:length(listing)
                 adj = squeeze(adj_all_t(tt,:,:));
                 
                 %% Calculate metrics  
-                % node strength of all chs
+                % node strength of biggest dev channel
                 ns_temp = strengths_und(adj);                
                 ns(f,s,tt) = ns_temp(biggest_dev);
+                
+                % global efficiency of full matrix
+                ge(f,s,tt) = efficiency_wei(adj,0); 
                 
             end
             
@@ -101,6 +105,9 @@ for i = 1:length(listing)
         end
         metrics.freq(f).ns.name = 'node strength';
         metrics.freq(f).ns.data = squeeze(ns(f,:,:));
+        
+        metrics.freq(f).ge.name = 'global efficiency';
+        metrics.freq(f).ge.data = squeeze(ge(f,:,:));
 
     end
     

@@ -239,7 +239,7 @@ for n = 1:network_count
                 text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1));
                 %if f == 8, error('look\n'); end
                 
-                %{
+                
                 if strcmp(text_out,'') == 1
                     plot([times(tt)-0.25 times(tt)+0.25],...
                     [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...

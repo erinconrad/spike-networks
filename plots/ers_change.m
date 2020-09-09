@@ -243,7 +243,10 @@ for t = 1:time_count
         %}
         
         ylim([-2 4])
-        xlim([-3 0])    
+        xl = get(gca,'xlim');
+    xl(2) = 0.1;
+    set(gca,'xlim',xl);
+       % xlim([-3 0])    
         %{
         if t == 2 && f == 4
              xlabel('Time relative to spike peak (s)')
@@ -266,7 +269,7 @@ for t = 1:time_count
         end
         %}
             
-        if t == 1 || t == 2, xticklabels([]); end
+       % if t == 1 || t == 2, xticklabels([]); end
         if f~=1, yticklabels([]); end
             
         set(gca,'fontsize',20);
