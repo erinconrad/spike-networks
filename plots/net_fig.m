@@ -465,7 +465,7 @@ end
 n_freq_abs = 0;
 
 % Loop through time scales
-time_listing = dir(network_folder);
+time_listing = dir(ers_folder);
 time_count = 0;
 network_count = 1;
 
@@ -488,7 +488,7 @@ for k = 1:length(time_listing)
     stats(network_count).time(time_count).name = time_name;
     stats(network_count).time(time_count).time_window = time_window;
 
-    time_folder = [network_folder,time_name,'/'];
+    time_folder = [ers_folder,time_name,'/'];
 
     pt_listing = dir([time_folder,'*.mat']);
 
@@ -522,26 +522,30 @@ for k = 1:length(time_listing)
         sim = sim.ers;
 
 
-        if isfield(sim(1),'time_windows') == 1 && isempty(sim(1).time_windows) == 0
-            stats(network_count).time(time_count).times = sim.time_windows;
-        end
+        %if isfield(sim(1),'time_windows') == 1 && isempty(sim(1).time_windows) == 0
+            stats(network_count).time(time_count).times = sim.time_window;
+        %end
 
 
         for f = 1:nfreq
             stats(network_count).time(time_count).freq(f).name = sim.freq_names{f};
 
-            power = (sim.powers(:,:,f),1);
+            power = (sim.powers(:,:,f));
             
             % Do a paired ttest
-            
+            t_stats = nan(size(power,2),1);
+            for tt = 2:size(power,2)
+                [~,~,~,stat1] = ttest(power(:,1),power(:,tt));
+                t_stats(tt) = stat1.tstat;
+            end
             
             % spike vs not a spike
             if contains(fname,'not') == 0
-                stats(network_count).time(time_count).freq(f).powers(pt_idx,:,1) = ...
-                    squeeze(mean(sim.powers(:,:,f),1));
+                stats(network_count).time(time_count).freq(f).t_stats(pt_idx,:,1) = ...
+                    t_stats;
             else
-                stats(network_count).time(time_count).freq(f).powers(pt_idx,:,2) = ...
-                    squeeze(mean(sim.powers(:,:,f),1));
+                stats(network_count).time(time_count).freq(f).t_stats(pt_idx,:,2) = ...
+                    t_stats;
             end
             
             
@@ -599,11 +603,11 @@ for t = 1:time_count
         sp = (n_freq_abs)*(t-1) + f;
         axes(ha(sp));
 
-        % Get F stats
+        % Get t stats
         if not_a_spike == 1
-            F = stats(n).time(t).freq(f).powers(:,:,2);
+            F = stats(n).time(t).freq(f).t_stats(:,:,2);
         else
-            F = stats(n).time(t).freq(f).powers(:,:,1);
+            F = stats(n).time(t).freq(f).t_stats(:,:,1);
         end
 
         % Just take times without significant power change
@@ -655,7 +659,7 @@ for t = 1:time_count
             xlabel('Time relative to spike peak (s)')
         end 
         if n == 2 && t == 2
-            ylabel(sprintf('Network distance from\nfirst time (z-score)'))
+            ylabel(sprintf('ERS change from\nfirst time (z-score)'))
         end
 
         % adjust z_range
@@ -667,12 +671,10 @@ for t = 1:time_count
             z_range(t,1) = min(min(z_curr));
         end
 
-        if t == 1 && strcmp(net_name,'coherence') == 1
-            title(sprintf('%s',...
-                strrep(stats(n).time(t).freq(f).name,'_',' ')))
-        elseif t == 1 && strcmp(net_name,'simple') == 1
-            title('correlation')
-        end
+        
+        title(sprintf('%s',...
+            strrep(stats(n).time(t).freq(f).name,'_',' ')))
+        
 
     end
 
