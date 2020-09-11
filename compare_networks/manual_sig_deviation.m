@@ -169,7 +169,9 @@ for i = 1:length(listing)
         sig_dev(pt_idx).ci(t,:) = ci;
         sig_dev(pt_idx).stats(t) = stats;
         
+        
     end
+    sig_dev(pt_idx).dev_windows = dev_windows;
     
     % Also get a normalized z-score to combine across patients
     dev_avg_all_spikes = nanmean(dev_windows,1); % avg across spikes
@@ -182,6 +184,6 @@ for i = 1:length(listing)
 end
 
 % Save the structure
-    save([sig_dev_folder,'sig_dev',not_a_spike_text,'.mat'],'sig_dev')
+save([sig_dev_folder,'sig_dev',not_a_spike_text,'.mat'],'sig_dev')
 
 end
