@@ -179,7 +179,8 @@ for i = 1:length(listing)
     sig_dev(pt_idx).z_score_dev = z_score_dev;
     sig_dev(pt_idx).avg_dev = dev_avg_all_spikes;
     sig_dev(pt_idx).time_window = time_window;
-    
+    sig_dev(pt_idx).index_windows = index_windows;
+    sig_dev(pt_idx).fs = fs;
     
 end
 
