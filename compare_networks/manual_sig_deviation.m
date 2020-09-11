@@ -163,8 +163,8 @@ for i = 1:length(listing)
     % Now I can compare the signal deviation across time windows
     for t = 2:size(index_windows,1)
         
-        % Do a two-sample t-test
-        [~,p,ci,stats] = ttest2(dev_windows(:,1),dev_windows(:,t));
+        % Do a paired t-test
+        [~,p,ci,stats] = ttest(dev_windows(:,1),dev_windows(:,t));
         sig_dev(pt_idx).p(t) = p;
         sig_dev(pt_idx).ci(t,:) = ci;
         sig_dev(pt_idx).stats(t) = stats;

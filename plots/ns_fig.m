@@ -25,11 +25,6 @@ if exist(out_folder,'dir') == 0
     mkdir(out_folder);
 end
 
-% Load spike file for one patient to get the surround time
-spike = load([eeg_folder,'HUP074_eeg.mat']);
-spike = spike.spike;
-surround_time = spike(1).surround_time;
-
 
 % Loop through network types
 listing = dir(ns_folder);
@@ -82,25 +77,26 @@ for l = 1:length(listing)
         
         pt_listing = dir([time_folder,'*.mat']);
         
-        % load one to get nfreq
+        % load one to get nfreq and index windows
         sim = load([time_folder,pt_listing(1).name]);
         sim = sim.metrics;
         nfreq = length(sim.freq);
         if n_freq_abs < nfreq
             n_freq_abs = nfreq;
         end
-        
+        stats(network_count).time(time_count).index_windows = sim.index_windows;
+        stats(network_count).time(time_count).fs = sim.fs;
        
         
         for f = 1:nfreq
             stats(network_count).time(time_count).freq(f).ns_all = ...
-                nan(length(pt_listing),surround_time*2/time_window);
+                nan(length(pt_listing),size(sim.index_windows,1));
             stats(network_count).time(time_count).freq(f).z_all = ...
-                nan(length(pt_listing),surround_time*2/time_window);
+                nan(length(pt_listing),size(sim.index_windows,1));
             stats(network_count).time(time_count).freq(f).p_all = ...
-                nan(length(pt_listing),surround_time*2/time_window);
+                nan(length(pt_listing),size(sim.index_windows,1));
             stats(network_count).time(time_count).freq(f).t_all = ...
-                nan(length(pt_listing),surround_time*2/time_window);
+                nan(length(pt_listing),size(sim.index_windows,1));
         end
         
         
@@ -177,7 +173,14 @@ for n = 1:network_count
         
         % change times for x axis
         nchunks = size(stats(n).time(t).freq(1).z_all,2);
-        times = realign_times(nchunks,surround_time);
+        if isfield(stats(n).time(t),'index_windows') && isempty(stats(n).time(t).index_windows) == 0
+            temp_times = stats(n).time(t).index_windows(:,1)/stats(n).time(t).fs-3;
+            times = realign_times(temp_times,surround_time);
+        else
+
+            times = realign_times(nchunks,surround_time);
+        end
+        times = round(times*1e2)/(1e2); %rounding errors
         
         nfreq = length(stats(n).time(t).freq);
         for f = 1:nfreq
