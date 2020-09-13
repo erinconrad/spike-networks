@@ -130,7 +130,8 @@ for k = 1:n_windows
     for j = 1:length(times)
         if j > 1
             [~,p] = ttest(t_score_all{k}(:,j)); % ttest looking at individual pt t stats
-            text_out = get_asterisks(p,size(z_score_all{k},2)-1);
+            %text_out = get_asterisks(p,size(z_score_all{k},2)-1);
+            text_out = get_asterisks(p,1);
             if strcmp(text_out,'') == 1
                 plot([times(j)-0.25*time_window times(j)+0.25*time_window],...
                 [nanmean(curr_z_score(:,j)) nanmean(curr_z_score(:,j))],...

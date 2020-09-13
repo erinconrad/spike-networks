@@ -164,12 +164,14 @@ for l = 1:length(listing)
         pt_listing = dir([time_folder,'*.mat']);
 
         % load one to get nfreq
-        sim = load([time_folder,pt_listing(1).name]);
+        sim = load([time_folder,pt_listing(2).name]);
         sim = sim.sim;
         nfreq = length(sim);
         if n_freq_abs < nfreq
             n_freq_abs = nfreq;
         end
+        
+        
 
         all_names = {};
         % loop through pts
@@ -178,6 +180,12 @@ for l = 1:length(listing)
             fname = pt_listing(i).name;
             pt_name = strsplit(fname,'_');
             pt_name = pt_name{1};
+            
+            if not_a_spike == 0
+                if contains(pt_listing(i).name,'not') == 1, continue; end
+            else
+                if contains(pt_listing(i).name,'not') == 0, continue; end
+            end
 
 
             [a,b] = ismember(pt_name,all_names);
@@ -197,6 +205,7 @@ for l = 1:length(listing)
                 stats(network_count).time(time_count).index_windows = sim.index_windows;
                 stats(network_count).time(time_count).fs = sim.fs;
             end
+            %}
 
 
             for f = 1:nfreq
@@ -219,6 +228,7 @@ for l = 1:length(listing)
 end
 
 %% Now plot network change over time and look for significant slope
+if 1
 figure
 set(gcf,'position',[1 100 1500 600])
 [ha, ~] = tight_subplot(time_count, n_freq_abs+1, [0.08 0.02], [0.12 0.07], [0.06 0.005]);
@@ -259,7 +269,9 @@ for n = 1:network_count
         not_sig_power_change_times = round(not_sig_power_change_times*1e2)/(1e2);
         [F_not_power_change] = ismember(times,not_sig_power_change_times);
         F_not_power_change(1) = 0; % ignore first time
+        %F_not_power_change(times<-1.8) = 0;
         times = times(F_not_power_change);
+        
         
         %if t == 2, error('look\n'); end
         
@@ -322,6 +334,8 @@ for n = 1:network_count
             X = [ones(length(x),1),x];
             b = X\y;
             
+          %  if f == 7, error('look\n'); end
+            
             if p < alpha/(n_freq_abs+1)
                 %plot(times',b(1)+b(2)*(1:size(z_curr,2)),'g','linewidth',2);
                 plot(times',b(1)+b(2)*times,'g','linewidth',3);
@@ -371,7 +385,10 @@ for sp = 1:length(ha)
     end
 end
 
-print(gcf,[out_folder,'net_change'],'-depsc');
+%print(gcf,[out_folder,'net_change'],'-depsc');
+end
+
+
 if 0
 %% Now, do the same thing for the power change (should not have a slope)
 figure
@@ -462,6 +479,7 @@ end
 end
 
 %% Now get frequency-specific power changes
+clear stats
 n_freq_abs = 0;
 
 % Loop through time scales
@@ -535,7 +553,7 @@ for k = 1:length(time_listing)
             % Do a paired ttest
             t_stats = nan(size(power,2),1);
             for tt = 2:size(power,2)
-                [~,~,~,stat1] = ttest(power(:,1),power(:,tt));
+                [~,~,~,stat1] = ttest(power(:,tt),power(:,1));
                 t_stats(tt) = stat1.tstat;
             end
             
@@ -638,7 +656,7 @@ for t = 1:time_count
 
         % Plot an overall trend line
        % x = repmat(1:size(z_curr,2),size(z_curr,1),1);
-        x = repmat(times',size(z_curr,1),1);
+        x = repmat(times,size(z_curr,1),1);
         y = z_curr(:);
         x = x(:);
         X = [ones(length(x),1),x];

@@ -88,7 +88,7 @@ for l = 1:length(listing)
         pt_listing = dir([time_folder,'*.mat']);
         
         % load one to get nfreq
-        sim = load([time_folder,pt_listing(1).name]);
+        sim = load([time_folder,pt_listing(2).name]);
         sim = sim.sim;
         nfreq = length(sim);
         if n_freq_abs < nfreq
