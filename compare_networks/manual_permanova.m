@@ -76,6 +76,16 @@ for j = 1:length(listing)
     meta = load([adj_folder,name,not_a_spike_text,'adj.mat']);
     meta = meta.meta;
     
+    %% Only look at closer times depending on time window
+    if time_window == 0.2
+        early_idx = meta.spike(1).index_windows(:,1)/meta.fs < 1;
+    elseif time_window == 0.1
+        early_idx = meta.spike(1).index_windows(:,1)/meta.fs < 2;
+    end
+    for s = 1:length(meta.spike)
+        meta.spike(s).index_windows(early_idx,:) = [];
+        meta.spike(s).adj.adj(early_idx,:,:) = [];
+    end
     
     % Get number of spikes, frequencies, times, channels
     nspikes = length(meta.spike);
