@@ -15,7 +15,7 @@ if do_notch == 1
                    'HalfPowerFrequency1',59,'HalfPowerFrequency2',61, ...
                    'DesignMethod','butter','SampleRate',fs);
     for i = 1:size(data,2)
-       %data(isnan(data)) = 0;
+       data(isnan(data)) = 0;
        data(:,i) = filtfilt(f,data(:,i));   
     end
 end
