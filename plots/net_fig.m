@@ -230,8 +230,8 @@ end
 %% Now plot network change over time and look for significant slope
 if 1
 figure
-set(gcf,'position',[1 100 1500 600])
-[ha, ~] = tight_subplot(time_count, n_freq_abs+1, [0.08 0.02], [0.12 0.07], [0.06 0.005]);
+set(gcf,'position',[1 100 1500 time_count*200+50])
+[ha, ~] = tight_subplot(time_count, n_freq_abs+1, [0.08 0.02], [0.15 0.12], [0.06 0.005]);
 z_range = zeros(time_count,2);
 for n = 1:network_count
 
@@ -269,7 +269,8 @@ for n = 1:network_count
         not_sig_power_change_times = round(not_sig_power_change_times*1e2)/(1e2);
         [F_not_power_change] = ismember(times,not_sig_power_change_times);
         F_not_power_change(1) = 0; % ignore first time
-        %F_not_power_change(times<-1.8) = 0;
+        F_not_power_change(times<-1.8) = 0;
+        
         times = times(F_not_power_change);
         
         
@@ -350,7 +351,7 @@ for n = 1:network_count
             if f == 4 && t == time_count
                 xlabel('Time relative to spike peak (s)')
             end 
-            if n == 2 && t == 2
+            if n == 2
                 ylabel(sprintf('Network distance from\nfirst time (z-score)'))
             end
             
@@ -385,15 +386,16 @@ for sp = 1:length(ha)
     end
 end
 
-%print(gcf,[out_folder,'net_change'],'-depsc');
+
+print(gcf,[out_folder,'net_change'],'-depsc');
 end
 
 
-if 0
+if 1
 %% Now, do the same thing for the power change (should not have a slope)
 figure
-set(gcf,'position',[1 100 1399 600])
-[ha, ~] = tight_subplot(time_count, 1, [0.1 0.01], [0.12 0.07], [0.06 0.01]);
+set(gcf,'position',[1 100 1399 time_count*200+50])
+[ha, ~] = tight_subplot(time_count, 1, [0.1 0.01], [0.15 0.1], [0.06 0.02]);
 n = 1;
 for t = 1:time_count
     % change times for x axis
@@ -476,6 +478,8 @@ for t = 1:time_count
     ylabel(sprintf('Power change from\nfirst time (z-score)'))
     
 end
+
+print(gcf,[out_folder,'power_change'],'-depsc')
 end
 
 %% Now get frequency-specific power changes

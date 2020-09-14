@@ -1,4 +1,4 @@
-function signal_dev_fig(not_a_spike)
+function signal_dev_fig(windows,not_a_spike)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -48,6 +48,10 @@ for i = 1:length(listing)
     
     time_text = listing(i).name;
     time_window = str2num(time_text);
+    
+    % Skip if not the time window we want
+    if ismember(time_window,windows) == 0, continue; end
+    
     time_window_folder = [sig_dev_folder,time_text,'/'];
     
     % load the file
@@ -163,6 +167,7 @@ for k = 1:n_windows
     ylim([min(min(z_score_all{k})) max(max(z_score_all{k}))+0.5])
     xl = get(gca,'xlim');
     xl(2) = 0.1;
+    xl(1) = -1;
     set(gca,'xlim',xl);
      %if k == 2, error('look\n'); end
 end

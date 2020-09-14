@@ -76,6 +76,16 @@ for j = 1:length(listing)
     meta = load([adj_folder,name,not_a_spike_text,'adj.mat']);
     meta = meta.meta;
     
+    %{
+    REMOVE AFTER TESTING!!!!!!!!!!!!!
+    %}
+    % temporary for bug testing, remove times before 2 s
+    early_idx = meta.spike(1).index_windows(:,1)/meta.fs < 1;
+    for s = 1:length(meta.spike)
+        meta.spike(s).index_windows(early_idx,:) = [];
+        meta.spike(s).adj.adj(early_idx,:,:) = [];
+    end
+    
     % Get number of spikes, frequencies, times, channels
     nspikes = length(meta.spike);
     nfreq = length(meta.spike(1).adj);

@@ -107,24 +107,7 @@ for l = 1:length(listing)
                 stats(network_count).time(time_count).freq(f).F_all = ...
                     nan(length(pt_listing),size(sim(f).index_windows,1));
 
-                stats(network_count).time(time_count).freq(f).p_all = ...
-                    nan(length(pt_listing),size(sim(f).index_windows,1));
-
-                stats(network_count).time(time_count).freq(f).z_all = ...
-                    nan(length(pt_listing),size(sim(f).index_windows,1));
-
-            end
-       else
-           
-           for f = 1:nfreq
-                stats(network_count).time(time_count).freq(f).F_all = ...
-                    nan(length(pt_listing),surround_time*2/time_window);
-
-                stats(network_count).time(time_count).freq(f).p_all = ...
-                    nan(length(pt_listing),surround_time*2/time_window);
-
-                stats(network_count).time(time_count).freq(f).z_all = ...
-                    nan(length(pt_listing),surround_time*2/time_window);
+                
 
             end
        end
@@ -141,7 +124,14 @@ for l = 1:length(listing)
             pt_name = pt_listing(i).name;
             pt_name_pt = strsplit(pt_name,'_');
             pt_name_pt = pt_name_pt{1};
-            pt_names = [pt_names;pt_name_pt];
+            
+            [a,b] = ismember(pt_name_pt,pt_names);
+            if a == 1
+                pt_idx = b;
+            else
+                pt_names = [pt_names;pt_name_pt];
+                pt_idx = length(pt_names);
+            end
             
             % load pt file
             sim = load([time_folder,pt_name]);
@@ -150,8 +140,8 @@ for l = 1:length(listing)
             
             for f = 1:nfreq
                 stats(network_count).time(time_count).freq(f).name = sim(f).name;
-                stats(network_count).time(time_count).freq(f).F_all(i,:) = sim(f).F;
-                stats(network_count).time(time_count).freq(f).p_all(i,:) = sim(f).p;
+                stats(network_count).time(time_count).freq(f).F_all(pt_idx,:) = sim(f).F;
+                stats(network_count).time(time_count).freq(f).p_all(pt_idx,:) = sim(f).p;
                 
                 F_curr = stats(network_count).time(time_count).freq(f).F_all;
                 if max_F < max(max(F_curr))
@@ -161,7 +151,7 @@ for l = 1:length(listing)
                 
                 
                 % convert F stats to z scores to compare across time points
-                stats(network_count).time(time_count).freq(f).z_all(i,:) = (sim(f).F-nanmean(sim(f).F))./nanstd(sim(f).F);
+                stats(network_count).time(time_count).freq(f).z_all(pt_idx,:) = (sim(f).F-nanmean(sim(f).F))./nanstd(sim(f).F);
                             
             end
             
@@ -239,20 +229,20 @@ for n = 1:network_count
                 text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1));
                 %if f == 8, error('look\n'); end
                 
-                
+                tw = stats(n).time(t).time_window;
                 if strcmp(text_out,'') == 1
-                    plot([times(tt)-0.25 times(tt)+0.25],...
-                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    plot([times(tt)-tw/2 times(tt)+tw/2],...
+                    [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
                     'k','linewidth',4);
                 else
-                    plot([times(tt)-0.25 times(tt)+0.25],...
-                    [mean(z_curr(:,tt)) mean(z_curr(:,tt))],...
+                    plot([times(tt)-tw/2 times(tt)+tw/2],...
+                    [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
                     'g','linewidth',4);
                 end
                 %}
             end
             
-
+            %if f == 7, error('look\n'); end
             
             if t == 3 && f == 4
                  xlabel('Time relative to spike peak (s)')
@@ -267,7 +257,7 @@ for n = 1:network_count
             
           %  xlim([-3 0]) 
           xl = get(gca,'xlim');
-          xl(2) = 0;
+          xl(2) = 0.1;
           set(gca,'xlim',xl);
             
         end

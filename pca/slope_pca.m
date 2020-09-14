@@ -275,7 +275,7 @@ end
 %% Test if the scores for spike are higher than the scores for not a spike
 for t = 1:time_count
     for n = 1:length(stats)
-        for f = 7%1:length(stats(n).time(t).freq)
+        for f = 8%1:length(stats(n).time(t).freq)
            
             if sd == 0
                 F = (stats(n).time(t).freq(f).F_all); %n_patients x n_time periods x 2 (spike and not a spike)
