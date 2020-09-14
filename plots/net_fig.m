@@ -269,7 +269,7 @@ for n = 1:network_count
         not_sig_power_change_times = round(not_sig_power_change_times*1e2)/(1e2);
         [F_not_power_change] = ismember(times,not_sig_power_change_times);
         F_not_power_change(1) = 0; % ignore first time
-        F_not_power_change(times<-1.8) = 0;
+        %F_not_power_change(times<-1.8) = 0;
         
         times = times(F_not_power_change);
         
