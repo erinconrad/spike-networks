@@ -20,8 +20,15 @@ freqs = freqs(1:end-1);
 P = P(1:ceil(length(P)/2));
 freqs = freqs(1:ceil(length(freqs)/2));
 
+% Perform linear interpolation to smooth this out
+freqs = [freqs,256];
+P = [P;P(end)];
+finterp = [0:2:256];
+Pinterp = interp1(freqs',P,finterp);
+
+
 for f = 1:size(freq_bands,1)
-    powers(f) = sum(P(freqs>=freq_bands(f,1) & freqs<=freq_bands(f,2)));
+    powers(f) = sum(Pinterp(finterp>=freq_bands(f,1) & finterp<=freq_bands(f,2)));
 end
 
 end

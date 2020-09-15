@@ -1,4 +1,4 @@
-function ns_fig
+function ns_fig(windows)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -24,6 +24,11 @@ freq_names = {'delta','theta','alpha','beta','low_gamma',...
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
 end
+
+% Load spike file for one patient to get the surround time
+spike = load([eeg_folder,'HUP074_eeg.mat']);
+spike = spike.spike;
+surround_time = spike(1).surround_time;
 
 
 % Loop through network types
@@ -67,6 +72,10 @@ for l = 1:length(listing)
 
         % Skip if not a directory
         if time_listing(k).isdir == 0, continue; end
+        
+        % Skip if not the time window we want
+        if ismember(time_window,windows) == 0, continue; end
+
         
         time_names = [time_names;time_name];
         
@@ -213,13 +222,13 @@ for n = 1:network_count
                 text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1)); % should I also adjust by nfreq?
                 
               %  if n == 1 && f == 5 && t == 1 && tt == 7, error('look\n'); end
-                
+                tw = stats(n).time(t).time_window;
                 if strcmp(text_out,'') == 1
-                    plot([times(tt)-0.25 times(tt)+0.25],...
+                    plot([times(tt)-tw/2 times(tt)+tw/2],...
                     [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
                     'k','linewidth',4);
                 else
-                    plot([times(tt)-0.25 times(tt)+0.25],...
+                    plot([times(tt)-tw/2 times(tt)+tw/2],...
                     [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
                     'g','linewidth',4);
                 end
@@ -261,30 +270,5 @@ end
 print(gcf,[out_folder,'ns'],'-depsc');
 
 
-%% Say the patients with significant pre-spike rise
-midpoint = nchunks/2;
-for n = 1:length(network_names)
-    fprintf('\n for %s:\n\n',network_names{n});
-for t = 1:length(time_names)
-    fprintf('\n for time window %s:\n\n',time_names{t});
-    for i = 1:length(pt_names)
-        fprintf('\n%s had significant pre-spike ns change for:',pt_names{i});
-        for f = 1:nfreq
-            for tt = 1:midpoint - 1
-            
-                if i>size(stats(n).time(t).freq(f).p_all,1), continue; end
-                % Get the p-value
-                p = stats(n).time(t).freq(f).p_all(i,tt);
-                
-                if p < 0.05/(n_freq_abs+1)/length(pt_names)/(nchunks-1)
-                    fprintf('\n%s time %d.\n',freq_names{f},tt);
-                end
-
-            end
-        end
-        fprintf('\n\n\n');
-    end
-end
-end
 
 end

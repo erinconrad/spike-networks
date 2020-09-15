@@ -300,7 +300,7 @@ for t = 1:time_count
             [coeff,score,latent] = pca(F_cat);
             
             % ttest comparing scores of first component for the spike to not-a-spike
-           [~,p] = ttest2(score(is_spike_idx,1),score(~is_spike_idx,1));
+           [~,p] = ttest(score(is_spike_idx,1),score(~is_spike_idx,1));
             
         end
     end
