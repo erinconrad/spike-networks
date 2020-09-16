@@ -18,6 +18,11 @@ expect a consistent slope in the power change across patients.
 %}
 
 %% Parameters
+plot_network = 1;
+plot_power = 1;
+plot_ers = 0;
+plot_metrics = 0;
+which_metric = 'ns';
 alpha = 0.05;
 
 % should I Bonferroni correct the alpha for the signal deviation step? If
@@ -40,6 +45,7 @@ out_folder = [results_folder,'plots/'];
 sig_dev_folder = [results_folder,'signal_deviation/manual/'];
 perm_folder = [results_folder,'perm_stats/'];
 ers_folder = [results_folder,'ers/'];
+ns_folder = [results_folder,'metrics/manual/'];
 
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
@@ -259,7 +265,7 @@ for l = 1:length(listing)
 end
 
 %% Now plot network change over time and look for significant slope
-if 1
+if plot_network
 figure
 set(gcf,'position',[1 100 1500 time_count*200+50])
 [ha, ~] = tight_subplot(time_count, n_freq_abs+1, [0.08 0.02], [0.15 0.12], [0.06 0.005]);
@@ -420,7 +426,7 @@ end
 end
 
 
-if 1
+if plot_power
 %% Power change
 %{
 With the times of significant power change removed, I now check for a
@@ -617,8 +623,9 @@ end
 
 
 %% Now plot ERS change over time and look for significant slope
+if plot_ers
 figure
-set(gcf,'position',[1 100 1500 600])
+set(gcf,'position',[1 100 1500 time_count*200+50])
 [ha, ~] = tight_subplot(time_count, n_freq_abs, [0.08 0.02], [0.12 0.07], [0.06 0.005]);
 z_range = zeros(time_count,2);
 n = 1;
@@ -737,7 +744,283 @@ for t = 1:time_count
     end
 
 end
-    
+end
 
+%% Now get network metrics
+network_count = 0;
+n_freq_abs = 0;
+listing = dir(ns_folder);
+for l = 1:length(listing)
+    name= listing(l).name;
+
+    % Skip if . or ..
+    if strcmp(name,'.') == 1 || strcmp(name,'..') == 1
+        continue
+    end
+
+    % Skip if not a directory
+    if listing(l).isdir == 0, continue; end
+
+    network_count = network_count + 1;
+    stats(network_count).name = name;
+
+    network_folder = [ns_folder,name,'/'];
+
+    % Loop through time scales
+    time_listing = dir(network_folder);
+    time_count = 0;
+
+    for k = 1:length(time_listing)
+        time_name= time_listing(k).name;
+        time_window = str2num(time_name);
+
+        % Skip if . or ..
+        if strcmp(time_name,'.') == 1 || strcmp(time_name,'..') == 1
+            continue
+        end
+
+        % Skip if not a directory
+        if time_listing(k).isdir == 0, continue; end
+
+        % Skip if not the time window we want
+        if ismember(time_window,windows) == 0, continue; end
+
+        time_count = time_count + 1;
+        stats(network_count).time(time_count).name = time_name;
+        stats(network_count).time(time_count).time_window = time_window;
+        
+        time_folder = [network_folder,time_name,'/'];
+
+        pt_listing = dir([time_folder,'*.mat']);
+
+        % load one to get nfreq
+        sim = load([time_folder,pt_listing(2).name]);
+        sim = sim.metrics;
+        nfreq = length(sim.freq);
+        if n_freq_abs < nfreq
+            n_freq_abs = nfreq;
+        end
+        
+        
+
+        all_names = {};
+        % loop through pts
+        for i = 1:length(pt_listing)
+
+            fname = pt_listing(i).name;
+            pt_name = strsplit(fname,'_');
+            pt_name = pt_name{1};
+            
+            if not_a_spike == 0
+                if contains(pt_listing(i).name,'not') == 1, continue; end
+            else
+                if contains(pt_listing(i).name,'not') == 0, continue; end
+            end
+
+
+            [a,b] = ismember(pt_name,all_names);
+            if a == 1
+                pt_idx = b;
+            else
+                all_names = [all_names;pt_name];
+                pt_idx = length(all_names);
+            end
+
+            % load pt file
+            sim = load([time_folder,fname]);
+            sim = sim.metrics;
+            
+            
+            if isfield(sim(1),'index_windows') == 1 && isempty(sim(1).index_windows) == 0
+                stats(network_count).time(time_count).index_windows = sim.index_windows;
+                stats(network_count).time(time_count).fs = sim.fs;
+            end
+            %}
+
+
+            for f = 1:nfreq
+                stats(network_count).time(time_count).freq(f).name = sim.freq(f).name;
+
+                
+                % spike vs not a spike
+                if contains(fname,'not') == 0
+                    stats(network_count).time(time_count).freq(f).F_all(pt_idx,:,1) = mean(sim.freq(f).(which_metric).data,1);
+                else
+                    stats(network_count).time(time_count).freq(f).F_all(pt_idx,:,2) = mean(sim.freq(f).(which_metric).data,1);
+                end
+                
+                % These pseudo F stats are from a permANOVA comparing the
+                % network in the first time period to that of subsequent
+                % time periods
+            end
+
+
+        end
+
+    end
+
+end
+
+    
+%% Now plot network metric change over time 
+if plot_metrics
+figure
+set(gcf,'position',[1 100 1500 time_count*200+50])
+[ha, ~] = tight_subplot(time_count, n_freq_abs+1, [0.08 0.02], [0.15 0.12], [0.06 0.005]);
+z_range = zeros(time_count,2);
+for n = 1:network_count
+
+    net_name = stats(n).name;
+    
+    for t = 1:time_count
+        
+        if t>size(stats(n).time), continue; end
+        
+        % change times for x axis
+        nchunks = size(stats(n).time(t).freq(1).F_all,2);
+        
+        if isfield(stats(n).time(t),'index_windows') && isempty(stats(n).time(t).index_windows) == 0
+            temp_times = stats(n).time(t).index_windows(:,1)/stats(n).time(t).fs-3;
+            times = realign_times(temp_times,surround_time);
+        else
+
+            times = realign_times(nchunks,surround_time);
+        end
+        
+        % Fix rounding error
+        times = round(times*1e2)/(1e2);
+        
+        % Find the corresponding sig_dev time window index
+        for tt = 1:length(sig_dev)
+            if strcmp(sig_dev(tt).name,stats(n).time(t).name) == 1
+                sig_dev_idx = tt;
+                break
+            end
+        end
+
+        % The times in the signal deviation structure should line up with
+        % the times in the network structure
+        sig_power_change_bin = sig_dev(sig_dev_idx).sig;
+        sig_dev_times = sig_dev(sig_dev_idx).times;
+        if ~isequal(sig_dev_times,times)
+            error('Non-aligning times');
+        end
+
+        % Only include times without sig power change
+        times = times(~sig_power_change_bin);
+        
+ 
+        nfreq = length(stats(n).time(t).freq);
+        for f = 1:nfreq
+            
+            % Get appropriate subplot
+            if strcmp(net_name,'coherence') == 1
+                column_add = 1;
+            else
+                column_add = 0;
+            end
+            % this adds the number of frequencies + 1 if it's on the 2nd
+            % time point (to move down a row), and it adds which frequency
+            % (which is 1 if simple) and adds 1 if coherence, to start with
+            % the 2nd column for coherence
+            %sp = f + column_add;
+            sp = (n_freq_abs+1)*(t-1) + f + column_add;
+            axes(ha(sp));
+            
+            % Get F stats
+            if not_a_spike == 1
+                F = stats(n).time(t).freq(f).F_all(:,:,2);
+            else
+                F = stats(n).time(t).freq(f).F_all(:,:,1);
+            end
+            
+            % remove any post-zero times
+            
+            % Just take times without significant power change
+            F_curr = F(:,~sig_power_change_bin);
+            
+            
+            % z score to normalize within pt
+            z_curr = (F_curr-nanmean(F_curr,2))./nanstd(F_curr,0,2); %nan because first time is nans
+            slopes = zeros(size(z_curr,1),1);
+            
+            % loop over patients and plot
+            for i = 1:size(z_curr,1)
+                plot(times,z_curr(i,:),'ko');
+                hold on
+                
+                % Get slope for each patient
+                y = z_curr(i,:)';
+                x = [ones(length(y),1), (1:length(y))'];
+                % do regression to find best fit line through the F stats
+                % for that patient
+                b = x\y; 
+                slopes(i) = b(2);
+                
+                
+            end
+            
+            % See if slopes are significantly different from zero
+            [~,p] = ttest(slopes);
+            
+            % Plot an overall trend line
+            x = repmat(times',size(z_curr,1),1);
+            y = z_curr(:);
+            x = x(:);
+            X = [ones(length(x),1),x];
+            b = X\y;
+            
+            
+            if p < alpha/(n_freq_abs+1) % Bonferroni for number of freq bands
+                plot(times',b(1)+b(2)*times,'g','linewidth',3);
+            else
+                plot(times',b(1)+b(2)*times,'k','linewidth',3);
+            end
+
+            set(gca,'fontsize',20)
+            if f == 4 && t == time_count
+                xlabel('Time relative to spike peak (s)')
+            end 
+            if n == 2
+                ylabel(sprintf('%s (z-score)', which_metric))
+            end
+            
+            % adjust z_range
+            if max(max(z_curr)) > z_range(t,2)
+                z_range(t,2) = max(max(z_curr));
+            end
+
+            if min(min(z_curr)) < z_range(t,1)
+                z_range(t,1) = min(min(z_curr));
+            end
+            
+            if t == 1 && strcmp(net_name,'coherence') == 1
+                title(sprintf('%s',...
+                    strrep(stats(n).time(t).freq(f).name,'_',' ')))
+            elseif t == 1 && strcmp(net_name,'simple') == 1
+                title('correlation')
+            end
+            
+        end
+        
+    end
+    
+end
+for sp = 1:length(ha)
+    axes(ha(sp))
+    t = ceil(sp/(n_freq_abs+1));
+    ylim(z_range(t,:))
+    
+    if mod(sp,(n_freq_abs+1)) ~= 1
+        yticklabels([])
+    end
+end
+
+if not_a_spike
+    print(gcf,[out_folder,'net_change_not_spike'],'-depsc');
+else
+    print(gcf,[out_folder,'net_change'],'-depsc');
+end
+end
 
 end

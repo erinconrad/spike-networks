@@ -167,7 +167,7 @@ for k = 1:n_windows
     ylim([min(min(z_score_all{k})) max(max(z_score_all{k}))+0.5])
     xl = get(gca,'xlim');
     xl(2) = 0.1;
-    xl(1) = -1;
+    %xl(1) = -1;
     set(gca,'xlim',xl);
      %if k == 2, error('look\n'); end
 end

@@ -349,19 +349,18 @@ for n = 1:network_count
             end
                         
             % plot mean F across patients
-            for tt = 1:size(z_curr,2)
-                
+            if remove_sig_sd == 1
+                adjusted_alpha2 = (n_freq_abs+1);
+                for tt = 1:size(z_curr,2) -1 
+                    tw = stats(n).time(t).time_window;
+                    plot([times(tt)-tw/2 times(tt)+tw/2],...
+                        [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
+                        'k','linewidth',4);
+                end
+                tt = size(z_curr,2);
                 curr_p_vals = stats(n).time(t).freq(f).p_all(:,tt);
                 comb_p = fisher_p_value(curr_p_vals);
-                
-                if remove_sig_sd == 1
-                    adjusted_alpha2 = sum(~sig_power_change_bin)*(n_freq_abs+1);
-                else
-                    adjusted_alpha2 = (nchunks-1)*(n_freq_abs+1);
-                end
                 text_out = get_asterisks(comb_p,adjusted_alpha2);
-                %if f == 8, error('look\n'); end
-                
                 tw = stats(n).time(t).time_window;
                 if strcmp(text_out,'') == 1
                     plot([times(tt)-tw/2 times(tt)+tw/2],...
@@ -372,10 +371,33 @@ for n = 1:network_count
                     [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
                     'g','linewidth',4);
                 end
-                %}
+            else
+                adjusted_alpha2 = (nchunks-1)*(n_freq_abs+1);
+                for tt = 1:size(z_curr,2)
+
+                    curr_p_vals = stats(n).time(t).freq(f).p_all(:,tt);
+                    comb_p = fisher_p_value(curr_p_vals);
+
+                    text_out = get_asterisks(comb_p,adjusted_alpha2);
+                    %if f == 8, error('look\n'); end
+
+                    tw = stats(n).time(t).time_window;
+                    if strcmp(text_out,'') == 1
+                        plot([times(tt)-tw/2 times(tt)+tw/2],...
+                        [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
+                        'k','linewidth',4);
+                    else
+                        plot([times(tt)-tw/2 times(tt)+tw/2],...
+                        [nanmean(z_curr(:,tt)) nanmean(z_curr(:,tt))],...
+                        'g','linewidth',4);
+                    end
+                    %}
+                end
+            
+            
             end
             
-            %if f == 7, error('look\n'); end
+            if f == 7, error('look\n'); end
             
             if t == 3 && f == 4
                  xlabel('Time relative to spike peak (s)')
