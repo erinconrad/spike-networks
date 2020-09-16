@@ -85,7 +85,7 @@ for j = 1:length(listing)
     for s = 1:length(meta.spike)
         for f = 1:length(meta.spike(s).adj)
             meta.spike(s).index_windows(early_idx,:) = [];
-            meta.spike(s).adj.adj(early_idx,:,:) = [];
+            meta.spike(s).adj(f).adj(early_idx,:,:) = [];
         end
     end
     
