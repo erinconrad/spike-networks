@@ -83,7 +83,7 @@ for i = 1:length(listing)
         temp_sig_dev = load([time_window_folder,sub_listing(k).name]);
         sig_dev(count).name = time_text;
         sig_dev(count).time_window = time_window;
-        sig_dev(count).sig_dev = temp_sig_dev.sig_dev;
+        sig_dev(count).sig_dev = temp_sig_dev.sig_dev; 
     end
 end
 
@@ -95,7 +95,8 @@ for t = 1:n_windows
     for i = 1:length(sig_dev(t).sig_dev)
         for tt = 1:length(sig_dev(t).sig_dev(i).stats)
             if isempty(sig_dev(t).sig_dev(i).stats(tt).tstat) == 0
-                sig_dev(t).t_stat_all(i,tt) = sig_dev(t).sig_dev(i).stats(tt).tstat;
+                % take negative so positive if later time larger
+                sig_dev(t).t_stat_all(i,tt) = -sig_dev(t).sig_dev(i).stats(tt).tstat;
             end
         end
     end
@@ -107,7 +108,7 @@ for t = 1:n_windows
         % One sample ttest on the t-statistics across patients
         [~,p] = ttest(sig_dev(t).t_stat_all(:,tt));
         sig_dev(t).p_all(tt) = p;
-        if p < alpha/(size(sig_dev(t).t_stat_all,2)-1)
+        if p < alpha%/(size(sig_dev(t).t_stat_all,2)-1)
             sig_dev(t).sig(tt:end) = 1;
             break
         end

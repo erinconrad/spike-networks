@@ -83,8 +83,10 @@ for j = 1:length(listing)
         early_idx = meta.spike(1).index_windows(:,1)/meta.fs < 2;
     end
     for s = 1:length(meta.spike)
-        meta.spike(s).index_windows(early_idx,:) = [];
-        meta.spike(s).adj.adj(early_idx,:,:) = [];
+        for f = 1:length(meta.spike(s).adj)
+            meta.spike(s).index_windows(early_idx,:) = [];
+            meta.spike(s).adj.adj(early_idx,:,:) = [];
+        end
     end
     
     % Get number of spikes, frequencies, times, channels
