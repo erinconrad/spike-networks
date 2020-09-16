@@ -18,8 +18,8 @@ expect a consistent slope in the power change across patients.
 %}
 
 %% Parameters
-plot_network = 1;
-plot_power = 1;
+plot_network = 0;
+plot_power = 0;
 plot_ers = 0;
 plot_metrics = 0;
 which_metric = 'ns';
@@ -203,11 +203,13 @@ for l = 1:length(listing)
             pt_name = strsplit(fname,'_');
             pt_name = pt_name{1};
             
+            %{
             if not_a_spike == 0
                 if contains(pt_listing(i).name,'not') == 1, continue; end
             else
                 if contains(pt_listing(i).name,'not') == 0, continue; end
             end
+            %}
 
 
             [a,b] = ismember(pt_name,all_names);
@@ -263,6 +265,7 @@ for l = 1:length(listing)
     end
 
 end
+net_stats = stats;
 
 %% Now plot network change over time and look for significant slope
 if plot_network
@@ -811,11 +814,13 @@ for l = 1:length(listing)
             pt_name = strsplit(fname,'_');
             pt_name = pt_name{1};
             
+            %{
             if not_a_spike == 0
                 if contains(pt_listing(i).name,'not') == 1, continue; end
             else
                 if contains(pt_listing(i).name,'not') == 0, continue; end
             end
+            %}
 
 
             [a,b] = ismember(pt_name,all_names);
@@ -1022,5 +1027,7 @@ else
     print(gcf,[out_folder,'net_change'],'-depsc');
 end
 end
+spike_classifier(net_stats,sig_dev);
+
 
 end
