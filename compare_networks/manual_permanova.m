@@ -81,6 +81,8 @@ for j = 1:length(listing)
         early_idx = meta.spike(1).index_windows(:,1)/meta.fs < 1;
     elseif time_window == 0.1
         early_idx = meta.spike(1).index_windows(:,1)/meta.fs < 2;
+    elseif time_widow == 0.5
+        early_idx = meta.spike(1).index_windows(:,1)/meta.fs > 3.5; % for 0.5 I used to go for post spike times
     end
     for s = 1:length(meta.spike)
         meta.spike(s).index_windows(early_idx,:) = [];

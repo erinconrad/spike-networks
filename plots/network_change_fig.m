@@ -1,10 +1,15 @@
-function network_change_fig(which_times,only_simple)
+function network_change_fig(which_times,remove_sig_sd,not_a_spike)
 
 %{
 I am not sure how to plot the NBS statistics, not sure what to show other
 than a p-value which is kind of lame. Thinking I will just show the
 permanova statistic.
 %}
+
+%% Parameters
+only_simple = 0;
+bonferroni_sd = 0;
+alpha = 0.05;
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -34,8 +39,89 @@ spike = load([eeg_folder,'HUP074_eeg.mat']);
 spike = spike.spike;
 surround_time = spike(1).surround_time;
 
+%% First, get signal deviations
+% get full directory listing
+listing = dir(sig_dev_folder);
+count = 0;
+for i = 1:length(listing)
+    % look for only those that are directories, ignoring '.' and '..'
+    if listing(i).isdir == 0
+        continue;
+    end
+    
+    if strcmp(listing(i).name,'.') == 1 || strcmp(listing(i).name,'..') == 1
+        continue
+    end
+    
+    time_text = listing(i).name;
+    time_window = str2num(time_text);
+    time_window_folder = [sig_dev_folder,time_text,'/'];
+    
+    % load the file
+    sub_listing = dir(time_window_folder);
+    for k = 1:length(sub_listing)
+        
+        if contains(sub_listing(k).name,'.mat') == 0, continue; end
+        
+        if not_a_spike == 0
+            if contains(sub_listing(k).name,'not_spike') == 1, continue; end
+        else
+            if contains(sub_listing(k).name,'not_spike') == 0, continue; end
+        end
+        count = count+1;
+        temp_sig_dev = load([time_window_folder,sub_listing(k).name]);
+        sig_dev(count).name = time_text;
+        sig_dev(count).time_window = time_window;
+        sig_dev(count).sig_dev = temp_sig_dev.sig_dev; 
+    end
+end
 
-% Loop through network types
+%% Now combine t statistics across patients to find the times of significant power change
+%{
+These t statistics are from a paired t test comparing the power in the
+first time window against subsequent time windows
+%}
+n_windows = count;
+for t = 1:n_windows
+    sig_dev(t).t_stat_all = nan(length(sig_dev(1).sig_dev),...
+        length(sig_dev(1).sig_dev(1).stats));
+    for i = 1:length(sig_dev(t).sig_dev)
+        for tt = 1:length(sig_dev(t).sig_dev(i).stats)
+            if isempty(sig_dev(t).sig_dev(i).stats(tt).tstat) == 0
+                % take negative so positive if later time larger
+                sig_dev(t).t_stat_all(i,tt) = -sig_dev(t).sig_dev(i).stats(tt).tstat;
+            end
+        end
+    end
+    
+    sig_dev(t).p_all = nan(size(sig_dev(t).t_stat_all,2),1);
+    sig_dev(t).sig = zeros(size(sig_dev(t).t_stat_all,2),1);
+    for tt = 2:size(sig_dev(t).t_stat_all,2)
+        
+        % One sample ttest on the t-statistics across patients
+        [~,p] = ttest(sig_dev(t).t_stat_all(:,tt));
+        sig_dev(t).p_all(tt) = p;
+        if bonferroni_sd == 1
+            adjusted_alpha = alpha/(size(sig_dev(t).t_stat_all,2)-1);
+        else
+            adjusted_alpha = alpha;
+        end
+        
+        % If power in this time period different from first power, then say
+        % this time and all subsequent times have a significant power
+        % change and should be excluded
+        if p < adjusted_alpha
+            sig_dev(t).sig(tt:end) = 1;
+            break
+        end
+    end
+    sig_dev(t).sig(1) = 1; % Also exclude the first time
+    sig_dev(t).sig = logical(sig_dev(t).sig); % indices of significant power changes
+    sig_dev(t).times = round(sig_dev(t).sig_dev(1).time_window'*1e2)/(1e2); % get times
+end
+
+
+%% Loop through network types
 listing = dir(perm_folder);
 network_count = 0;
 n_freq_abs = 0;
@@ -140,6 +226,18 @@ for l = 1:length(listing)
             
             for f = 1:nfreq
                 stats(network_count).time(time_count).freq(f).name = sim(f).name;
+                if isfield(stats(network_count).time(time_count).freq(f),'F_all') && ...
+                        size(stats(network_count).time(time_count).freq(f).F_all,2) > length(sim(f).F)
+                    sim(f).F = [sim(f).F; ...
+                        nan(size(stats(network_count).time(time_count).freq(f).F_all,2)-length(sim(f).F),1)];
+                    sim(f).p = [sim(f).p; ...
+                        nan(size(stats(network_count).time(time_count).freq(f).p_all,2)-length(sim(f).p),1)];
+                    fprintf('\nWarning, had to pad F stats with nans for %s.\n',pt_name);
+                    % this is because I originally calculated adjacency
+                    % matrices for -3 to +3 for some patients, but I do
+                    % later patients and subsequent analyses on just -3
+                    % to 0
+                end
                 stats(network_count).time(time_count).freq(f).F_all(pt_idx,:) = sim(f).F;
                 stats(network_count).time(time_count).freq(f).p_all(pt_idx,:) = sim(f).p;
                 
@@ -195,7 +293,33 @@ for n = 1:network_count
             times = realign_times(nchunks,surround_time);
         end
         
+        % Fix rounding error
+        times = round(times*1e2)/(1e2);
+        
+        % Find the corresponding sig_dev time window index
+        for tt = 1:length(sig_dev)
+            if strcmp(sig_dev(tt).name,stats(n).time(t).name) == 1
+                sig_dev_idx = tt;
+                break
+            end
+        end
+
+        % The times in the signal deviation structure should line up with
+        % the times in the network structure
+        sig_power_change_bin = sig_dev(sig_dev_idx).sig;
+        sig_dev_times = sig_dev(sig_dev_idx).times;
+        if ~isequal(sig_dev_times,times)
+            error('Non-aligning times');
+        end
+        
         nfreq = length(stats(n).time(t).freq);
+        
+        
+        if remove_sig_sd
+            % Only include times without sig power change
+            times = times(~sig_power_change_bin);
+        end
+        
         for f = 1:nfreq
             
             % Get appropriate subplot
@@ -213,6 +337,11 @@ for n = 1:network_count
             axes(ha(sp));
           
             z_curr = stats(n).time(t).freq(f).z_all;
+            if remove_sig_sd
+                % Only include times without sig power change
+                z_curr = z_curr(:,~sig_power_change_bin);
+            end
+            
             % loop over patients and plot
             for i = 1:size(z_curr,1)
                 plot(times,z_curr(i,:),'ko');
@@ -225,8 +354,12 @@ for n = 1:network_count
                 curr_p_vals = stats(n).time(t).freq(f).p_all(:,tt);
                 comb_p = fisher_p_value(curr_p_vals);
                 
-
-                text_out = get_asterisks(comb_p,(nchunks-1)*(n_freq_abs+1));
+                if remove_sig_sd == 1
+                    adjusted_alpha2 = sum(~sig_power_change_bin)*(n_freq_abs+1);
+                else
+                    adjusted_alpha2 = (nchunks-1)*(n_freq_abs+1);
+                end
+                text_out = get_asterisks(comb_p,adjusted_alpha2);
                 %if f == 8, error('look\n'); end
                 
                 tw = stats(n).time(t).time_window;

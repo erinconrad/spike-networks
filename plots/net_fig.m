@@ -20,6 +20,11 @@ expect a consistent slope in the power change across patients.
 %% Parameters
 alpha = 0.05;
 
+% should I Bonferroni correct the alpha for the signal deviation step? If
+% yes, I am more likely to include time periods that have a small pre-spike
+% power rise (which I should see in my subsequent power test)
+bonferroni_sd = 0; 
+
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;
@@ -28,17 +33,13 @@ data_folder = [main_folder,'data/'];
 eeg_folder = [main_folder,'results/eeg_data/'];
 script_folder = locations.script_folder;
 addpath(genpath(script_folder));
-pt_file = [data_folder,'spike_structures/pt.mat'];
+
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
 out_folder = [results_folder,'plots/'];
 sig_dev_folder = [results_folder,'signal_deviation/manual/'];
 perm_folder = [results_folder,'perm_stats/'];
 ers_folder = [results_folder,'ers/'];
-nbs_folder = [results_folder,'nbs_stats/'];
-
-freq_names = {'delta','theta','alpha','beta','low_gamma',...
-    'high_gamma','ultra_high','broadband'};
 
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
@@ -88,10 +89,14 @@ for i = 1:length(listing)
 end
 
 %% Now combine t statistics across patients to find the times of significant power change
+%{
+These t statistics are from a paired t test comparing the power in the
+first time window against subsequent time windows
+%}
 n_windows = count;
 for t = 1:n_windows
-    sig_dev(t).t_stat_all = nan(length(sig_dev(1).sig_dev),...
-        length(sig_dev(1).sig_dev(1).stats));
+    sig_dev(t).t_stat_all = nan(length(sig_dev(t).sig_dev),...
+        length(sig_dev(t).sig_dev(1).stats));
     for i = 1:length(sig_dev(t).sig_dev)
         for tt = 1:length(sig_dev(t).sig_dev(i).stats)
             if isempty(sig_dev(t).sig_dev(i).stats(tt).tstat) == 0
@@ -108,13 +113,23 @@ for t = 1:n_windows
         % One sample ttest on the t-statistics across patients
         [~,p] = ttest(sig_dev(t).t_stat_all(:,tt));
         sig_dev(t).p_all(tt) = p;
-        if p < alpha%/(size(sig_dev(t).t_stat_all,2)-1)
+        if bonferroni_sd == 1
+            adjusted_alpha = alpha/(size(sig_dev(t).t_stat_all,2)-1);
+        else
+            adjusted_alpha = alpha;
+        end
+        
+        % If power in this time period different from first power, then say
+        % this time and all subsequent times have a significant power
+        % change and should be excluded
+        if p < adjusted_alpha
             sig_dev(t).sig(tt:end) = 1;
             break
         end
     end
+    sig_dev(t).sig(1) = 1; % Also exclude the first time
     sig_dev(t).sig = logical(sig_dev(t).sig); % indices of significant power changes
-    sig_dev(t).times = sig_dev(t).sig_dev(1).time_window'; % all times
+    sig_dev(t).times = round(sig_dev(t).sig_dev(1).time_window'*1e2)/(1e2); % get times
 end
 
 %% Now get F statistics for network differences
@@ -230,6 +245,10 @@ for l = 1:length(listing)
                 else
                     stats(network_count).time(time_count).freq(f).F_all(pt_idx,:,2) = sim(f).F;
                 end
+                
+                % These pseudo F stats are from a permANOVA comparing the
+                % network in the first time period to that of subsequent
+                % time periods
             end
 
 
@@ -267,27 +286,26 @@ for n = 1:network_count
         % Fix rounding error
         times = round(times*1e2)/(1e2);
         
-        % Find the corresponding sig_dev time
+        % Find the corresponding sig_dev time window index
         for tt = 1:length(sig_dev)
             if strcmp(sig_dev(tt).name,stats(n).time(t).name) == 1
                 sig_dev_idx = tt;
                 break
             end
         end
-        
-        % only include times without significant power change
+
+        % The times in the signal deviation structure should line up with
+        % the times in the network structure
         sig_power_change_bin = sig_dev(sig_dev_idx).sig;
-        not_sig_power_change_times = sig_dev(sig_dev_idx).times(~sig_power_change_bin);
-        not_sig_power_change_times = round(not_sig_power_change_times*1e2)/(1e2);
-        [F_not_power_change] = ismember(times,not_sig_power_change_times);
-        F_not_power_change(1) = 0; % ignore first time
-        %F_not_power_change(times<-1.8) = 0;
+        sig_dev_times = sig_dev(sig_dev_idx).times;
+        if ~isequal(sig_dev_times,times)
+            error('Non-aligning times');
+        end
+
+        % Only include times without sig power change
+        times = times(~sig_power_change_bin);
         
-        times = times(F_not_power_change);
-        
-        
-        %if t == 2, error('look\n'); end
-        
+ 
         nfreq = length(stats(n).time(t).freq);
         for f = 1:nfreq
             
@@ -312,8 +330,10 @@ for n = 1:network_count
                 F = stats(n).time(t).freq(f).F_all(:,:,1);
             end
             
+            % remove any post-zero times
+            
             % Just take times without significant power change
-            F_curr = F(:,F_not_power_change);
+            F_curr = F(:,~sig_power_change_bin);
             
             
             % z score to normalize within pt
@@ -340,25 +360,19 @@ for n = 1:network_count
             [~,p] = ttest(slopes);
             
             % Plot an overall trend line
-           % x = repmat(1:size(z_curr,2),size(z_curr,1),1);
             x = repmat(times',size(z_curr,1),1);
             y = z_curr(:);
             x = x(:);
             X = [ones(length(x),1),x];
             b = X\y;
             
-          %  if f == 7, error('look\n'); end
             
-            if p < alpha/(n_freq_abs+1)
-                %plot(times',b(1)+b(2)*(1:size(z_curr,2)),'g','linewidth',2);
+            if p < alpha/(n_freq_abs+1) % Bonferroni for number of freq bands
                 plot(times',b(1)+b(2)*times,'g','linewidth',3);
             else
-                %plot(times',b(1)+b(2)*(1:size(z_curr,2)),'k','linewidth',2);
                 plot(times',b(1)+b(2)*times,'k','linewidth',3);
             end
-            
-           % if t == 2, error('look\n'); end
-            
+
             set(gca,'fontsize',20)
             if f == 4 && t == time_count
                 xlabel('Time relative to spike peak (s)')
@@ -407,7 +421,14 @@ end
 
 
 if 1
-%% Now, do the same thing for the power change (should not have a slope)
+%% Power change
+%{
+With the times of significant power change removed, I now check for a
+significant positive slope in the power t-stats. If there is, this would
+suggest that I insufficiently removed times of early pre-spike power rise
+and that any postive slope of network change may reflect a pre-spike power
+rise.
+%}
 figure
 set(gcf,'position',[1 100 1399 time_count*200+50])
 [ha, ~] = tight_subplot(time_count, 1, [0.1 0.01], [0.15 0.1], [0.06 0.02]);
@@ -436,12 +457,14 @@ for t = 1:time_count
         end
     end
 
+    
+    % only include times without significant power change
     sig_power_change_bin = sig_dev(sig_dev_idx).sig;
-    not_sig_power_change_times = sig_dev(sig_dev_idx).times(~sig_power_change_bin);
-    not_sig_power_change_times = round(not_sig_power_change_times*1e2)/(1e2);
-    [F_not_power_change] = ismember(times,not_sig_power_change_times);
-    F_not_power_change(1) = 0; % ignore first time
-    times = times(F_not_power_change);
+    sig_dev_times = sig_dev(sig_dev_idx).times;
+    if ~isequal(sig_dev_times,times)
+        error('Non-aligning times');
+    end
+    times = times(~sig_power_change_bin);
     
     axes(ha(t));
     
@@ -449,7 +472,7 @@ for t = 1:time_count
     t_stats = sig_dev(sig_dev_idx).t_stat_all;
     
     % Just take times without significant power change           
-    t_curr = t_stats(:,F_not_power_change);
+    t_curr = t_stats(:,~sig_power_change_bin);
     
     % z score to normalize within pt
     z_curr = (t_curr-nanmean(t_curr,2))./nanstd(t_curr,0,2); %nan because first time is nans
@@ -480,7 +503,7 @@ for t = 1:time_count
     x = [ones(length(x),1),x];
     b = x\y;
 
-    if p < alpha
+    if p < alpha % no need to bonferroni correct
         plot(times,b(1)+b(2)*times,'g','linewidth',3);
     else
         plot(times,b(1)+b(2)*times,'k','linewidth',3);
@@ -559,9 +582,7 @@ for k = 1:length(time_listing)
         sim = sim.ers;
 
 
-        %if isfield(sim(1),'time_windows') == 1 && isempty(sim(1).time_windows) == 0
-            stats(network_count).time(time_count).times = sim.time_window;
-        %end
+        stats(network_count).time(time_count).times = sim.time_window;
 
 
         for f = 1:nfreq
@@ -569,7 +590,7 @@ for k = 1:length(time_listing)
 
             power = (sim.powers(:,:,f));
             
-            % Do a paired ttest
+            % Do a paired ttest comparing first time to subsequent times
             t_stats = nan(size(power,2),1);
             for tt = 2:size(power,2)
                 [~,~,~,stat1] = ttest(power(:,tt),power(:,1));
@@ -606,7 +627,7 @@ for t = 1:time_count
 
     if t>size(stats(n).time), continue; end
 
-    times = stats(n).time(t).times;
+    times = stats(n).time(t).times';
 
     % Fix rounding error
     times = round(times*1e2)/(1e2);
@@ -619,15 +640,16 @@ for t = 1:time_count
         end
     end
 
+    
     % only include times without significant power change
     sig_power_change_bin = sig_dev(sig_dev_idx).sig;
-    not_sig_power_change_times = sig_dev(sig_dev_idx).times(~sig_power_change_bin);
-    not_sig_power_change_times = round(not_sig_power_change_times*1e2)/(1e2);
-    [F_not_power_change] = ismember(times,not_sig_power_change_times);
-    F_not_power_change(1) = 0; % ignore first time
-    times = times(F_not_power_change);
+    sig_dev_times = sig_dev(sig_dev_idx).times;
+    if ~isequal(sig_dev_times,times)
+        error('Non-aligning times');
+    end
+    
+    times = times(~sig_power_change_bin);
 
-    %if t == 2, error('look\n'); end
 
     nfreq = length(stats(n).time(t).freq);
     for f = 1:nfreq
@@ -648,7 +670,7 @@ for t = 1:time_count
         end
 
         % Just take times without significant power change
-        F_curr = F(:,F_not_power_change);
+        F_curr = F(:,~sig_power_change_bin);
 
         % z score to normalize within pt
         z_curr = (F_curr-nanmean(F_curr,2))./nanstd(F_curr,0,2); %nan because first time is nans
@@ -674,8 +696,7 @@ for t = 1:time_count
         [~,p] = ttest(slopes);
 
         % Plot an overall trend line
-       % x = repmat(1:size(z_curr,2),size(z_curr,1),1);
-        x = repmat(times,size(z_curr,1),1);
+        x = repmat(times',size(z_curr,1),1);
         y = z_curr(:);
         x = x(:);
         X = [ones(length(x),1),x];
