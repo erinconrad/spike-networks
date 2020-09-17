@@ -36,6 +36,13 @@ pt = pt.pt;
 listing = dir(eeg_folder);
 count = 0;
 pt_names = {};
+
+if not_a_spike
+    not_text = '_not_spike';
+else
+    not_text = '';
+end
+    
 for i = 1:length(listing)
     
     % Get name
@@ -51,7 +58,7 @@ for i = 1:length(listing)
     pt_name = pt_name{1};
     
     if overwrite == 0
-        if exist([out_folder,pt_name,'.eps'],'file') ~= 0
+        if exist([out_folder,pt_name,not_text,'.eps'],'file') ~= 0
             fprintf('\nSkipping %s...\n',pt_name);
             continue
         else
@@ -177,7 +184,7 @@ for i = 1:length(listing)
     plot(linspace(-surround,surround,length(final_dev)),final_dev_involved)
     title(sprintf('%s avg spike power\nin all involved chs',pt_name))
     set(gca,'fontsize',20)
-    print([out_folder,pt_name],gcf,'-depsc');
+    print([out_folder,pt_name,not_text],gcf,'-depsc');
     close(gcf)
         
 end
