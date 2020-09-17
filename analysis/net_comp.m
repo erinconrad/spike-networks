@@ -1,7 +1,7 @@
 function spike = net_comp(windows)
 
 %% Parameters
-do_plot = 0;
+do_plot = 1;
 alpha = 0.05;
 bf = 0; % Bonferroni correction for power change analysis?
 paired = 'paired';
@@ -33,8 +33,10 @@ end
 sig_dev = get_sd(alpha,bf);
 
 %% Get network permanova statistics
-% Returns a structure with 
 perm_stats = get_perm;
+
+%% Get network metrics
+%metrics = get_metrics;
 
 %% Reduce perm stats and power to the times without significant power change
 [sd_red,perm_red] = reduce_to_ns(sig_dev,perm_stats,paired);
@@ -45,8 +47,7 @@ perm_red = assess_net_change(perm_red,alpha);
 %% Compare reduced power change in spike and not-spike
 sd_red = assess_power_change(sd_red,alpha);
 
-%% Classifier
-spike = spike_classifier(perm_red);
+
 
 if do_plot
 %% Plot network change
@@ -62,6 +63,8 @@ if strcmp(paired,'unpaired')
 end
 end
 
+%% Classifier
+spike = spike_classifier(perm_red);
 
 
 end

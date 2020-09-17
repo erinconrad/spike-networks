@@ -94,7 +94,7 @@ end
 for t = 1:n_windows % loop over time windows
     
     if bf == 1
-        adjusted_alpha = alpha/(size(sig_dev(t).is_spike(s).t_stat_all,2)-1);
+        adjusted_alpha = alpha/(size(sig_dev(t).is_spike(1).t_stat_all,2)-1);
     else
         adjusted_alpha = alpha;
     end

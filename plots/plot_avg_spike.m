@@ -87,6 +87,7 @@ for i = 1:length(listing)
     
     dev_all = zeros(size(spike(1).data,1),nspikes);
     dev_all_involved = zeros(size(spike(1).data,1),nspikes);
+    dev_all_ch = zeros(size(spike(1).data,1),nspikes);
     surround = spike(1).surround_time;
     fs = spike(1).fs;
     
@@ -107,19 +108,26 @@ for i = 1:length(listing)
         % all involved
         y = x(:,all_involved);
         
+        % all channels
+        z = x;
+        
         % just most involved ch
         x = x(:,biggest_dev);
+        
         
         
               
         % get baseline
         bl = median(x,1);
         bly = median(y,1);
+        blz = median(z,1);
         
         % get dev
         dev = (abs(x-bl)).^2;
         dev_involved = (abs(y-bly)).^2;
         dev_involved = nanmean(dev_involved,2); % avg across involved chs
+        dev_avg = (abs(z-blz)).^2;
+        dev_avg = nanmean(dev_avg,2); % avg across all channels
                 
         
         if size(dev_all,1) > size(dev,1)
@@ -136,8 +144,16 @@ for i = 1:length(listing)
             dev_involved(end-(size(dev_involved,1)-size(dev_all_involved,1))+1:end) = [];
         end
         
+        if size(dev_all_ch,1) > size(dev_avg,1)
+            dev_avg = [dev_avg;...
+                repmat(dev_avg(end),size(dev_all_ch,1)-size(dev_avg,1),1)];
+        elseif size(dev_all_ch,1) < size(dev_avg,1)
+            dev_avg(end-(size(dev_avg,1)-size(dev_all_ch,1))+1:end) = [];
+        end
+        
         dev_all(:,s) = dev;
         dev_all_involved(:,s) = dev_involved;
+        dev_all_ch(:,s) = dev_avg;
 
         ch_devs_all(s) = biggest_dev;
         
@@ -145,6 +161,7 @@ for i = 1:length(listing)
     
     final_dev = nanmean(dev_all,2);
     final_dev_involved = nanmean(dev_all_involved,2);
+    final_dev_all = nanmean(dev_all_ch,2);
     
     % take mode channel with biggest dev
     ch_devs_all(ch_devs_all==0) = [];
@@ -181,8 +198,8 @@ for i = 1:length(listing)
     set(gca,'fontsize',20)
     
     subplot(2,1,2)
-    plot(linspace(-surround,surround,length(final_dev)),final_dev_involved)
-    title(sprintf('%s avg spike power\nin all involved chs',pt_name))
+    plot(linspace(-surround,surround,length(final_dev)),final_dev_all)
+    title(sprintf('%s avg spike power\nin all chs',pt_name))
     set(gca,'fontsize',20)
     print([out_folder,pt_name,not_text],gcf,'-depsc');
     close(gcf)
