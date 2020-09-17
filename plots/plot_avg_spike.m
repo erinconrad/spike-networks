@@ -1,4 +1,4 @@
-function plot_avg_spike(overwrite)
+function plot_avg_spike(overwrite,not_a_spike)
 
 %% Parameters
 do_notch = 1; % notch filter?
@@ -41,6 +41,12 @@ for i = 1:length(listing)
     % Get name
     fname = listing(i).name;
     if contains(fname,'_eeg.mat') == 0, continue; end
+    
+    if not_a_spike
+        if contains(fname,'not') == 0, continue; end
+    else
+        if contains(fname,'not') == 1, continue; end
+    end
     pt_name = strsplit(fname,'_');
     pt_name = pt_name{1};
     

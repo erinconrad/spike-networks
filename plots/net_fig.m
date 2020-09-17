@@ -18,8 +18,8 @@ expect a consistent slope in the power change across patients.
 %}
 
 %% Parameters
-plot_network = 0;
-plot_power = 0;
+plot_network = 1;
+plot_power = 1;
 plot_ers = 0;
 plot_metrics = 0;
 which_metric = 'ns';
@@ -387,7 +387,11 @@ for n = 1:network_count
                 xlabel('Time relative to spike peak (s)')
             end 
             if n == 2
-                ylabel(sprintf('Network distance from\nfirst time (z-score)'))
+                if time_count == 3 && t == 2
+                    ylabel(sprintf('Network distance from\nfirst time (z-score)'))
+                elseif time_count == 1
+                    ylabel(sprintf('Network distance from\nfirst time (z-score)'))
+                end
             end
             
             % adjust z_range
@@ -521,8 +525,11 @@ for t = 1:time_count
     set(gca,'fontsize',20)
     
     xlabel('Time relative to spike peak (s)')
-    
-    ylabel(sprintf('Power change from\nfirst time (z-score)'))
+    if time_count == 3 && t == 2
+        ylabel(sprintf('Power change from\nfirst time (z-score)'))
+    elseif time_count == 1
+        ylabel(sprintf('Power change from\nfirst time (z-score)'))
+    end
     
 end
 

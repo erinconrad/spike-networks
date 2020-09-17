@@ -397,7 +397,7 @@ for n = 1:network_count
             
             end
             
-            if f == 7, error('look\n'); end
+       %     if f == 7, error('look\n'); end
             
             if t == 3 && f == 4
                  xlabel('Time relative to spike peak (s)')
