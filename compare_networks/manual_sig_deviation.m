@@ -110,9 +110,13 @@ for i = 1:length(listing)
         % biggest dev
         biggest_dev = spike(s).biggest_dev;
         
-        % restrict to involved channels
+        % restrict to involved channels (avg if not a spike)
         %data_spike = data(:,is_sp_ch);
-        data_spike = data(:,biggest_dev);
+        if not_a_spike == 1
+            data_spike = mean(data,2);
+        else
+            data_spike = data(:,biggest_dev);
+        end
         
         % get baseline (diff for each ch)
         baseline = median(data_spike,1); %1 x n_sp_ch (median across all time points)
