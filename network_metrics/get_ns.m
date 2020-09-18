@@ -66,7 +66,7 @@ for i = 1:length(listing)
     meta = meta.meta;
     
     % load eeg data
-    spike = load([eeg_folder,name,'_eeg.mat']);
+    spike = load([eeg_folder,name,not_spike_text,'_eeg.mat']);
     spike = spike.spike;
     
     % get sizes for matrices

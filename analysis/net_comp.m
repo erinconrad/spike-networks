@@ -63,6 +63,10 @@ plot_power_change(sd_red,windows,out_folder,paired,1);
 if strcmp(paired,'unpaired')
     plot_power_change(sd_red,windows,out_folder,paired,2);
 end
+
+%% Plot metric change
+plot_metric_change(metric_red,windows,out_folder,paired,1,'ge');
+
 end
 
 %% Classifier
