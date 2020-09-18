@@ -3,8 +3,8 @@ function plot_power_change(sig_dev,windows,out_folder,paired,is_spike)
 time_count = length(sig_dev);
 
 figure
-set(gcf,'position',[1 100 1399 length(windows)*200+50])
-[ha, ~] = tight_subplot(length(windows), 1, [0.1 0.01], [0.15 0.1], [0.06 0.02]);
+set(gcf,'position',[1 100 1399 length(windows)*200+100])
+[ha, ~] = tight_subplot(length(windows), 1, [0.1 0.01], [0.2 0.1], [0.06 0.02]);
 
 tcount = 0;
 for t = 1:time_count
@@ -14,7 +14,7 @@ for t = 1:time_count
     tcount = tcount+1;
     axes(ha(tcount));
     
-    s = 1; % plot for spike
+    s = is_spike; 
     
     z_curr = sig_dev(t).is_spike(s).z_curr;
     times = sig_dev(t).is_spike(s).times;
@@ -50,4 +50,6 @@ for t = 1:time_count
     
 end
 
+
+print(gcf,[out_folder,'updated_power_change_',num2str(is_spike)],'-depsc');
 end

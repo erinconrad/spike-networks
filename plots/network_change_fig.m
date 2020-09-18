@@ -266,12 +266,12 @@ end
 nfreq (coherence) + 1 (simple) columns and 2 (2 time scales) rows
 %}
 figure
-set(gcf,'position',[1 100 1399 600])
+set(gcf,'position',[1 100 1399 time_count*200+100])
 %[ha, pos] = tight_subplot(1, n_freq_abs+1, [0.01 0.01], [0.12 0.07], [0.05 0.01]);
 if only_simple == 1
-    [ha, pos] = tight_subplot(time_count, 1, [0.1 0.01], [0.12 0.07], [0.05 0.01]);
+    [ha, pos] = tight_subplot(time_count, 1, [0.1 0.01], [0.13 0.08], [0.07 0.01]);
 else
-    [ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.1 0.01], [0.12 0.07], [0.05 0.01]);
+    [ha, pos] = tight_subplot(time_count, n_freq_abs+1, [0.1 0.01], [0.2 0.11], [0.07 0.01]);
 end
 
 for n = 1:network_count
@@ -399,7 +399,7 @@ for n = 1:network_count
             
        %     if f == 7, error('look\n'); end
             
-            if t == 3 && f == 4
+            if f == 4
                  xlabel('Time relative to spike peak (s)')
             end 
            
@@ -412,7 +412,7 @@ for n = 1:network_count
             
           %  xlim([-3 0]) 
           xl = get(gca,'xlim');
-          xl(2) = 0.1;
+          xl(2) = -0.3;
           set(gca,'xlim',xl);
             
         end
@@ -421,7 +421,7 @@ for n = 1:network_count
         
     end
 end
-
+%{
 for t = 1:time_count
     max_z = 0;
     min_z = 0;
@@ -439,6 +439,7 @@ for t = 1:time_count
     end
     ylim([min_z max_z]);
 end
+%}
 
 for sp = 1:length(ha)
     axes(ha(sp))
@@ -446,9 +447,9 @@ for sp = 1:length(ha)
     %ylim([min_z-1 max_z+1]);
     if mod(sp,n_freq_abs+1) == 1
         %ylabel(sprintf('%s s time window',stats(1).time(floor((sp/n_freq_abs+1))).name));
-        if ceil(sp/(n_freq_abs+1)) == 2
-            ylabel('z-score')
-        end
+        %if ceil(sp/(n_freq_abs+1)) == 2
+            ylabel(sprintf('Network change from\nfirst time (z-score)'))
+        %end
     else
         yticklabels([])
     end

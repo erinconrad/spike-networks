@@ -5,8 +5,8 @@ time_count = length(stats(1).time);
 n_freq_abs = length(stats(1).time(1).freq);
 
 figure
-set(gcf,'position',[1 100 1500 length(windows)*200+50])
-[ha, ~] = tight_subplot(length(windows), n_freq_abs+1, [0.08 0.02], [0.15 0.12], [0.06 0.005]);
+set(gcf,'position',[1 100 1500 length(windows)*200+100])
+[ha, ~] = tight_subplot(length(windows), n_freq_abs+1, [0.08 0.02], [0.2 0.12], [0.06 0.005]);
 z_range = zeros(length(windows),2);
 
 for n = 1:network_count
@@ -65,7 +65,7 @@ for n = 1:network_count
             end
             
             set(gca,'fontsize',20)
-            if f == 4 && t == time_count
+            if f == 4 && tcount == length(windows)
                 xlabel('Time relative to spike peak (s)')
             end 
             if n == 2
@@ -107,3 +107,5 @@ for sp = 1:length(ha)
         yticklabels([])
     end
 end
+
+print(gcf,[out_folder,'updated_net_change_',num2str(is_spike)],'-depsc');
