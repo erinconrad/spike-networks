@@ -1,4 +1,4 @@
-function get_ns(overwrite,simple,time_window)
+function get_ns(overwrite,simple,time_window,not_spike)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -30,6 +30,12 @@ if exist(metrics_folder,'dir') == 0
     mkdir(metrics_folder);
 end
 
+if not_spike == 1
+    not_spike_text = '_not_spike';
+else
+    not_spike_text = '';
+end
+
 listing = dir([adj_folder,'*_adj.mat']);
 
 for i = 1:length(listing)
@@ -38,10 +44,14 @@ for i = 1:length(listing)
     name_sp = split(filename,'_');
     name = name_sp{1};
     
-    if contains(filename,'not'), continue; end
+    if not_a_spike
+        if ~contains(filename,'not'), continue; end
+    else
+        if contains(filename,'not'), continue; end
+    end
     
     if overwrite == 0
-        if exist([metrics_folder,name,'_ns.mat'],'file') ~= 0
+        if exist([metrics_folder,name,not_spike_text,'_ns.mat'],'file') ~= 0
             fprintf('Already did %s, skipping...\n',name);
             continue;
         end
@@ -115,7 +125,7 @@ for i = 1:length(listing)
         metrics.freq(f).ge.data = squeeze(ge(f,:,:));
         
         metrics.freq(f).ns_all.name = 'node strength all';
-        metrics.freq(f).ns_all.data = squeeze(ns_all(f,:,:));
+        metrics.freq(f).ns_all.data = squeeze(ns_all(f,:,:,:));
 
     end
     
@@ -123,7 +133,7 @@ for i = 1:length(listing)
     metrics.index_windows = meta.spike(1).index_windows;
     metrics.fs = meta.fs;
     
-    save([metrics_folder,name,'_ns.mat'],'metrics');
+    save([metrics_folder,name,not_spike_text,'_ns.mat'],'metrics');
     
 end
 

@@ -36,10 +36,10 @@ sig_dev = get_sd(alpha,bf);
 perm_stats = get_perm;
 
 %% Get network metrics
-%metrics = get_metrics;
+metrics = get_metrics;
 
 %% Reduce perm stats and power to the times without significant power change
-[sd_red,perm_red] = reduce_to_ns(sig_dev,perm_stats,paired);
+[sd_red,perm_red,metrics_red] = reduce_to_ns(sig_dev,perm_stats,metrics,paired);
 
 %% Compare reduced network change in spike and not-spike
 perm_red = assess_net_change(perm_red,alpha);
@@ -47,6 +47,8 @@ perm_red = assess_net_change(perm_red,alpha);
 %% Compare reduced power change in spike and not-spike
 sd_red = assess_power_change(sd_red,alpha);
 
+%% Compare reduced metrics in spike and not-spike
+metrics_red = assess_metric_change(metrics_red,alpha);
 
 
 if do_plot
