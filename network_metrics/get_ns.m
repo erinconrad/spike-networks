@@ -44,7 +44,7 @@ for i = 1:length(listing)
     name_sp = split(filename,'_');
     name = name_sp{1};
     
-    if not_a_spike
+    if not_spike
         if ~contains(filename,'not'), continue; end
     else
         if contains(filename,'not'), continue; end
