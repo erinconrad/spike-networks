@@ -130,7 +130,6 @@ for i = 1:length(listing)
         metrics.freq(f).ns_all.data = squeeze(ns_all(f,:,:,:));
 
     end
-    error('look');
     
     metrics.biggest_dev = biggest_dev;
     metrics.index_windows = meta.spike(1).index_windows;
