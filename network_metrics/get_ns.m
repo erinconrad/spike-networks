@@ -61,7 +61,7 @@ for i = 1:length(listing)
     n_f = length(meta.spike(1).adj);
     n_times = size(meta.spike(1).index_windows,1);
     n_spikes = length(meta.spike);
-    n_ch = size(meta.spike(1).adj(1).adj,1);
+    n_ch = size(meta.spike(1).adj(1).adj,2);
     
     % Initialize
     ns = nan(n_f,n_spikes,n_times);
