@@ -57,6 +57,8 @@ for i = 1:length(listing)
         end
     end
     
+    fprintf('\nDoing %s',name);
+    
     metrics.name = name;
     
     % load adj matrix
@@ -85,7 +87,7 @@ for i = 1:length(listing)
 
         s_count = s_count + 1;
         
-        fprintf('Doing spike %d of %d\n',s_count,n_spikes);
+        %fprintf('Doing spike %d of %d\n',s_count,n_spikes);
         biggest_dev = spike(s).biggest_dev;
         
         for f = 1:n_f
@@ -128,6 +130,7 @@ for i = 1:length(listing)
         metrics.freq(f).ns_all.data = squeeze(ns_all(f,:,:,:));
 
     end
+    error('look');
     
     metrics.biggest_dev = biggest_dev;
     metrics.index_windows = meta.spike(1).index_windows;
