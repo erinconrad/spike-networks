@@ -40,6 +40,7 @@ for n = 1:network_count
             axes(ha(sp));
             
             % Get z scores and h's
+            met_name = stats(n).time(t).freq(f).(metric).name;
             z_curr = stats(n).time(t).freq(f).(metric).z_curr;
             h = stats(n).time(t).freq(f).(metric).tests.(paired).h(is_spike);
             np = size(z_curr,1);
@@ -70,9 +71,9 @@ for n = 1:network_count
             end 
             if n == 2
                 if length(windows) == 3 && tcount == 2
-                    ylabel(sprintf('metric (z-score)'))
+                    ylabel(sprintf('%s\n(z-score)',met_name))
                 elseif length(windows) == 1
-                    ylabel(sprintf('metric (z-score)'))
+                    ylabel(sprintf('%s\n(z-score)',met_name))
                 end
             end
             
@@ -108,4 +109,4 @@ for sp = 1:length(ha)
     end
 end
 
-print(gcf,[out_folder,'updated_net_change_',num2str(is_spike)],'-depsc');
+print(gcf,[out_folder,metric,'_change_',num2str(is_spike)],'-depsc');

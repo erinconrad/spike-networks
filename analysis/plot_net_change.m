@@ -45,10 +45,28 @@ for n = 1:network_count
             np = size(z_curr,1);
             
             % Loop over patients and plot
+            cols = [0 0.4470 0.7410;...
+                0.8500 0.3250 0.0980;...
+                0.9290 0.6940 0.1250;...
+                0.4940 0.1840 0.5560];
+            
             for i = 1:np
                 plot(times,squeeze(z_curr(i,:,is_spike)),'ko'); 
                 hold on
+                %{
+                plot(times,squeeze(z_curr(i,:,is_spike)),'o','color',cols(i,:),'markersize',20); 
+                xtemp = [ones(length(times),1),times];
+                ytemp = squeeze(z_curr(i,:,is_spike))';
+                btemp = xtemp\ytemp;
+                hold on
+                plot(times',btemp(1)+btemp(2)*times,'linewidth',3,'color',cols(i,:));
+                set(gca,'fontsize',20)
+                xlabel('Time relative to spike peak (s)')
+                ylabel(sprintf('Network distance from\nfirst time (z-score)'))
+                pause
+                %}
             end
+            
             
             % Get overall trend line
             x = repmat(times',size(z_curr,1),1);
@@ -58,11 +76,13 @@ for n = 1:network_count
             X = [ones(length(x),1),x];
             b = X\y;
             
+            
             if h == 1
                 plot(times',b(1)+b(2)*times,'g','linewidth',3);
             else
                 plot(times',b(1)+b(2)*times,'k','linewidth',3);
             end
+            %}
             
             set(gca,'fontsize',20)
             if f == 4 && tcount == length(windows)

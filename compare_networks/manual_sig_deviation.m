@@ -1,4 +1,4 @@
-function manual_sig_deviation(time_window,not_a_spike)
+function manual_sig_deviation(time_window,not_a_spike,do_avg)
 
 %{
 This function determines the time periods in which the EEG data surrounding
@@ -38,9 +38,15 @@ else
     not_a_spike_text = '';
 end
 
+if do_avg
+    avg_text = 'avg_chs/';
+else
+    avg_text = '';
+end
+
 % Folders
 eeg_folder = [results_folder,'eeg_data/'];
-sig_dev_folder = [results_folder,'signal_deviation/manual/',time_text];
+sig_dev_folder = [results_folder,'signal_deviation/manual/',avg_text,time_text];
 adj_folder = [results_folder,'adj_mat/manual/adj_simple/',time_text];
 
 listing = dir([eeg_folder,'*',not_a_spike_text,'_eeg.mat']);
@@ -115,15 +121,19 @@ for i = 1:length(listing)
         if not_a_spike == 1
             data_spike = mean(data,2);
         else
-            data_spike = data(:,biggest_dev);
+            if do_avg
+                data_spike = mean(data,2);
+            else
+                data_spike = data(:,biggest_dev); % if not taking avg, take peak ch
+            end
         end
         
         % get baseline (diff for each ch)
-        baseline = median(data_spike,1); %1 x n_sp_ch (median across all time points)
+        baseline = median(data_spike,1); 
         
         % get deviation from baseline (for all time points) and square to
         % get power
-        dev = (abs((data_spike - repmat(baseline,size(data_spike,1),1))).^2); % ntimes x n_sp_ch 
+        dev = (abs((data_spike - repmat(baseline,size(data_spike,1),1))).^2); 
 
         
         % get the average deviation across involved channels

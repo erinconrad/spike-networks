@@ -1,4 +1,4 @@
-function [sig_dev,stats] = reduce_to_ns(sig_dev,stats,metrics,paired)
+function [sig_dev,stats,metrics] = reduce_to_ns(sig_dev,stats,metrics,paired)
 
 network_count = length(stats);
 time_count = length(stats(1).time);
@@ -59,7 +59,7 @@ for n = 1:network_count
     nfreq = length(metrics(n).time(1).freq);
     for t = 1:time_count
         
-        if t > length(sig_dev), continue; end
+        if t > length(metrics(n).time), continue; end
         
         % get the indices of significant power change
         sig = sig_dev(t).tests.(paired).sig;
@@ -69,9 +69,9 @@ for n = 1:network_count
         
         for f = 1:nfreq
             % reduce metrics to non-significant indices
-            metrics(n).time(t).freq(f).ge = metrics(n).time(t).freq(f).ge(:,~sig,:);
-            metrics(n).time(t).freq(f).ns_avg = metrics(n).time(t).freq(f).ns_avg(:,~sig,:);
-            metrics(n).time(t).freq(f).ns_big = metrics(n).time(t).freq(f).ns_big(:,~sig,:);
+            metrics(n).time(t).freq(f).ge.data = metrics(n).time(t).freq(f).ge.data(:,~sig,:);
+            metrics(n).time(t).freq(f).ns_avg.data = metrics(n).time(t).freq(f).ns_avg.data(:,~sig,:);
+            metrics(n).time(t).freq(f).ns_big.data = metrics(n).time(t).freq(f).ns_big.data(:,~sig,:);
             
         end
     end

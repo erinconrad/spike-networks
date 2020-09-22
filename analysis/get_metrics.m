@@ -93,7 +93,7 @@ for l = 1:length(listing)
             sim = sim.metrics;
             
             
-            if isfield(sim,'index_windows') == 1 && isempty(simindex_windows) == 0
+            if isfield(sim,'index_windows') == 1 && isempty(sim.index_windows) == 0
                 stats(network_count).time(time_count).index_windows = sim.index_windows;
                 stats(network_count).time(time_count).fs = sim.fs;
             else
@@ -129,14 +129,18 @@ for l = 1:length(listing)
                 
                 % spike vs not a spike
                 if contains(fname,'not') == 0 
-                    stats(network_count).time(time_count).freq(f).ge(pt_idx,:,1) = ge;
-                    stats(network_count).time(time_count).freq(f).ns_avg(pt_idx,:,1) = ns_avg;
-                    stats(network_count).time(time_count).freq(f).ns_big(pt_idx,:,1) = ns;
+                    stats(network_count).time(time_count).freq(f).ge.data(pt_idx,:,1) = ge;
+                    stats(network_count).time(time_count).freq(f).ns_avg.data(pt_idx,:,1) = ns_avg;
+                    stats(network_count).time(time_count).freq(f).ns_big.data(pt_idx,:,1) = ns;
                 else
-                    stats(network_count).time(time_count).freq(f).ge(pt_idx,:,2) = ge;
-                    stats(network_count).time(time_count).freq(f).ns_avg(pt_idx,:,2) = ns_avg;
-                    stats(network_count).time(time_count).freq(f).ns_big(pt_idx,:,2) = ns;
+                    stats(network_count).time(time_count).freq(f).ge.data(pt_idx,:,2) = ge;
+                    stats(network_count).time(time_count).freq(f).ns_avg.data(pt_idx,:,2) = ns_avg;
+                    stats(network_count).time(time_count).freq(f).ns_big.data(pt_idx,:,2) = ns;
                 end
+                
+                stats(network_count).time(time_count).freq(f).ns_big.name = 'Node strength (spike channel)';
+                stats(network_count).time(time_count).freq(f).ns_avg.name = 'Node strength (average)';
+                stats(network_count).time(time_count).freq(f).ge.name = 'Global efficiency';
                 
                 % These pseudo F stats are from a permANOVA comparing the
                 % network in the first time period to that of subsequent

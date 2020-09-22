@@ -4,7 +4,8 @@ function spike = net_comp(windows)
 do_plot = 1;
 alpha = 0.05;
 bf = 0; % Bonferroni correction for power change analysis?
-paired = 'paired';
+which_met = 'ge';
+paired = 'unpaired';
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -50,13 +51,15 @@ sd_red = assess_power_change(sd_red,alpha);
 %% Compare reduced metrics in spike and not-spike
 metrics_red = assess_metric_change(metrics_red,alpha);
 
-
 if do_plot
+
+
 %% Plot network change
 plot_net_change(perm_red,windows,out_folder,paired,1);
 if strcmp(paired,'unpaired')
     plot_net_change(perm_red,windows,out_folder,paired,2);
 end
+
 
 %% Plot power change
 plot_power_change(sd_red,windows,out_folder,paired,1);
@@ -64,9 +67,14 @@ if strcmp(paired,'unpaired')
     plot_power_change(sd_red,windows,out_folder,paired,2);
 end
 
-%% Plot metric change
-plot_metric_change(metric_red,windows,out_folder,paired,1,'ge');
 
+if 0
+%% Plot metric change
+plot_metric_change(metrics_red,windows,out_folder,paired,1,which_met);
+if strcmp(paired,'unpaired')
+    plot_metric_change(metrics_red,windows,out_folder,paired,2,which_met);
+end
+end
 end
 
 %% Classifier

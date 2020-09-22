@@ -1,4 +1,4 @@
-function assess_metric_change(stats,alpha)
+function stats = assess_metric_change(stats,alpha)
 
 network_count = length(stats);
 time_count = length(stats(1).time);
@@ -16,17 +16,19 @@ for n = 1:network_count
             fields = fieldnames(curr_freq);
             for fn = 1:length(fields)
             
-                name = fields{fn};
+                name1 = fields{fn};
+                if strcmp(name1,'name'), continue; end
+                
                 
                 % get metric
-                metric = stats(n).time(t).freq(f).(name);
+                metric = stats(n).time(t).freq(f).(name1).data;
 
                 % Skip if incomplete
                 if ndims(metric) < 3, continue; end
 
                 % z score to normalize within pt
                 z_curr = (metric-mean(metric,2))./std(metric,0,2);
-
+                %z_curr = metric;
 
                 % initialize slopes
                 slopes = zeros(size(z_curr,1),2); % n_pt x 2 (spike and not spike)
@@ -46,8 +48,8 @@ for n = 1:network_count
 
                     end
                 end
-                stats(n).time(t).freq(f).(name).z_curr = z_curr;
-                stats(n).time(t).freq(f).(name).tests.slopes = slopes;
+                stats(n).time(t).freq(f).(name1).z_curr = z_curr;
+                stats(n).time(t).freq(f).(name1).tests.slopes = slopes;
             end
         end
     end
@@ -65,7 +67,8 @@ for n = 1:network_count
             fields = fieldnames(curr_freq);
             for fn = 1:length(fields)
                 name = fields{fn};
-                slopes = stats(n).time(t).freq(f).(name).tests.slope;
+                if strcmp(name,'name'), continue; end
+                slopes = stats(n).time(t).freq(f).(name).tests.slopes;
                 [~,p,~,stats1] = ttest(slopes(:,1),slopes(:,2)); % expect positive t stats because higher slopes in spike
                 stats(n).time(t).freq(f).(name).tests.paired.p = p;
                 stats(n).time(t).freq(f).(name).tests.paired.stats = stats1;
