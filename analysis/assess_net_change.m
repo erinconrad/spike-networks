@@ -20,7 +20,7 @@ for n = 1:network_count
             
             % z score to normalize within pt
             z_curr = (F_curr-mean(F_curr,2))./std(F_curr,0,2);
-            
+            %z_curr =  F_curr;
             
             % initialize slopes
             slopes = zeros(size(z_curr,1),2); % n_pt x 2 (spike and not spike)

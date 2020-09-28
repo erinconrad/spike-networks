@@ -30,6 +30,15 @@ do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 
+freq_bands = [0.5 12;... %delta/theta/alpha
+    12 25;... %beta
+    30 40;... % low gamma
+    96 106;... % high gamma
+    106 256;... %ultra-high
+    0.5 256;... %broadband    
+    ]; 
+
+%{
 freq_bands = [0 4;... %delta
     4 8;...%theta
     8 12;...% alpha
@@ -39,8 +48,11 @@ freq_bands = [0 4;... %delta
     106 256;... %ultra-high
     0 256;... %broadband    
     ]; 
+%}
+
 freq_names = {'delta','theta','alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
+pos_text = '';
 if length(time_window) == 1
     time_text = sprintf('%1.1f/',time_window);
 else
@@ -48,6 +60,9 @@ else
     all_times = time_window;
     true_window = all_times(2)-all_times(1);
     time_text = sprintf('%1.1f/',true_window);
+    if time_window(1) == 0
+        pos_text = 'pos_';
+    end
 end
 
 if not_a_spike
@@ -101,9 +116,9 @@ for whichPt = whichPts
     
     % output folder
     if do_simple_corr == 1
-        out_folder = [results_folder,'adj_simple/',time_text];
+        out_folder = [results_folder,'adj_simple/',pos_text,time_text];
     else
-        out_folder = [results_folder,'adj_coherence/',time_text];
+        out_folder = [results_folder,'adj_coherence/',pos_text,time_text];
     end
     
     if exist(out_folder,'dir') == 0

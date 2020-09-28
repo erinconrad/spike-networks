@@ -1,11 +1,12 @@
 function spike = net_comp(windows)
 
 %% Parameters
+do_avg = 0;
 do_plot = 1;
 alpha = 0.05;
 bf = 0; % Bonferroni correction for power change analysis?
 which_met = 'ge';
-paired = 'unpaired';
+paired = 'paired';
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -31,7 +32,7 @@ end
 %% Get power
 % Returns a structure with power for different time windows and spike vs
 % not a spike, as well as indices with significant power change.
-sig_dev = get_sd(alpha,bf);
+sig_dev = get_sd(alpha,bf,do_avg);
 
 %% Get network permanova statistics
 perm_stats = get_perm;
@@ -68,7 +69,7 @@ if strcmp(paired,'unpaired')
 end
 
 
-if 0
+if 1
 %% Plot metric change
 plot_metric_change(metrics_red,windows,out_folder,paired,1,which_met);
 if strcmp(paired,'unpaired')

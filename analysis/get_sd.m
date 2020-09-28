@@ -1,4 +1,10 @@
-function sig_dev = get_sd(alpha,bf)
+function sig_dev = get_sd(alpha,bf,do_avg)
+
+if do_avg == 1
+    do_avg_text = 'avg_chs/';
+else
+    do_avg_text = '';
+end
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -12,7 +18,7 @@ addpath(genpath(script_folder));
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
 out_folder = [results_folder,'plots/'];
-sig_dev_folder = [results_folder,'signal_deviation/manual/'];
+sig_dev_folder = [results_folder,'signal_deviation/manual/',do_avg_text];
 perm_folder = [results_folder,'perm_stats/'];
 ers_folder = [results_folder,'ers/'];
 ns_folder = [results_folder,'metrics/manual/'];
@@ -30,6 +36,8 @@ for i = 1:length(listing)
     if strcmp(listing(i).name,'.') == 1 || strcmp(listing(i).name,'..') == 1
         continue
     end
+    
+    if contains(listing(i).name,'avg_chs'), continue; end
     
     time_text = listing(i).name;
     time_window = str2num(time_text);

@@ -141,7 +141,7 @@ for i = 1:length(listing)
         dev_avg_ch = dev;
         
         % The peak should be the very center of each file
-        peak = round(size(values,1)/2);
+        peak = round(size(data,1)/2); % size of data should be same as size of values
 
         % Get index windows
         if length(time_window) == 1

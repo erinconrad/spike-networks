@@ -412,7 +412,7 @@ for n = 1:network_count
             
           %  xlim([-3 0]) 
           xl = get(gca,'xlim');
-          xl(2) = -0.3;
+          %xl(2) = -0.3;
           set(gca,'xlim',xl);
             
         end
