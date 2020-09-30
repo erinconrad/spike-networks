@@ -37,7 +37,7 @@ for n = 1:network_count
                     x = [ones(length(z),1), (1:length(z))'];
                     b = x\z;
                     slopes(i,s) = b(2); % slope of line
-                
+                    %slopes(i,s) = squeeze(z_curr(i,end,s));
                 end
             end
             stats(n).time(t).freq(f).z_curr = z_curr;

@@ -52,7 +52,7 @@ adj_alpha = alpha/n_freq_total;
                         
                         % Reduce not spike data to only those times before
                         % mode rise
-                        curr_pt.not.data(before_rise_mode==0) = nan;
+                       % curr_pt.not.data(before_rise_mode==0) = nan;
                         
                         % Loop over spike and not
                         snames = fieldnames(curr_pt);
@@ -72,8 +72,8 @@ adj_alpha = alpha/n_freq_total;
                                 data(isnan(data)) = [];
                                 
                                 % get z scores
-                                %z = (data-mean(data))./std(data);
-                                z = data;
+                                z = (data-mean(data))./std(data);
+                                %z = data;
                                 
                                 % do linear regression
                                 x = [ones(length(z),1), (1:length(z))'];
@@ -81,6 +81,8 @@ adj_alpha = alpha/n_freq_total;
                                 b = x\y;
                                 slope = b(2);
                                 sp_or_not.slopes(s) = slope;
+                                
+                                %sp_or_not.slopes(s) = z(end)-z(1);
                             end
                             
                             metrics(n).time(t).freq(f).(met).pt(p).(snames{sn}) = sp_or_not;

@@ -107,7 +107,7 @@ for i = 1:length(listing)
         % plot the spikes
         if 1
         figure
-        set(gcf,'position',[-1343  194  792 804])
+        set(gcf,'position',[-1343  194  500 804])
         offset = 0;
         for ich = 1:size(data_spike,2)
             plot(linspace(-3,3,size(data_spike,1)),data_spike(:,ich)+offset);

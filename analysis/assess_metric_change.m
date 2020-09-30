@@ -69,7 +69,7 @@ for n = 1:network_count
                 name = fields{fn};
                 if strcmp(name,'name'), continue; end
                 slopes = stats(n).time(t).freq(f).(name).tests.slopes;
-                [~,p,~,stats1] = ttest(slopes(:,1),slopes(:,2)); % expect positive t stats because higher slopes in spike
+                [~,p,~,stats1] = ttest((slopes(:,1)),(slopes(:,2))); % expect positive t stats because higher slopes in spike
                 stats(n).time(t).freq(f).(name).tests.paired.p = p;
                 stats(n).time(t).freq(f).(name).tests.paired.stats = stats1;
 

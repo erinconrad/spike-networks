@@ -38,7 +38,7 @@ sig_dev = get_sd(alpha,bf,do_avg);
 perm_stats = get_perm;
 
 %% Get network metrics
-metrics = get_metrics;
+metrics = get_metrics(sig_dev);
 
 %% Reduce perm stats and power to the times without significant power change
 [sd_red,perm_red,metrics_red] = reduce_to_ns(sig_dev,perm_stats,metrics,paired);

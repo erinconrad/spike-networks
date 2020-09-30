@@ -1,4 +1,4 @@
-function stats = get_metrics
+function stats = get_metrics(sig_dev)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -53,7 +53,15 @@ for l = 1:length(listing)
         % Skip if not a directory
         if time_listing(k).isdir == 0, continue; end
 
-        time_count = time_count + 1;
+        for tt = 1:length(sig_dev)
+            sd_window = sig_dev(tt).is_spike(1).time_window;
+            if sd_window == time_window
+                time_count = tt;
+                break
+            end
+        end
+        
+        
         stats(network_count).time(time_count).name = time_name;
         stats(network_count).time(time_count).time_window = time_window;
         

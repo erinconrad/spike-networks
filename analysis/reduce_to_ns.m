@@ -64,6 +64,8 @@ for n = 1:network_count
         % get the indices of significant power change
         sig = sig_dev(t).tests.(paired).sig;
         
+        if isempty(metrics(n).time(t).times), continue; end
+        
         % reduce time to non-significant indices
         metrics(n).time(t).times = metrics(n).time(t).times(~sig);
         

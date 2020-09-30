@@ -1,4 +1,4 @@
-function spike_comp(which_pt)
+function spike_comp
 
 %{
 Plan:
@@ -16,8 +16,9 @@ spikes and not spikes
 
 %% Parameters
 met = 'ge';
-windows = 0.1;
-%which_pt = 7;
+windows = [0.1,0.5];
+method = 'ttestpabs';
+which_pt = 1;
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -46,13 +47,22 @@ end
 %% Find windows for each spike in which no early spike rise
 pre_spike = find_pre_spike_windows(windows);
 
+%% Get signal power deviation
+sig_dev = get_sd(0.05,0,0);
+
 %% Get network metrics
-metrics = get_all_metrics;
+metrics = get_all_metrics(windows);
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
 metrics_red = remove_early_rise(metrics,pre_spike);
 
-%% Plot the distribution of slopes
+%% Significance testing across patients
+metrics_red = agg_pts_test(metrics_red);
+
+%% Plot slopes across patients
+agg_pts_plot(metrics_red,met,windows,method)
+
+%% Plot the distribution of slopes (single pt)
 plot_slopes(metrics_red,met,which_pt,windows)
 
 
