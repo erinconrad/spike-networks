@@ -12,14 +12,25 @@ Plan:
 spikes and not spikes
 6) Now I will have a bunch of slopes, 50 for spikes and 50 for not spikes
 7) Compare slopes between spikes and not spikes; do classifier
+
+
+do a more careful comparison of sd
 %}
 
 %% Parameters
-met = 'F';
+met = 'sd';
 windows = [0.1];
-method = 'ttest';
+method = 'ttestp';
 which_pt = 1;
-which_pre_rise = 'normal';%'alt';
+which_pre_rise = 2;
+
+if which_pre_rise == 0
+    wpr = 'manual_before_rise';
+elseif which_pre_rise == 1
+    wpr = 'before_rise';
+else
+    wpr = 'cons';
+end
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -51,20 +62,19 @@ pre_spike = find_pre_spike_windows(windows);
 %% Get signal power deviation
 sig_dev = get_sd(0.05,0,0);
 % convert this to be similar to pre_spike
-alt_pre_spike = convert_sd(sig_dev,windows,pre_spike);
-
-if strcmp(which_pre_rise,'alt') == 1
-    pre_spike = alt_pre_spike;
-end
+pre_spike = convert_sd(sig_dev,windows,pre_spike);
 
 %% Get network metrics
-metrics = get_all_metrics(windows);
+metrics = get_all_metrics(windows,pre_spike);
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
-metrics_red = remove_early_rise(metrics,pre_spike);
+metrics_red = remove_early_rise(metrics,pre_spike,wpr);
 
 %% Significance testing across patients
 metrics_red = agg_pts_test(metrics_red);
+
+%% Plot the avg in time windows across patients
+agg_pts_tw(metrics_red,met,windows,method)
 
 %% Plot slopes across patients
 agg_pts_plot(metrics_red,met,windows,method)

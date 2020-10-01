@@ -1,4 +1,4 @@
-function metrics = remove_early_rise(metrics,pre_spike)
+function metrics = remove_early_rise(metrics,pre_spike,wpr)
 alpha = 0.05;
 
 n_freq_total = 0;
@@ -117,8 +117,10 @@ adj_alpha = alpha/n_freq_total;
                             error('Time windows do not align');
                         end
                         
+                        metrics(n).time(t).times = pre_spike(p).windows(t).all_windows;
+                        
                         % Get the time windows before the early spike rise
-                        before_rise = pre_spike(p).windows(t).before_rise;
+                        before_rise = pre_spike(p).windows(t).(wpr);
                         
                         % Get the mode across all spikes (this is what I
                         % will use to reduce the not a spike data)
@@ -131,7 +133,7 @@ adj_alpha = alpha/n_freq_total;
                         
                         % Reduce not spike data to only those times before
                         % mode rise
-                       % curr_pt.not.data(before_rise_mode==0) = nan;
+                        curr_pt.not.data(before_rise_mode==0) = nan;
                         
                         % Loop over spike and not
                         snames = fieldnames(curr_pt);
@@ -142,16 +144,22 @@ adj_alpha = alpha/n_freq_total;
                             % initialize slopes (as many as there are
                             % spikes)
                             sp_or_not.slopes = zeros(size(sp_or_not.data,1),1);
+                            sp_or_not.zs = [];
                             
                             % Get slopes for each spike
                             for s = 1:size(sp_or_not.data,1)
                                 data = sp_or_not.data(s,:)';
+                                %zdat = data';
+                                zdat = ((data-nanmean(data))./nanstd(data))';
+                                sp_or_not.zs = [sp_or_not.zs;zdat];
                                 
                                 % remove nans
-                                data(isnan(data)) = [];
+                                zdat(isnan(zdat)) = [];
+                                z = zdat';
+                                
                                 
                                 % get z scores
-                                z = (data-mean(data))./std(data);
+                                %z = (data-mean(data))./std(data);
                                 %z = data;
                                 
                                 % do linear regression
@@ -162,9 +170,12 @@ adj_alpha = alpha/n_freq_total;
                                 sp_or_not.slopes(s) = slope;
                                 
                                 %sp_or_not.slopes(s) = z(end)-z(1);
+                                
                             end
+                            sp_or_not.mean_z = nanmean(sp_or_not.zs,1);
                             
                             metrics(n).time(t).freq(f).(met).pt(p).(snames{sn}) = sp_or_not;
+                            
                         end
                          
                         

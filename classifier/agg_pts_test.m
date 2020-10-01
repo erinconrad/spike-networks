@@ -27,6 +27,8 @@ for n = 1:length(metrics)
                 all_p = [];
                 all_slopes = [];
                 all_abs_slopes = [];
+                all_z_spike = [];
+                all_z_not = [];
                 
                 % Loop over patients
                 for p = 1:length(curr_met.pt)
@@ -43,6 +45,9 @@ for n = 1:length(metrics)
                     all_abs_slopes = [all_abs_slopes;...
                         mean(abs(curr_met.pt(p).test.slopes{1})),...
                         mean(abs(curr_met.pt(p).test.slopes{2}))];
+                    
+                    all_z_spike = [all_z_spike;curr_met.pt(p).spike.mean_z];
+                    all_z_not = [all_z_not;curr_met.pt(p).not.mean_z];
                     
                 end
                 
@@ -81,6 +86,9 @@ for n = 1:length(metrics)
                 curr_met.ttestpabs.stats = tstatpabs_stats;
                 curr_met.ttestpabs.h = tstatpabs_h;              
                 curr_met.ttestpabs.all_slopes = all_abs_slopes;
+                
+                curr_met.all_z_spike = all_z_spike;
+                curr_met.all_z_not = all_z_not;
                 
                 metrics(n).time(t).freq(f).(met) = curr_met;
             end

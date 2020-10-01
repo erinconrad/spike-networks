@@ -1,4 +1,4 @@
-function stats = get_all_metrics(windows)
+function stats = get_all_metrics(windows,pre_spike)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -179,6 +179,26 @@ for l = 1:length(listing)
 
     end
 
+end
+
+% Add spike power
+for n = 1:length(stats)
+    for t = 1:length(stats(n).time)
+        
+        % confirm times align
+        tw = stats(n).time(t).time_window;
+        if tw ~= pre_spike(1).windows(t).which, error('what'); end
+        
+        for f = 1:length(stats(n).time(t).freq)
+            
+            stats(n).time(t).freq(f).sd.index_windows = pre_spike(1).windows(t).all_windows;
+            for p = 1:length(pre_spike)
+                stats(n).time(t).freq(f).sd.pt(p).name = pre_spike(p).name;
+                stats(n).time(t).freq(f).sd.pt(p).spike.data = pre_spike(p).windows(t).dev.spike;
+                stats(n).time(t).freq(f).sd.pt(p).not.data = pre_spike(p).windows(t).dev.not;
+            end
+        end
+    end
 end
 
 end
