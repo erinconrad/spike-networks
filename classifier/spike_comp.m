@@ -60,7 +60,7 @@ end
 pre_spike = find_pre_spike_windows(windows);
 
 %% Get signal power deviation
-sig_dev = get_sd(0.05,0,0);
+sig_dev = get_sd(0.2,0,0);
 % convert this to be similar to pre_spike
 pre_spike = convert_sd(sig_dev,windows,pre_spike);
 
