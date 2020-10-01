@@ -54,6 +54,8 @@ for j = 1:length(listing)
         end
     end
     
+    fprintf('\nDoing %s\n',name);
+    
     %% Load adjacency matrices 
     meta = load([adj_folder,name,not_a_spike_text,'adj.mat']);
     meta = meta.meta;

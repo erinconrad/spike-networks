@@ -151,6 +151,9 @@ for l = 1:length(listing)
                 if add_sp_diff == 1
                     stats(network_count).time(time_count).freq(f).F.index_windows = spd.sim(f).index_windows;
                     stats(network_count).time(time_count).freq(f).score.index_windows = spd.sim(f).index_windows;
+                    
+                    stats(network_count).time(time_count).freq(f).F.pt(pt_idx).name = spd.sim(f).pt_name;
+                    stats(network_count).time(time_count).freq(f).score.pt(pt_idx).name = spd.sim(f).pt_name;
                     % convert score to a 2 dimensional vector
                     score = spd.sim(f).score;
                     time_idx = spd.sim(f).time_idx;
