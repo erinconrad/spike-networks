@@ -12,7 +12,86 @@ adj_alpha = alpha/n_freq_total;
             for f = 1:length(metrics(n).time(t).freq)
                 curr_freq = metrics(n).time(t).freq(f);
                 
-                % Loop through metrics
+                %{
+                %% Reduce sp diff
+                sp_diff = curr_freq.sp_diff;
+                
+                % Loop over pts
+                for p = 1:length(sp_diff.F.pt)
+                    
+                    % Get the time windows before the early spike rise
+                    before_rise = pre_spike(p).windows(t).before_rise;
+                    
+                    for fn = {'F','score'}
+                        sp_sub = sp_diff.(fn{1}).pt(p);
+                        sp_sub.spike.data(before_rise == 0) = nan;
+                        
+                        % Get slopes
+                        for sp = {'spike','not'}
+                            sp_sub_2 = sp_sub.(sp{1});
+                            data = sp_sub_2.data;
+                            % DO THIS*******
+                            sp_sub_2.slopes = zeros(size(data,1),1);
+                            
+                            % Loop over spikes
+                            for s = 1:size(data,1)
+                                
+                                sdata = squeeze(data(s,:));
+                                
+                                % remove nans
+                                sdata(isnan(sdata)) = [];
+                                
+                                z = (sdata-mean(sdata))./std(sdata);
+                                %z = data;
+                                
+                                % do linear regression
+                                x = [ones(length(z),1), (1:length(z))'];
+                                y = z';
+                                b = x\y;
+                                slope = b(2);
+                                sp_sub_2.slopes(s) = slope;
+                                
+                                
+                            end
+                            
+                            metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).(sp{1}).slopes = sp_sub_2.slopes;
+                        end
+                        
+                        % Now compare slopes in sp vs not using two sample
+                        % ttest
+                        slopes_sp = metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).spike.slopes;
+                        slopes_not = metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).not.slopes;
+                        [~,pval,~,stats1] = ttest2(slopes_sp,slopes_not);
+                        metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).test.p = pval;
+                        metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).test.stats = stats1;
+                        metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).test.slopes{1} = slopes_sp;
+                        metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).test.slopes{2} = slopes_not;
+                    end
+
+                    if 0
+                        figure
+                        subplot(2,2,1)
+                        plot(curr_freq.sp_diff.F.pt(p).spike.data','ko')
+                        title('Spike F')
+                        
+                        subplot(2,2,2)
+                        plot(curr_freq.sp_diff.F.pt(p).not.data','ko')
+                        title('Not spike F')
+                        
+                        subplot(2,2,3)
+                        plot(curr_freq.sp_diff.score.pt(p).spike.data','ko')
+                        title('Spike score')
+                        
+                        subplot(2,2,4)
+                        plot(curr_freq.sp_diff.score.pt(p).not.data','ko')
+                        title('Not spike score')
+                        pause
+                        close gcf
+                    end
+                end
+                %}
+                
+                %% Loop through metrics
                 fnames = fieldnames(curr_freq);
                 
                 for fn = 1:length(fnames)

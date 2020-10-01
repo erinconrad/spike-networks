@@ -16,7 +16,7 @@ spikes and not spikes
 
 %% Parameters
 met = 'ge';
-windows = [0.1,0.5];
+windows = [0.1];
 method = 'ttestpabs';
 which_pt = 1;
 

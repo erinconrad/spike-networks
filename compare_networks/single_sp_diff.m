@@ -66,7 +66,7 @@ for j = 1:length(listing)
     
     %% Get arrays of flattened adjacency matrices
     for i = 1:nfreq
-
+        sim(i).pt_name = name;
         adj_avg(i).adj = nan(n_times,nchs*(nchs-1)/2,nspikes);
         if isfield(meta.spike(1).adj(i),'name') == 1
             sim(i).name = meta.spike(1).adj(i).name;
@@ -82,6 +82,7 @@ for j = 1:length(listing)
         
         sim(i).index_windows = meta.spike(1).index_windows;
         sim(i).fs = meta.fs;
+        sim(i).times = round(sim(i).index_windows(:,1)/sim(i).fs*1e2)/(1e2);
        
     end
     

@@ -16,6 +16,7 @@ sig_dev_folder = [results_folder,'signal_deviation/manual/'];
 perm_folder = [results_folder,'perm_stats/'];
 ers_folder = [results_folder,'ers/'];
 ns_folder = [results_folder,'metrics/manual/'];
+sp_diff_folder = [results_folder,'net_diff_stats/'];
 
 %% Now get F statistics for network differences
 network_count = 0;
@@ -96,6 +97,24 @@ for l = 1:length(listing)
             sim = sim.metrics;
 
             
+            % Also load the spike diff file if it exists
+            if contains(fname,'not')
+                nstext = '_not_spike';
+            else
+                nstext = '';
+            end
+            sp_diff_file = [sp_diff_folder,...
+                stats(network_count).name,'/',time_name,'/',...
+                pt_name,nstext,'_perm.mat'];
+            if exist(sp_diff_file,'file') ~= 0
+                add_sp_diff = 1;
+                spd = load(sp_diff_file);
+                spd = spd;
+            else
+                add_sp_diff = 0;
+            end
+                
+            
             for f = 1:nfreq
                 stats(network_count).time(time_count).freq(f).name = sim.freq(f).name;
                 ns = sim.freq(f).ns.data;
@@ -128,7 +147,27 @@ for l = 1:length(listing)
                 stats(network_count).time(time_count).freq(f).ns_avg.name = 'Node strength (average)';
                 stats(network_count).time(time_count).freq(f).ge.name = 'Global efficiency';
                 
-
+                % Add spike diff stuff
+                if add_sp_diff == 1
+                    stats(network_count).time(time_count).freq(f).F.index_windows = spd.sim(f).index_windows;
+                    stats(network_count).time(time_count).freq(f).score.index_windows = spd.sim(f).index_windows;
+                    % convert score to a 2 dimensional vector
+                    score = spd.sim(f).score;
+                    time_idx = spd.sim(f).time_idx;
+                    num_time_idx = length(unique(time_idx));
+                    new_score = zeros(length(score)/num_time_idx,num_time_idx);
+                    for tt = 1:num_time_idx
+                        new_score(:,tt) = score(time_idx == tt);
+                    end
+                    
+                    if contains(fname,'not') == 1
+                        stats(network_count).time(time_count).freq(f).F.pt(pt_idx).not.data = spd.sim(f).F';
+                        stats(network_count).time(time_count).freq(f).score.pt(pt_idx).not.data = new_score;
+                    else
+                        stats(network_count).time(time_count).freq(f).F.pt(pt_idx).spike.data = spd.sim(f).F';
+                        stats(network_count).time(time_count).freq(f).score.pt(pt_idx).spike.data = new_score;
+                    end
+                end
                 
             end
 
