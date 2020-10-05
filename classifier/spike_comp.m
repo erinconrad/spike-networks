@@ -18,11 +18,12 @@ do a more careful comparison of sd
 %}
 
 %% Parameters
-met = 'sd';
+met = 'F';
 windows = [0.1];
 method = 'ttestp';
 which_pt = 1;
 which_pre_rise = 2;
+comp_points = 3;  % 0 = absolute, 1 = z score, 2 = relative change from first one
 
 if which_pre_rise == 0
     wpr = 'manual_before_rise';
@@ -60,7 +61,7 @@ end
 pre_spike = find_pre_spike_windows(windows);
 
 %% Get signal power deviation
-sig_dev = get_sd(0.2,0,0);
+sig_dev = get_sd(0.05,0,0);
 % convert this to be similar to pre_spike
 pre_spike = convert_sd(sig_dev,windows,pre_spike);
 
@@ -68,7 +69,7 @@ pre_spike = convert_sd(sig_dev,windows,pre_spike);
 metrics = get_all_metrics(windows,pre_spike);
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
-metrics_red = remove_early_rise(metrics,pre_spike,wpr);
+metrics_red = remove_early_rise(metrics,pre_spike,wpr,comp_points);
 
 %% Significance testing across patients
 metrics_red = agg_pts_test(metrics_red);
@@ -80,7 +81,7 @@ agg_pts_tw(metrics_red,met,windows,method)
 agg_pts_plot(metrics_red,met,windows,method)
 
 %% Plot the distribution of slopes (single pt)
-plot_slopes(metrics_red,met,which_pt,windows)
+%plot_slopes(metrics_red,met,which_pt,windows)
 
 
 end

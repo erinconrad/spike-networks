@@ -70,7 +70,7 @@ for i = 1:length(listing)
     % Load it if it exists to see how much we've already done
     if overwrite == 0
         if exist(bad_file,'file') ~= 0
-            early = load(bad_file);
+            bad = load(bad_file);
             bad = bad.bad;
 
             % Find first unfinished spike
@@ -79,6 +79,7 @@ for i = 1:length(listing)
             fprintf('File already exists, loading and starting from unfinished spike.\n');
 
         else
+            clear bad
             start_spike = 1;
             bad.name = name;
         end

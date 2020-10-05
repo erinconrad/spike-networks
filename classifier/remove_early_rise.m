@@ -1,4 +1,4 @@
-function metrics = remove_early_rise(metrics,pre_spike,wpr)
+function metrics = remove_early_rise(metrics,pre_spike,wpr,comp_points)
 alpha = 0.05;
 
 n_freq_total = 0;
@@ -149,8 +149,20 @@ adj_alpha = alpha/n_freq_total;
                             % Get slopes for each spike
                             for s = 1:size(sp_or_not.data,1)
                                 data = sp_or_not.data(s,:)';
-                                %zdat = data';
-                                zdat = ((data-nanmean(data))./nanstd(data))';
+                                
+                                if comp_points == 0
+                                    zdat = data';
+                                elseif comp_points == 1
+                                    zdat = ((data-nanmean(data))./nanstd(data))';
+                                elseif comp_points == 2
+                                    first_non_nan_data = data(~isnan(data));
+                                    first_non_nan_data = first_non_nan_data(1);
+                                    zdat = ((data-first_non_nan_data)./first_non_nan_data)';
+                                elseif comp_points == 3
+                                    first_non_nan_data = data(~isnan(data));
+                                    first_non_nan_data = first_non_nan_data(1);
+                                    zdat = ((data-first_non_nan_data)./nanstd(data))';
+                                end
                                 sp_or_not.zs = [sp_or_not.zs;zdat];
                                 
                                 % remove nans
@@ -167,9 +179,10 @@ adj_alpha = alpha/n_freq_total;
                                 y = z;
                                 b = x\y;
                                 slope = b(2);
-                                sp_or_not.slopes(s) = slope;
+                                %sp_or_not.slopes(s) = slope;
                                 
                                 %sp_or_not.slopes(s) = z(end)-z(1);
+                                sp_or_not.slopes(s) = z(end);
                                 
                             end
                             sp_or_not.mean_z = nanmean(sp_or_not.zs,1);

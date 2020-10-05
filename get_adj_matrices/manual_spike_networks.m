@@ -37,6 +37,8 @@ freq_bands = [0.5 12;... %delta/theta/alpha
     106 256;... %ultra-high
     0.5 256;... %broadband    
     ]; 
+freq_names = {'delta/theta/alpha','beta','low_gamma',...
+    'high_gamma','ultra_high','broadband'};
 
 %{
 freq_bands = [0 4;... %delta
@@ -48,10 +50,11 @@ freq_bands = [0 4;... %delta
     106 256;... %ultra-high
     0 256;... %broadband    
     ]; 
-%}
+
 
 freq_names = {'delta','theta','alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
+    %}
 pos_text = '';
 if length(time_window) == 1
     time_text = sprintf('%1.1f/',time_window);
@@ -168,6 +171,7 @@ for whichPt = whichPts
         meta.chLabels = chLabels;
         meta.spike(s).time =spike(s).time;
         meta.spike(s).is_sp_ch = involved;
+        meta.freq_bands = freq_bands;
 
         %% Pre-processing
         % Parameters 2 and 3 indicate whether to do CAR and pre-whiten,
