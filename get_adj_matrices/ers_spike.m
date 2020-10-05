@@ -204,6 +204,7 @@ for whichPt = whichPts
     ers.powers = ers_array;
     ers.freq_names = freq_names;
     ers.freq_bands = freq_bands;
+    ers.fs = fs;
     
     % save
     save(out_file,'ers');
