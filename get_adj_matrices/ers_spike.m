@@ -13,6 +13,9 @@ freq_bands = [0.5 12;... %delta/theta/alpha
     0.5 256;... %broadband    
     ]; 
 
+freq_names = {'delta/theta/alpha','beta','low_gamma',...
+    'high_gamma','ultra_high','broadband'};
+
 %{
 freq_bands = [0 4;... %delta
     4 8;...%theta
