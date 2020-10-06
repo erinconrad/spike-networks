@@ -1,4 +1,4 @@
-function metrics = remove_early_rise(metrics,pre_spike,wpr,comp_points)
+function metrics = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise)
 alpha = 0.05;
 
 n_freq_total = 0;
@@ -128,14 +128,16 @@ adj_alpha = alpha/n_freq_total;
                         before_rise_mode = repmat(before_rise_mode,...
                             size(curr_pt.not.data,1),1);
                         
-                        if p == 10 && strcmp(met,'ers'), error('look'); end
+                    %    if p == 10 && strcmp(met,'ers'), error('look'); end
                         
+                        if rm_rise == 1
                         % Reduce spike data to only those times before rise
                         curr_pt.spike.data(before_rise==0) = nan;
                         
                         % Reduce not spike data to only those times before
                         % mode rise
                         curr_pt.not.data(before_rise_mode==0) = nan;
+                        end
                         
                         
                         % Loop over spike and not
@@ -152,19 +154,21 @@ adj_alpha = alpha/n_freq_total;
                             % Get slopes for each spike
                             for s = 1:size(sp_or_not.data,1)
                                 data = sp_or_not.data(s,:)';
-                                
+                                first_non_nan_data = data(~isnan(data));
+                                first_non_nan_data = first_non_nan_data(1);
                                 if comp_points == 0
                                     zdat = data';
                                 elseif comp_points == 1
                                     zdat = ((data-nanmean(data))./nanstd(data))';
                                 elseif comp_points == 2
-                                    first_non_nan_data = data(~isnan(data));
-                                    first_non_nan_data = first_non_nan_data(1);
                                     zdat = ((data-first_non_nan_data)./first_non_nan_data)';
                                 elseif comp_points == 3
-                                    first_non_nan_data = data(~isnan(data));
-                                    first_non_nan_data = first_non_nan_data(1);
+                                    
                                     zdat = ((data-first_non_nan_data)./nanstd(data))';
+                                elseif comp_points == 4
+                                    zdat = (data./nanstd(data))';
+                                elseif comp_points == 5
+                                    zdat = (data-first_non_nan_data)';
                                 end
                                 sp_or_not.zs = [sp_or_not.zs;zdat];
                                 

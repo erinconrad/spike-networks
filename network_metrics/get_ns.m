@@ -79,6 +79,7 @@ for i = 1:length(listing)
     ns = nan(n_f,n_spikes,n_times);
     ns_all = nan(n_f,n_spikes,n_times,n_ch);
     ge = nan(n_f,n_spikes,n_times);
+    trans = nan(n_f,n_spikes,n_times);
 
     % Initialize spike count
     s_count = 0;
@@ -106,6 +107,9 @@ for i = 1:length(listing)
                 % global efficiency of full matrix
                 ge(f,s,tt) = efficiency_wei(adj,0); 
                 
+                % transitivity of the full matrix
+                trans = transitivity_wu(adj);
+                
             end
             
         end
@@ -125,6 +129,9 @@ for i = 1:length(listing)
         
         metrics.freq(f).ge.name = 'global efficiency';
         metrics.freq(f).ge.data = squeeze(ge(f,:,:));
+        
+        metrics.freq(f).trans.name = 'transitivity';
+        metrics.freq(f).trans.data = squeeze(trans(f,:,:));
         
         metrics.freq(f).ns_all.name = 'node strength all';
         metrics.freq(f).ns_all.data = squeeze(ns_all(f,:,:,:));

@@ -18,11 +18,12 @@ do a more careful comparison of sd
 %}
 
 %% Parameters
-met = 'ers';
+rm_rise = 1;
+met = 'F';
 windows = [0.1];
 method = 'ttestp';
 which_pt = 1;
-which_pre_rise = 3;
+which_pre_rise = 2;
 comp_points = 3;  % 0 = absolute, 1 = z score, 2 = relative change from first one
 
 if which_pre_rise == 0
@@ -69,7 +70,7 @@ pre_spike = convert_sd(sig_dev,windows,pre_spike);
 metrics = get_all_metrics(windows,pre_spike);
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
-metrics_red = remove_early_rise(metrics,pre_spike,wpr,comp_points);
+metrics_red = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise);
 
 %% Significance testing across patients
 metrics_red = agg_pts_test(metrics_red);

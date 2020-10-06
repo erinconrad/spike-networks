@@ -2,7 +2,7 @@ function manual_sig_deviation(time_window,not_a_spike,do_avg)
 
 %{
 This function determines the time periods in which the EEG data surrounding
-the spike is significantly different from the baseline (first half second).
+the spike is significantly different from the baseline (first time window).
 This serves as a control for other measures
 %}
 
@@ -195,6 +195,11 @@ for i = 1:length(listing)
     sig_dev(pt_idx).time_window = time_window;
     sig_dev(pt_idx).index_windows = index_windows;
     sig_dev(pt_idx).fs = fs;
+    if do_avg == 0
+        sig_dev(pt_idx).biggest_dev_ch = 'yes';
+    else
+        sig_dev(pt_idx).biggest_dev_ch = 'no, average of all chs';
+    end
     
 end
 
