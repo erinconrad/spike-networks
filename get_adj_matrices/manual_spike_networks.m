@@ -239,8 +239,8 @@ for whichPt = whichPts
                 final_index_windows = [index_windows;old_index_windows];
                 n_chunks = n_chunks -1;
             else
-                fprintf('Warning, I am not sure how to append this to the existing data. Skipping patient\n');
-                break
+                fprintf('Warning, I am not sure how to append this to the existing data. Skipping spike\n');
+                continue
             end
         else
             append = 0;
