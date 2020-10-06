@@ -52,9 +52,15 @@ ers_folder = [results_folder,'ers/'];
 ns_folder = [results_folder,'metrics/manual/'];
 adj_folder = [results_folder,'adj_mat/manual/'];
 spike_rise_folder = [results_folder,'spike_rise/'];
+pre_spike_folder = [results_folder,'/pre_spike/'];
 
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
+end
+
+
+if exist(pre_spike_folder,'dir') == 0
+    mkdir(pre_spike_folder);
 end
 
 
@@ -65,6 +71,7 @@ pre_spike = find_pre_spike_windows(windows);
 sig_dev = get_sd(0.05,0,0);
 % convert this to be similar to pre_spike
 pre_spike = convert_sd(sig_dev,windows,pre_spike);
+save([pre_spike_folder,'pre_spike.mat'],'pre_spike');
 
 %% Get network metrics
 metrics = get_all_metrics(windows,pre_spike);
@@ -74,6 +81,7 @@ metrics_red = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise);
 
 %% Significance testing across patients
 metrics_red = agg_pts_test(metrics_red);
+
 
 %% Plot the avg in time windows across patients
 agg_pts_tw(metrics_red,met,windows,method)

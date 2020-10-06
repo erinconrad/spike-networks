@@ -146,9 +146,13 @@ for whichPt = whichPts
             
             fprintf('File already exists, loading and starting from unfinished spike.\n');
 
-        else
+        elseif overwrite == 1
             start_spike = 1;
             meta.name = name;
+        elseif overwrite == 2
+            meta = load(meta_file);
+            meta = meta.meta;
+            start_spike = 1;
         end
     else
         
@@ -171,6 +175,12 @@ for whichPt = whichPts
         meta.chLabels = chLabels;
         meta.spike(s).time =spike(s).time;
         meta.spike(s).is_sp_ch = involved;
+        
+        if overwrite == 2
+            if ~isequal(meta.freq_bands,freq_bands)
+                error('Frequency bands do not line up.');
+            end
+        end
         meta.freq_bands = freq_bands;
 
         %% Pre-processing
@@ -214,6 +224,27 @@ for whichPt = whichPts
         % negative or beyond the total size
         index_windows(1,1) = max(index_windows(1,1),1);
         index_windows(end,2) = min(index_windows(end,2),size(values,1));
+        
+        % Try to line up with old time windows
+        if overwrite == 2
+            old_index_windows = meta.spike(s).index_windows;
+            old_adj = meta.spike(s).adj;
+            
+            if isequal(old_index_windows(end,:),index_windows(1,:))
+                append = 1; % I am adding on to the end
+                index_windows(1,:) = []; % remove the first index window because it's the same
+                final_index_windows = [old_index_windows;index_windows];
+            elseif isequal(old_index_windows(1,:),index_windows(end,:))
+                append = 2; % I am adding on before the beginning
+                index_windows(end,:) = []; % remove last index window
+                final_index_windows = [index_windows;old_index_windows];
+            else
+                error('I am not sure how to append this to the existing data');
+            end
+        else
+            append = 0;
+            final_index_windows = index_windows;
+        end
 
 
         %% Get adjacency matrices
@@ -235,7 +266,20 @@ for whichPt = whichPts
                 t_adj = get_adj_matrices(temp_values,fs,freq_bands);
 
                 for ff = 1:size(freq_bands,1)
-                    adj(ff).adj(tt,:,:) = t_adj(ff).adj;
+                    
+                    if append == 1
+                        % add onto old index windows
+                        adj(ff).adj(tt+size(old_index_windows,1),:,:) = t_adj(ff).adj;
+                    elseif append == 2
+                        % move old index windows down to make room for new
+                        % ones
+                        adj(ff).adj = ...
+                            [zeros(size(index_windows,1),size(adj(ff).adj,2),size(adj(ff).adj,3)),adj(ff).adj];
+                        
+                        adj(ff).adj(tt,:,:) = t_adj(ff).adj;
+                    else
+                        adj(ff).adj(tt,:,:) = t_adj(ff).adj;
+                    end
                 end
 
             end
@@ -245,7 +289,16 @@ for whichPt = whichPts
             for tt = 1:n_chunks
                 % get appropriate points
                 temp_values = values(round(index_windows(tt,1)):round(index_windows(tt,2)),:); 
-                adj(1).adj(tt,:,:) = get_simple_corr(temp_values);
+                if append == 1
+                    adj(1).adj(tt+size(old_index_windows,1),:,:) = get_simple_corr(temp_values);
+                elseif append == 2
+                    adj(1).adj = ...
+                            [zeros(size(index_windows,1),size(adj(1).adj,2),size(adj(1).adj,3)),adj(1).adj];
+                        
+                    adj(1).adj(tt,:,:) = get_simple_corr(temp_values);
+                else
+                    adj(1).adj(tt,:,:) = get_simple_corr(temp_values);
+                end
             end
 
             if 0
@@ -262,7 +315,9 @@ for whichPt = whichPts
         end
 
         meta.spike(s).adj = adj;
-        meta.spike(s).index_windows = index_windows;
+        meta.spike(s).index_windows = final_index_windows;
+        
+        error('look');
 
         % Save the meta file after each spike run
         save(meta_file,'meta');
