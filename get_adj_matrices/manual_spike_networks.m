@@ -232,10 +232,12 @@ for whichPt = whichPts
                 append = 1; % I am adding on to the end
                 index_windows(1,:) = []; % remove the first index window because it's the same
                 final_index_windows = [old_index_windows;index_windows];
+                n_chunks = n_chunks -1;
             elseif isequal(old_index_windows(1,:),index_windows(end,:))
                 append = 2; % I am adding on before the beginning
                 index_windows(end,:) = []; % remove last index window
                 final_index_windows = [index_windows;old_index_windows];
+                n_chunks = n_chunks -1;
             else
                 error('I am not sure how to append this to the existing data');
             end
