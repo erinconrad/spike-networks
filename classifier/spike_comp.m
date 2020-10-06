@@ -24,7 +24,9 @@ windows = [0.1];
 method = 'ttestp';
 which_pt = 1;
 which_pre_rise = 2;
-comp_points = 3;  % 0 = absolute, 1 = z score, 2 = relative change from first one
+comp_points = 3;  
+% 0 = absolute, 1 = z score, 2 = relative change from first one, 3 = like z
+% score but subtracting first one
 
 if which_pre_rise == 0
     wpr = 'manual_before_rise';
@@ -71,7 +73,7 @@ pre_spike = find_pre_spike_windows(windows);
 sig_dev = get_sd(0.05,0,0);
 % convert this to be similar to pre_spike
 pre_spike = convert_sd(sig_dev,windows,pre_spike);
-save([pre_spike_folder,'pre_spike.mat'],'pre_spike');
+%save([pre_spike_folder,'pre_spike.mat'],'pre_spike');
 
 %% Get network metrics
 metrics = get_all_metrics(windows,pre_spike);
