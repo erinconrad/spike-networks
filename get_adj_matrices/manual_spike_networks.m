@@ -268,14 +268,18 @@ for whichPt = whichPts
                 for ff = 1:size(freq_bands,1)
                     
                     if append == 1
+                        adj(ff).adj = [old_adj(ff).adj;zeros(n_chunks,nchs,nchs)];
+                    elseif append == 2
+                        adj(ff).adj = ...
+                                [zeros(n_chunks,nchs,nchs);old_adj(ff).adj];
+                    else
+                        adj(ff).adj = zeros(n_chunks,nchs,nchs);
+                    end
+                    
+                    if append == 1
                         % add onto old index windows
                         adj(ff).adj(tt+size(old_index_windows,1),:,:) = t_adj(ff).adj;
                     elseif append == 2
-                        % move old index windows down to make room for new
-                        % ones
-                        adj(ff).adj = ...
-                            [zeros(size(index_windows,1),size(adj(ff).adj,2),size(adj(ff).adj,3)),adj(ff).adj];
-                        
                         adj(ff).adj(tt,:,:) = t_adj(ff).adj;
                     else
                         adj(ff).adj(tt,:,:) = t_adj(ff).adj;
@@ -285,16 +289,21 @@ for whichPt = whichPts
             end
 
         elseif do_simple_corr == 1
-            adj(1).adj = zeros(n_chunks,nchs,nchs);
+            
+            if append == 1
+                adj(1).adj = [old_adj.adj;zeros(n_chunks,nchs,nchs)];
+            elseif append == 2
+                adj(1).adj = ...
+                        [zeros(n_chunks,nchs,nchs);old_adj.adj];
+            else
+                adj(1).adj = zeros(n_chunks,nchs,nchs);
+            end
             for tt = 1:n_chunks
                 % get appropriate points
                 temp_values = values(round(index_windows(tt,1)):round(index_windows(tt,2)),:); 
                 if append == 1
                     adj(1).adj(tt+size(old_index_windows,1),:,:) = get_simple_corr(temp_values);
                 elseif append == 2
-                    adj(1).adj = ...
-                            [zeros(size(index_windows,1),size(adj(1).adj,2),size(adj(1).adj,3));adj(1).adj];
-                        
                     adj(1).adj(tt,:,:) = get_simple_corr(temp_values);
                 else
                     adj(1).adj(tt,:,:) = get_simple_corr(temp_values);
