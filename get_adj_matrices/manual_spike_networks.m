@@ -254,7 +254,14 @@ for whichPt = whichPts
             % Initialize adjacency matrix
             for ff = 1:size(freq_bands,1)
                 adj(ff).name = freq_names{ff};
-                adj(ff).adj = zeros(n_chunks,nchs,nchs);
+                if append == 1
+                    adj(ff).adj = [old_adj(ff).adj;zeros(n_chunks,nchs,nchs)];
+                elseif append == 2
+                    adj(ff).adj = ...
+                            [zeros(n_chunks,nchs,nchs);old_adj(ff).adj];
+                else
+                    adj(ff).adj = zeros(n_chunks,nchs,nchs);
+                end
             end
 
             for tt = 1:n_chunks
@@ -266,15 +273,6 @@ for whichPt = whichPts
                 t_adj = get_adj_matrices(temp_values,fs,freq_bands);
 
                 for ff = 1:size(freq_bands,1)
-                    
-                    if append == 1
-                        adj(ff).adj = [old_adj(ff).adj;zeros(n_chunks,nchs,nchs)];
-                    elseif append == 2
-                        adj(ff).adj = ...
-                                [zeros(n_chunks,nchs,nchs);old_adj(ff).adj];
-                    else
-                        adj(ff).adj = zeros(n_chunks,nchs,nchs);
-                    end
                     
                     if append == 1
                         % add onto old index windows
@@ -326,7 +324,7 @@ for whichPt = whichPts
         meta.spike(s).adj = adj;
         meta.spike(s).index_windows = final_index_windows;
         
-        error('look');
+       % error('look');
 
         % Save the meta file after each spike run
         save(meta_file,'meta');
