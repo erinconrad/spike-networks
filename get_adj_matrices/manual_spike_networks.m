@@ -291,7 +291,7 @@ for whichPt = whichPts
                     adj(1).adj(tt+size(old_index_windows,1),:,:) = get_simple_corr(temp_values);
                 elseif append == 2
                     adj(1).adj = ...
-                            [zeros(size(index_windows,1),size(adj(1).adj,2),size(adj(1).adj,3)),adj(1).adj];
+                            [zeros(size(index_windows,1),size(adj(1).adj,2),size(adj(1).adj,3));adj(1).adj];
                         
                     adj(1).adj(tt,:,:) = get_simple_corr(temp_values);
                 else
