@@ -145,19 +145,15 @@ for whichPt = whichPts
             start_spike = length(meta.spike) + 1;
             
             fprintf('File already exists, loading and starting from unfinished spike.\n');
-
-        elseif overwrite == 1
-            start_spike = 1;
-            meta.name = name;
-        elseif overwrite == 2
-            meta = load(meta_file);
-            meta = meta.meta;
-            start_spike = 1;
         end
-    else
+    elseif overwrite == 1
         
         start_spike = 1;
         meta.name = name;
+    elseif overwrite == 2
+        meta = load(meta_file);
+        meta = meta.meta;
+        start_spike = 1;
     end
           
     % Loop through spikes
@@ -176,12 +172,14 @@ for whichPt = whichPts
         meta.spike(s).time =spike(s).time;
         meta.spike(s).is_sp_ch = involved;
         
+        %{
         if overwrite == 2
             if ~isequal(meta.freq_bands,freq_bands)
                 error('Frequency bands do not line up.');
             end
         end
         meta.freq_bands = freq_bands;
+        %}
 
         %% Pre-processing
         % Parameters 2 and 3 indicate whether to do CAR and pre-whiten,
