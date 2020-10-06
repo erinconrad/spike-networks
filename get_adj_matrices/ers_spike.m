@@ -80,6 +80,7 @@ end
 for whichPt = whichPts
     
     %% Prep patient
+    clear ers
     
     % Skip it if name is empty
     if isempty(pt(whichPt).name) == 1, continue; end

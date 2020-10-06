@@ -18,11 +18,11 @@ do a more careful comparison of sd
 %}
 
 %% Parameters
-met = 'F';
+met = 'ers';
 windows = [0.1];
 method = 'ttestp';
 which_pt = 1;
-which_pre_rise = 2;
+which_pre_rise = 3;
 comp_points = 3;  % 0 = absolute, 1 = z score, 2 = relative change from first one
 
 if which_pre_rise == 0

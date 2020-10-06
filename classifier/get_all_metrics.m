@@ -113,6 +113,18 @@ for l = 1:length(listing)
             else
                 add_sp_diff = 0;
             end
+            
+            % Also load the ERS file if it exists
+            ers_file = [ers_folder,...
+                time_name,'/',...
+                pt_name,nstext,'_ers.mat'];
+            if exist(ers_file,'file') ~= 0
+                add_ers = 1;
+                ers = load(ers_file);
+                ers = ers.ers;
+            else
+                add_ers = 0;
+            end
                 
             
             for f = 1:nfreq
@@ -146,6 +158,45 @@ for l = 1:length(listing)
                 stats(network_count).time(time_count).freq(f).ns_big.name = 'Node strength (spike channel)';
                 stats(network_count).time(time_count).freq(f).ns_avg.name = 'Node strength (average)';
                 stats(network_count).time(time_count).freq(f).ge.name = 'Global efficiency';
+                
+                % Add ERS stuff
+                if add_ers == 1
+                    stats(network_count).time(time_count).freq(f).ers.index_windows = ers.index_windows;
+                    stats(network_count).time(time_count).freq(f).ers.pt(pt_idx).name = ers.name;
+                    
+                    % Concatenate spike data
+                    all_ers(f).data = zeros(length(ers.spike),size(ers.spike(1).ers,1));
+                    nfreq_ers = size(ers.freq_bands,1);
+                    if nfreq_ers < nfreq
+                        fix_freq = 1;
+                    else
+                        fix_freq = 0;
+                    end
+                    for s = 1:length(ers.spike)
+                        % Fix for frequency inconsistency
+                        for ff = 1:nfreq_ers
+                            curr_ers = ers.spike(s).ers(:,ff);
+                            if fix_freq == 0
+                                all_ers(f).data(s,:) = curr_ers;
+                            elseif fix_freq == 1
+                                if ff == 1 % delta/theta/alpha
+                                    for fff = 1:3
+                                        all_ers(fff).data(s,:) = curr_ers;
+                                    end
+                                else % beta or onward
+                                    fff = ff + 2;
+                                    all_ers(fff).data(s,:) = curr_ers;
+                                end
+                            end
+                        end
+                    end
+                    
+                    if contains(fname,'not') == 1
+                        stats(network_count).time(time_count).freq(f).ers.pt(pt_idx).not.data = all_ers(f).data;
+                    else
+                        stats(network_count).time(time_count).freq(f).ers.pt(pt_idx).spike.data = all_ers(f).data;
+                    end
+                end
                 
                 % Add spike diff stuff
                 if add_sp_diff == 1
