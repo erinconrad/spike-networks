@@ -19,12 +19,12 @@ do a more careful comparison of sd
 
 %% Parameters
 rm_rise = 1;
-met = 'F';
+met = 'ers';
 windows = [0.1];
-method = 'ttestp';
+method = 'ttestp'; % ttestp is default
 which_pt = 1;
-which_pre_rise = 2;
-comp_points = 3;  
+which_pre_rise = 2; % 2 is default
+comp_points = 3;  %3 is default
 % 0 = absolute, 1 = z score, 2 = relative change from first one, 3 = like z
 % score but subtracting first one
 
@@ -89,7 +89,7 @@ metrics_red = agg_pts_test(metrics_red);
 agg_pts_tw(metrics_red,met,windows,method)
 
 %% Plot slopes across patients
-agg_pts_plot(metrics_red,met,windows,method)
+%agg_pts_plot(metrics_red,met,windows,method)
 
 %% Plot the distribution of slopes (single pt)
 %plot_slopes(metrics_red,met,which_pt,windows)

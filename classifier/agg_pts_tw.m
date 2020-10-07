@@ -13,10 +13,10 @@ if strcmp(met,'sd'), n_freq_abs = 0; end
 figure
 if strcmp(met,'sd')
     set(gcf,'position',[1 100 600 length(windows)*200+200])
-    [ha, ~] = tight_subplot(length(windows), 1, [0.08 0.01], [0.2 0.12], [0.13 0.09]);
+    [ha, ~] = tight_subplot(length(windows), 1, [0.08 0.01], [0.2 0.12], [0.10 0.09]);
 else
     set(gcf,'position',[1 100 1500 length(windows)*200+100])
-    [ha, ~] = tight_subplot(length(windows), n_freq_abs+1, [0.08 0.01], [0.2 0.12], [0.07 0.005]);
+    [ha, ~] = tight_subplot(length(windows), n_freq_abs+1, [0.08 0.01], [0.2 0.12], [0.05 0.005]);
 end
 z_range = zeros(length(windows),2);
 

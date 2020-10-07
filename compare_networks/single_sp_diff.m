@@ -40,7 +40,7 @@ pt = pt.pt;
 listing = dir([adj_folder,'*_adj.mat']);
 
 
-
+finished_names = {};
 for j = 1:length(listing)
 
     filename = listing(j).name;
@@ -52,6 +52,10 @@ for j = 1:length(listing)
             fprintf('%s already exists, skipping...\n',name);
             continue;
         end
+    end
+    
+    if ismember(name,finished_names)
+        continue
     end
     
     fprintf('\nDoing %s\n',name);
@@ -180,7 +184,8 @@ for j = 1:length(listing)
     %% Save the sim structure
     save([out_folder,name,not_a_spike_text,'perm.mat'],'sim');
 
-    
+    %% Add to finished names
+    finished_names = [finished_names,name];
 end
 
 end
