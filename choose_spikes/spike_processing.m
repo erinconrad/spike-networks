@@ -63,6 +63,8 @@ for whichPt = whichPts
         fprintf('Doing %s...\n',name);
     end
     
+    if strcmp(name,'HUP080'), continue; end
+    
     % Skip if I already did it
     if overwrite == 0
         if exist([results_folder,name,not_a_spike_text,'eeg.mat'],'file') ~= 0
