@@ -84,7 +84,7 @@ for whichPt = whichPts
     
     n_spikes = length(sp(whichPt).spike);
     if start_spike == n_spikes + 1
-    %    continue;
+        continue;
     end
     
     % get ieeg name and sampling rate
