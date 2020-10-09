@@ -66,9 +66,18 @@ for whichPt = whichPts
     % Skip if I already did it
     if overwrite == 0
         if exist([results_folder,name,not_a_spike_text,'eeg.mat'],'file') ~= 0
-            fprintf('Already did %s, skipping...\n',name);
-            continue;
+            fprintf('Already did %s, starting at first unfinished spike...\n',name);
+            %continue;
+            
+            % Load file
+            spike = load([results_folder,name,not_a_spike_text,'eeg.mat']);
+            spike = spike.spike;
+            
+            % Find first unfinished spike
+            start_spike = length(spike) + 1;
         end
+    else
+        start_spike = 1;
     end
     
     n_spikes = length(sp(whichPt).spike);
@@ -94,7 +103,9 @@ for whichPt = whichPts
         error('what\n');
     end
     
-    for s = 1:n_spikes
+    for s = start_spike:n_spikes
+        
+        fprintf('\nDoing %s spike %d of %d\n',name,s,n_spikes);
         
         %% Load the data surrounding the spike
         s_time = sp(whichPt).spike(s);

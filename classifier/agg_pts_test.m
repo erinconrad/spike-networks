@@ -33,6 +33,8 @@ for n = 1:length(metrics)
                 % Loop over patients
                 for p = 1:length(curr_met.pt)
                     
+                    if ~isfield(curr_met.pt(p),'test'), continue; end
+                    
                     % add t stat and p value to arrays
                     all_t = [all_t;curr_met.pt(p).test.stats.tstat];
                     all_p = [all_p;curr_met.pt(p).test.p];
@@ -59,6 +61,7 @@ for n = 1:length(metrics)
                 [~,tstat_p,~,tstat_stats] = ttest(all_t);
                 tstat_h = tstat_p < adj_alpha;
                 
+                if isempty(all_slopes), continue; end
                 [~,tstatp_p,~,tstatp_stats] = ttest(all_slopes(:,1),all_slopes(:,2));
                 tstatp_h = tstatp_p < adj_alpha;
                 

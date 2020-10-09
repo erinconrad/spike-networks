@@ -1,5 +1,5 @@
-function metrics = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise)
-alpha = 0.05;
+function metrics = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise,alpha)
+
 
 n_freq_total = 0;
 for n = 1:length(metrics)
@@ -12,85 +12,6 @@ adj_alpha = alpha/n_freq_total;
             for f = 1:length(metrics(n).time(t).freq)
                 curr_freq = metrics(n).time(t).freq(f);
                 
-                %{
-                %% Reduce sp diff
-                sp_diff = curr_freq.sp_diff;
-                
-                % Loop over pts
-                for p = 1:length(sp_diff.F.pt)
-                    
-                    % Get the time windows before the early spike rise
-                    before_rise = pre_spike(p).windows(t).before_rise;
-                    
-                    for fn = {'F','score'}
-                        sp_sub = sp_diff.(fn{1}).pt(p);
-                        sp_sub.spike.data(before_rise == 0) = nan;
-                        
-                        % Get slopes
-                        for sp = {'spike','not'}
-                            sp_sub_2 = sp_sub.(sp{1});
-                            data = sp_sub_2.data;
-                            % DO THIS*******
-                            sp_sub_2.slopes = zeros(size(data,1),1);
-                            
-                            % Loop over spikes
-                            for s = 1:size(data,1)
-                                
-                                sdata = squeeze(data(s,:));
-                                
-                                % remove nans
-                                sdata(isnan(sdata)) = [];
-                                
-                                z = (sdata-mean(sdata))./std(sdata);
-                                %z = data;
-                                
-                                % do linear regression
-                                x = [ones(length(z),1), (1:length(z))'];
-                                y = z';
-                                b = x\y;
-                                slope = b(2);
-                                sp_sub_2.slopes(s) = slope;
-                                
-                                
-                            end
-                            
-                            metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).(sp{1}).slopes = sp_sub_2.slopes;
-                        end
-                        
-                        % Now compare slopes in sp vs not using two sample
-                        % ttest
-                        slopes_sp = metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).spike.slopes;
-                        slopes_not = metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).not.slopes;
-                        [~,pval,~,stats1] = ttest2(slopes_sp,slopes_not);
-                        metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).test.p = pval;
-                        metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).test.stats = stats1;
-                        metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).test.slopes{1} = slopes_sp;
-                        metrics(n).time(t).freq(f).sp_diff.(fn{1}).pt(p).test.slopes{2} = slopes_not;
-                    end
-
-                    if 0
-                        figure
-                        subplot(2,2,1)
-                        plot(curr_freq.sp_diff.F.pt(p).spike.data','ko')
-                        title('Spike F')
-                        
-                        subplot(2,2,2)
-                        plot(curr_freq.sp_diff.F.pt(p).not.data','ko')
-                        title('Not spike F')
-                        
-                        subplot(2,2,3)
-                        plot(curr_freq.sp_diff.score.pt(p).spike.data','ko')
-                        title('Spike score')
-                        
-                        subplot(2,2,4)
-                        plot(curr_freq.sp_diff.score.pt(p).not.data','ko')
-                        title('Not spike score')
-                        pause
-                        close gcf
-                    end
-                end
-                %}
-                
                 %% Loop through metrics
                 fnames = fieldnames(curr_freq);
                 
@@ -99,9 +20,63 @@ adj_alpha = alpha/n_freq_total;
                     met = fnames{fn};
                     curr_met = curr_freq.(met);
                     
+                    %% Align times with SD
+                    % check that time windows line up
+                    if pre_spike(1).windows(t).which ~= metrics(n).time(t).time_window
+                        error('Time windows do not align');
+                    end
+                    
+                    if rm_rise == 1
+                        
+                        % Find where in the SD array the metric array
+                        % starts
+                        if strcmp(wpr,'cons')
+                            ps_windows = pre_spike(1).windows(t).cons_windows;
+                        else
+                            ps_windows = pre_spike(1).windows(t).all_windows;
+                        end
+                        shift = find(ps_windows == curr_met.pt(1).times(1));
+                        
+                        all_t = nan(length(curr_met.pt),length(curr_met.pt(1).times));
+                        
+                        % Get early rise times
+                        if strcmp(wpr,'cons')
+                            % Loop over patients
+                            for p = 1:length(curr_met.pt)
+                                spike_dev = pre_spike(p).windows(t).dev.spike(:,shift:end);
+                                
+                                % Paired ttest comparing first time window
+                                % to subsequent time windows
+                                for tt = 2:size(spike_dev,2)
+                                    [~,~,~,tstats] = ttest(spike_dev(:,1),spike_dev(:,tt));
+                                    all_t(p,tt) = tstats.tstat;
+                                    
+                                end
+
+                            end
+                            
+                            % Do one sample test of tstats
+                            before_rise_windows = ones(size(all_t,2),1);
+                            for tt = 2:size(all_t,2)
+                                [~,pval] = ttest(all_t(:,tt));
+                                if pval < alpha
+                                    before_rise_windows(tt) = 0;
+                                end
+                            end
+
+                        end
+                    
+                    
                     % Loop over patients
                     for p = 1:length(curr_met.pt)
+                        
+                        if p > length(curr_met.pt), continue; end
+
                         curr_pt = curr_met.pt(p);
+                        
+                        if ~isfield(curr_pt,'spike') || ~isfield(curr_pt,'not')
+                            continue;
+                        end
                         
                         % Skip it if I don't have pre-spike info for it
                         if p > length(pre_spike), continue; end
@@ -112,38 +87,39 @@ adj_alpha = alpha/n_freq_total;
                             error('Names do not align');
                         end
                         
-                        % check that time windows line up
-                        if pre_spike(p).windows(t).which ~= metrics(n).time(t).time_window
-                            error('Time windows do not align');
+                        if strcmp(wpr,'cons')
+                            before_rise = repmat(before_rise_windows',...
+                                size(curr_pt.spike.data,1),1);
+                        else
+                            before_rise = pre_spike(p).windows(t).(wpr);
                         end
-                        
-                        metrics(n).time(t).times = pre_spike(p).windows(t).all_windows;
-                        
-                        % Get the time windows before the early spike rise
-                        before_rise = pre_spike(p).windows(t).(wpr);
-                        
+
+                      
                         % Get the mode across all spikes (this is what I
                         % will use to reduce the not a spike data)
                         before_rise_mode = mode(before_rise,1);
                         before_rise_mode = repmat(before_rise_mode,...
                             size(curr_pt.not.data,1),1);
-                        
-                    %    if p == 10 && strcmp(met,'ers'), error('look'); end
-                        
-                        if rm_rise == 1
+
                         % Reduce spike data to only those times before rise
                         curr_pt.spike.data(before_rise==0) = nan;
-                        
+
                         % Reduce not spike data to only those times before
                         % mode rise
                         curr_pt.not.data(before_rise_mode==0) = nan;
-                        end
+                        curr_met.pt(p) = curr_pt;
+                    end
+                    end
                         
                         
                         % Loop over spike and not
+                    for p = 1:length(curr_met.pt)
+                        curr_pt = curr_met.pt(p);
                         snames = fieldnames(curr_pt);
                         for sn = 1:length(snames)
-                            if strcmp(snames{sn},'name'), continue; end
+                            if strcmp(snames{sn},'name') || strcmp(snames{sn},'times') || strcmp(snames{sn},'index_windows')
+                                continue; 
+                            end
                             sp_or_not = curr_pt.(snames{sn});
                             
                             % initialize slopes (as many as there are

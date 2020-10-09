@@ -18,8 +18,9 @@ do a more careful comparison of sd
 %}
 
 %% Parameters
+alpha = 0.05;
 rm_rise = 1;
-met = 'ers';
+met = 'F';
 windows = [0.1];
 method = 'ttestp'; % ttestp is default
 which_pt = 1;
@@ -32,6 +33,7 @@ if which_pre_rise == 0
     wpr = 'manual_before_rise';
 elseif which_pre_rise == 1
     wpr = 'before_rise';
+    error('I do not do this anymore')
 else
     wpr = 'cons';
 end
@@ -70,16 +72,19 @@ end
 pre_spike = find_pre_spike_windows(windows);
 
 %% Get signal power deviation
-sig_dev = get_sd(0.05,0,0);
+sig_dev = get_sd(alpha,0,0);
 % convert this to be similar to pre_spike
 pre_spike = convert_sd(sig_dev,windows,pre_spike);
 %save([pre_spike_folder,'pre_spike.mat'],'pre_spike');
 
 %% Get network metrics
-metrics = get_all_metrics(windows,pre_spike);
+metrics = get_all_metrics(windows,pre_spike,wpr);
+
+%% Remove bad spikes
+metrics = remove_bad_spikes(metrics);
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
-metrics_red = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise);
+metrics_red = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise,alpha);
 
 %% Significance testing across patients
 metrics_red = agg_pts_test(metrics_red);

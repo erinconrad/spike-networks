@@ -33,7 +33,7 @@ for n = 1:network_count
         % Skip it if I want
         if ~ismember(stats(n).time(t).time_window,windows), continue; end
         tcount = tcount+1;
-        times = stats(n).time(t).times;
+        times = stats(n).time(t).freq(1).(met).pt(1).times;
         
         nfreq = length(stats(n).time(t).freq);
         if strcmp(met,'sd')

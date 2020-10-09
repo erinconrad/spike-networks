@@ -1,4 +1,4 @@
-function stats = get_all_metrics(windows,pre_spike)
+function stats = get_all_metrics(windows,pre_spike,wpr)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -125,7 +125,7 @@ for l = 1:length(listing)
             else
                 add_ers = 0;
             end
-                
+            %add_ers = 0;
             
             for f = 1:nfreq
                 stats(network_count).time(time_count).freq(f).name = sim.freq(f).name;
@@ -139,6 +139,8 @@ for l = 1:length(listing)
                 % Avg ns_all across channels
                 ns_avg = squeeze(mean(ns_all,3));
                 ns_avg_name = 'average node strength';
+                
+                times = round((sim.index_windows(:,1)/sim.fs-3)*1e2)/(1e2);
                 
                 stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).name = pt_name;
                 stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).name = pt_name;
@@ -159,9 +161,15 @@ for l = 1:length(listing)
                 stats(network_count).time(time_count).freq(f).ns_avg.name = 'Node strength (average)';
                 stats(network_count).time(time_count).freq(f).ge.name = 'Global efficiency';
                 
+                stats(network_count).time(time_count).freq(f).ns_big.pt(pt_idx).times = times;
+                stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).times = times;
+                stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).times = times;
+                
                 % Add ERS stuff
                 if add_ers == 1
-                    stats(network_count).time(time_count).freq(f).ers.index_windows = ers.index_windows;
+                    stats(network_count).time(time_count).freq(f).ers.pt(pt_idx).index_windows = ers.index_windows;
+                    times = round((ers.index_windows(:,1)/ers.fs-3)*1e2)/(1e2);
+                    stats(network_count).time(time_count).freq(f).ers.pt(pt_idx).times = times;
                     stats(network_count).time(time_count).freq(f).ers.pt(pt_idx).name = ers.name;
                     
                     % Concatenate spike data
@@ -200,8 +208,15 @@ for l = 1:length(listing)
                 
                 % Add spike diff stuff
                 if add_sp_diff == 1
-                    stats(network_count).time(time_count).freq(f).F.index_windows = spd.sim(f).index_windows;
-                    stats(network_count).time(time_count).freq(f).score.index_windows = spd.sim(f).index_windows;
+                    if f>length(spd.sim)
+                        fprintf('\nWarning, non-aligning frequencies\n');
+                        continue;
+                    end
+                    stats(network_count).time(time_count).freq(f).F.pt(pt_idx).index_windows = spd.sim(f).index_windows;
+                    times = round((spd.sim(f).index_windows(:,1)/spd.sim(f).fs-3)*1e2)/(1e2);
+                    stats(network_count).time(time_count).freq(f).score.pt(pt_idx).index_windows = spd.sim(f).index_windows;
+                    stats(network_count).time(time_count).freq(f).score.pt(pt_idx).times = times;
+                    stats(network_count).time(time_count).freq(f).F.pt(pt_idx).times = times;
                     
                     stats(network_count).time(time_count).freq(f).F.pt(pt_idx).name = spd.sim(f).pt_name;
                     stats(network_count).time(time_count).freq(f).score.pt(pt_idx).name = spd.sim(f).pt_name;
@@ -242,8 +257,14 @@ for n = 1:length(stats)
         
         for f = 1:length(stats(n).time(t).freq)
             
-            stats(n).time(t).freq(f).sd.index_windows = pre_spike(1).windows(t).all_windows;
+            
+            %times = round((ers.index_windows(:,1)/ers.fs-3)*1e2)/(1e2);
             for p = 1:length(pre_spike)
+                if strcmp(wpr,'cons')
+                    stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).cons_windows;
+                else
+                    stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).all_windows;
+                end
                 stats(n).time(t).freq(f).sd.pt(p).name = pre_spike(p).name;
                 stats(n).time(t).freq(f).sd.pt(p).spike.data = pre_spike(p).windows(t).dev.spike;
                 stats(n).time(t).freq(f).sd.pt(p).not.data = pre_spike(p).windows(t).dev.not;

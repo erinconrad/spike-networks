@@ -1,7 +1,7 @@
 function denote_bad_spikes(overwrite)
 
 %% Parameters
-surround_time = 1;
+surround_time = 2;
 do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
@@ -83,15 +83,29 @@ for i = 1:length(listing)
             start_spike = 1;
             bad.name = name;
         end
-    else
+    elseif overwrite == 1
         
         start_spike = 1;
         bad.name = name;
+    elseif overwrite == 2
+        if exist(bad_file,'file') ~= 0
+            bad = load(bad_file);
+            bad = bad.bad;
+            start_spike = 1;
+        else
+            clear bad
+            start_spike = 1;
+            bad.name = name;
+        end
     end
     bad.ch_labels = spike(1).chLabels;
     
     % loop through spikes
     for s = start_spike:length(spike)
+        
+        if overwrite == 2
+        if bad.spike(s).bad_spike == 1, continue; end
+        end
         
         fprintf('Doing spike %d of %d...\n',s,length(spike));
         
@@ -111,7 +125,7 @@ for i = 1:length(listing)
         % plot the spikes
         if 1
         figure
-        set(gcf,'position',[-1343  194  500 804])
+        set(gcf,'position',[-1343  100 500 804])
         offset = 0;
         ch_offsets = zeros(size(data_spike,2),1);
         ch_bl = zeros(size(data_spike,2),1);
@@ -133,55 +147,57 @@ for i = 1:length(listing)
         
         
         %% Find the bad channels
-        fprintf('\n\nFirst assessing for bad channels:\n');
-        bad_chs = [];
-        
-        while 1
-            inpt = input('\nAre there any (more) bad channels? (y/n)\n','s');
-            if strcmp(inpt,'y') || strcmp(inpt,'yes')
-                fprintf('Select a bad channels and press Enter.\n');
-                [~,y] = ginput;
-                
-                % Find closest channel
-                [~,cl_ch] = (min(abs(ch_bl-y)));
-                
-                % Replot it to confirm
-                hold off
-                offset = 0;
-                for ich = 1:size(data_spike,2)
-                    ch_offsets(ich) = offset;
-                    ch_bl(ich) = offset + median(data_spike(:,ich));
-                    if ich == cl_ch
-                        plot(linspace(-3,3,size(data_spike,1)),data_spike(:,ich)+offset,'linewidth',3);
-                        text(surround_time+0.05,ch_bl(ich),sprintf('%s',spike(s).chLabels{ich}))
-                    else
-                        plot(linspace(-3,3,size(data_spike,1)),data_spike(:,ich)+offset);
-                        text(surround_time+0.05,ch_bl(ich),spike(s).chLabels{ich})
-                    end
-                    
-                    xlim([-surround_time,surround_time]);
-                    if ich<size(data_spike,2)
-                        offset = offset + max(data_spike(:,ich)) - min(data_spike(:,ich+1));
-                    end
-                    hold on
-                end
-                
-                inpt = input('\nIs this the correct channel? (y/n)\n','s');
+        if overwrite ~=2
+            fprintf('\n\nFirst assessing for bad channels:\n');
+            bad_chs = [];
+
+            while 1
+                inpt = input('\nAre there any (more) bad channels? (y/n)\n','s');
                 if strcmp(inpt,'y') || strcmp(inpt,'yes')
-                    bad_chs = [bad_chs,cl_ch];
+                    fprintf('Select a bad channels and press Enter.\n');
+                    [~,y] = ginput;
+
+                    % Find closest channel
+                    [~,cl_ch] = (min(abs(ch_bl-y)));
+
+                    % Replot it to confirm
+                    hold off
+                    offset = 0;
+                    for ich = 1:size(data_spike,2)
+                        ch_offsets(ich) = offset;
+                        ch_bl(ich) = offset + median(data_spike(:,ich));
+                        if ich == cl_ch
+                            plot(linspace(-3,3,size(data_spike,1)),data_spike(:,ich)+offset,'linewidth',3);
+                            text(surround_time+0.05,ch_bl(ich),sprintf('%s',spike(s).chLabels{ich}))
+                        else
+                            plot(linspace(-3,3,size(data_spike,1)),data_spike(:,ich)+offset);
+                            text(surround_time+0.05,ch_bl(ich),spike(s).chLabels{ich})
+                        end
+
+                        xlim([-surround_time,surround_time]);
+                        if ich<size(data_spike,2)
+                            offset = offset + max(data_spike(:,ich)) - min(data_spike(:,ich+1));
+                        end
+                        hold on
+                    end
+
+                    inpt = input('\nIs this the correct channel? (y/n)\n','s');
+                    if strcmp(inpt,'y') || strcmp(inpt,'yes')
+                        bad_chs = [bad_chs,cl_ch];
+                    end
+                    fprintf('\nBad channels include:\n');
+                    for b = 1:length(bad_chs)
+                        fprintf('%s\n',spike(s).chLabels{bad_chs(b)});
+                    end
+
+                else
+                    break
                 end
-                fprintf('\nBad channels include:\n');
-                for b = 1:length(bad_chs)
-                    fprintf('%s\n',spike(s).chLabels{bad_chs(b)});
-                end
-                
-            else
-                break
             end
-        end
-        fprintf('\nFinal bad channels are:\n');
-        for b = 1:length(bad_chs)
-            fprintf('%s',spike(s).chLabels{bad_chs(b)});
+            fprintf('\nFinal bad channels are:\n');
+            for b = 1:length(bad_chs)
+                fprintf('%s',spike(s).chLabels{bad_chs(b)});
+            end
         end
         
         %% Assess if the spike overall is bad
@@ -197,7 +213,9 @@ for i = 1:length(listing)
         end
         
         bad.spike(s).bad_spike = bad_spike;
-        bad.spike(s).bad_chs = bad_chs;
+        if overwrite ~=2
+            bad.spike(s).bad_chs = bad_chs;
+        end
         % Save the meta file after each spike run
         save(bad_file,'bad');
         close(gcf)
