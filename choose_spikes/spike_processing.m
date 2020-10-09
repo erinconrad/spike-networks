@@ -81,7 +81,7 @@ for whichPt = whichPts
     end
     
     n_spikes = length(sp(whichPt).spike);
-    if start_spike == n_spikes
+    if start_spike == n_spikes + 1
         continue;
     end
     
