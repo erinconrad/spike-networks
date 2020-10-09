@@ -95,7 +95,7 @@ for whichPt = whichPts
     chs = pt(whichPt).new_elecs.ch_order;
     
     % Download dummy data
-    if exist(spike,'var') == 0
+    if exist('spike','var') == 0
         data = download_eeg(ieeg_name,[],pwname,1,[]);
         fs = data.fs;
         chLabels = data.chLabels(:,1);
