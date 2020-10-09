@@ -63,8 +63,6 @@ for whichPt = whichPts
         fprintf('Doing %s...\n',name);
     end
     
-    if strcmp(name,'HUP080'), continue; end
-    
     % Skip if I already did it
     if overwrite == 0
         if exist([results_folder,name,not_a_spike_text,'eeg.mat'],'file') ~= 0
@@ -77,6 +75,8 @@ for whichPt = whichPts
             
             % Find first unfinished spike
             start_spike = length(spike) + 1;
+        else
+            start_spike = 1;
         end
     elseif overwrite == 1
         start_spike = 1;
@@ -84,7 +84,7 @@ for whichPt = whichPts
     
     n_spikes = length(sp(whichPt).spike);
     if start_spike == n_spikes + 1
-        continue;
+    %    continue;
     end
     
     % get ieeg name and sampling rate
