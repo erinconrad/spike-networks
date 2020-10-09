@@ -76,11 +76,14 @@ for whichPt = whichPts
             % Find first unfinished spike
             start_spike = length(spike) + 1;
         end
-    else
+    elseif overwrite == 1
         start_spike = 1;
     end
     
     n_spikes = length(sp(whichPt).spike);
+    if start_spike == n_spikes
+        continue;
+    end
     
     % get ieeg name and sampling rate
     ieeg_name = pt(whichPt).ieeg_name;
