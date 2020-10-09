@@ -95,15 +95,20 @@ for whichPt = whichPts
     chs = pt(whichPt).new_elecs.ch_order;
     
     % Download dummy data
-    data = download_eeg(ieeg_name,[],pwname,1,[]);
-    fs = data.fs;
-    chLabels = data.chLabels(:,1);
-    chLabels = cellfun(@ieeg_ch_parser,chLabels,'UniformOutput',false);
-    
-    % Compare chLabels to pt(whichPt).new_elecs.names (should be identical
-    % after parsing)
-    if isequal(chLabels(chs),pt(whichPt).new_elecs.names) == 0
-        error('what\n');
+    if exist(spike,'var') == 0
+        data = download_eeg(ieeg_name,[],pwname,1,[]);
+        fs = data.fs;
+        chLabels = data.chLabels(:,1);
+        chLabels = cellfun(@ieeg_ch_parser,chLabels,'UniformOutput',false);
+
+        % Compare chLabels to pt(whichPt).new_elecs.names (should be identical
+        % after parsing)
+        if isequal(chLabels(chs),pt(whichPt).new_elecs.names) == 0
+            error('what\n');
+        end
+    else
+        fs = spike(1).fs;
+        chLabels = spike(1).chLabels;
     end
     
     for s = start_spike:n_spikes
