@@ -51,6 +51,7 @@ for n = 1:length(metrics)
                     all_z_spike = [all_z_spike;curr_met.pt(p).spike.mean_z];
                     all_z_not = [all_z_not;curr_met.pt(p).not.mean_z];
                     
+                   % if strcmp(met,'sd'), error('look'); end
                 end
                 
                 % Do 3 methods (one sample ttest, Fisher's method, paired t of mean slopes) to

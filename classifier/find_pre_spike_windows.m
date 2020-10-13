@@ -41,9 +41,9 @@ for i = 1:length(listing)
     for t = 1:length(windows)
         pre_spike(pt_idx).windows(t).which = windows(t);
         if windows(t) == 0.1
-            pre_spike(pt_idx).windows(t).all_windows = [(-1:windows(t):0)'];
+            pre_spike(pt_idx).windows(t).all_windows = [(-3:windows(t):0)'];
         elseif windows(t) == 0.2
-            pre_spike(pt_idx).windows(t).all_windows = [(-2:windows(t):0)'];
+            pre_spike(pt_idx).windows(t).all_windows = [(-3:windows(t):0)'];
         elseif windows(t) == 0.5
             pre_spike(pt_idx).windows(t).all_windows = [(-3:windows(t):0)'];
         end

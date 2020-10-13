@@ -60,7 +60,7 @@ adj_alpha = alpha/n_freq_total;
                             for tt = 2:size(all_t,2)
                                 [~,pval] = ttest(all_t(:,tt));
                                 if pval < alpha
-                                    before_rise_windows(tt) = 0;
+                                    before_rise_windows(tt:end) = 0;
                                 end
                             end
 
@@ -94,20 +94,32 @@ adj_alpha = alpha/n_freq_total;
                             before_rise = pre_spike(p).windows(t).(wpr);
                         end
 
-                      
+                        
+                        
+
+                      %  if strcmp(met,'sd'), error('look'); end
+                        % Reduce spike data to only those times before rise
+                        if size(before_rise,1) > size(curr_pt.spike.data,1)
+                            before_rise = before_rise(1:size(curr_pt.spike.data,1),:);
+                        end
+                        
+                        if size(before_rise,2) > size(curr_pt.spike.data,2)
+                            before_rise = before_rise(:,size(before_rise,2) - size(curr_pt.spike.data,2) +1: end);
+                        end
+                        curr_pt.spike.data(before_rise==0) = nan;
+                        
                         % Get the mode across all spikes (this is what I
                         % will use to reduce the not a spike data)
                         before_rise_mode = mode(before_rise,1);
                         before_rise_mode = repmat(before_rise_mode,...
                             size(curr_pt.not.data,1),1);
 
-                        % Reduce spike data to only those times before rise
-                        curr_pt.spike.data(before_rise==0) = nan;
-
                         % Reduce not spike data to only those times before
                         % mode rise
                         curr_pt.not.data(before_rise_mode==0) = nan;
                         curr_met.pt(p) = curr_pt;
+                        
+                        
                     end
                     end
                         
@@ -169,6 +181,7 @@ adj_alpha = alpha/n_freq_total;
                                 
                             end
                             sp_or_not.mean_z = nanmean(sp_or_not.zs,1);
+                            
                             
                             metrics(n).time(t).freq(f).(met).pt(p).(snames{sn}) = sp_or_not;
                             

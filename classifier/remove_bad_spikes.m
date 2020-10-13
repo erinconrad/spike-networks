@@ -59,10 +59,18 @@ for i = 1:length(listing)
                     met = fn{ff};
                     if strcmp(met,'name'), continue; end
                     
+                    
+                    
                     % Remove the bad spikes
                     if contains(filename,'not')
+                        if size(bad_spikes,1) > size(metrics(n).time(t).freq(f).(met).pt(pt_idx).not.data,1)
+                            bad_spikes = bad_spikes(1:size(metrics(n).time(t).freq(f).(met).pt(pt_idx).not.data,1),:);
+                        end
                         metrics(n).time(t).freq(f).(met).pt(pt_idx).not.data(bad_spikes,:) = [];
                     else
+                        if size(bad_spikes,1) > size(metrics(n).time(t).freq(f).(met).pt(pt_idx).spike.data,1)
+                            bad_spikes = bad_spikes(1:size(metrics(n).time(t).freq(f).(met).pt(pt_idx).spike.data,1),:);
+                        end
                         metrics(n).time(t).freq(f).(met).pt(pt_idx).spike.data(bad_spikes,:) = [];
                     end
                 end

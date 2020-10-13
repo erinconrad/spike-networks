@@ -260,11 +260,14 @@ for n = 1:length(stats)
             
             %times = round((ers.index_windows(:,1)/ers.fs-3)*1e2)/(1e2);
             for p = 1:length(pre_spike)
+                stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).cons_windows;
+                %{
                 if strcmp(wpr,'cons')
                     stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).cons_windows;
                 else
                     stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).all_windows;
                 end
+                %}
                 stats(n).time(t).freq(f).sd.pt(p).name = pre_spike(p).name;
                 stats(n).time(t).freq(f).sd.pt(p).spike.data = pre_spike(p).windows(t).dev.spike;
                 stats(n).time(t).freq(f).sd.pt(p).not.data = pre_spike(p).windows(t).dev.not;

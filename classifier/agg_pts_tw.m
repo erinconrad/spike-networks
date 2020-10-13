@@ -1,7 +1,16 @@
 function agg_pts_tw(stats,met,windows,method)
 
+locations = spike_network_files;
+main_folder = locations.main_folder;
+results_folder = [main_folder,'results/'];
+out_folder = [results_folder,'plots/'];
+
 if strcmp(met,'sd')
     met_text = 'power';
+elseif strcmp(met,'ers')
+    met_text = 'frequency-specific power';
+elseif strcmp(met,'F')
+    met_text = 'network difference';
 else
     met_text = met;
 end
@@ -94,7 +103,11 @@ for n = 1:network_count
             all_nan_columns = sum(isnan(dat_sp),1) == size(dat_sp,1);
             last_non_nan = find(all_nan_columns);
             last_non_nan(last_non_nan == 1) = [];
-            last_non_nan = last_non_nan(1)-1;
+            if isempty(last_non_nan)
+                last_non_nan = size(dat_sp,2);
+            else
+                last_non_nan = last_non_nan(1)-1;
+            end
             [~,pval] = ttest(dat_sp(:,last_non_nan),dat_not(:,last_non_nan));
             prettyp = pretty_p(pval,n_freq_abs+1);
             yl = get(gca,'ylim');
@@ -163,6 +176,8 @@ for sp = 1:length(ha)
         yticklabels([])
     end
 end
+
+print(gcf,[out_folder,sprintf('%s',method)],'-depsc')
 
 end
 

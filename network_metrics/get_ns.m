@@ -108,7 +108,7 @@ for i = 1:length(listing)
                 ge(f,s,tt) = efficiency_wei(adj,0); 
                 
                 % transitivity of the full matrix
-                trans = transitivity_wu(adj);
+                trans(f,s,tt) = transitivity_wu(adj);
                 
             end
             
