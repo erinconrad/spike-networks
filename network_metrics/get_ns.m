@@ -80,6 +80,7 @@ for i = 1:length(listing)
     ns_all = nan(n_f,n_spikes,n_times,n_ch);
     ge = nan(n_f,n_spikes,n_times);
     trans = nan(n_f,n_spikes,n_times);
+    involved = nan(n_spikes,n_ch);
 
     % Initialize spike count
     s_count = 0;
@@ -90,6 +91,7 @@ for i = 1:length(listing)
         
         %fprintf('Doing spike %d of %d\n',s_count,n_spikes);
         biggest_dev = spike(s).biggest_dev;
+        involved(s,:) = spike(s).involved;
         
         for f = 1:n_f
             adj_all_t= meta.spike(s).adj(f).adj;
@@ -135,6 +137,8 @@ for i = 1:length(listing)
         
         metrics.freq(f).ns_all.name = 'node strength all';
         metrics.freq(f).ns_all.data = squeeze(ns_all(f,:,:,:));
+
+        metrics.freq(f).involved = involved;
 
     end
     

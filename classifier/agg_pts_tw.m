@@ -1,4 +1,4 @@
-function agg_pts_tw(stats,met,windows,method)
+function agg_pts_tw(stats,met,windows,method,which_pre_rise)
 
 locations = spike_network_files;
 main_folder = locations.main_folder;
@@ -8,7 +8,7 @@ out_folder = [results_folder,'plots/'];
 if strcmp(met,'sd')
     met_text = 'power';
 elseif strcmp(met,'ers')
-    met_text = 'frequency-specific power';
+    met_text = [newline,'frequency-specific power'];
 elseif strcmp(met,'F')
     met_text = 'network difference';
 else
@@ -22,16 +22,17 @@ if strcmp(met,'sd'), n_freq_abs = 0; end
 figure
 if strcmp(met,'sd')
     set(gcf,'position',[1 100 600 length(windows)*200+200])
-    [ha, ~] = tight_subplot(length(windows), 1, [0.08 0.01], [0.2 0.12], [0.10 0.09]);
+    [ha, ~] = tight_subplot(length(windows), 1, [0.08 0.01], [0.2 0.12], [0.12 0.06]);
 else
     set(gcf,'position',[1 100 1500 length(windows)*200+100])
-    [ha, ~] = tight_subplot(length(windows), n_freq_abs+1, [0.08 0.01], [0.2 0.12], [0.05 0.005]);
+    [ha, ~] = tight_subplot(length(windows), n_freq_abs+1, [0.08 0.01], [0.2 0.12], [0.07 0.005]);
 end
 z_range = zeros(length(windows),2);
 
 if strcmp(met,'sd')
     network_count = 1;
 end
+
 for n = 1:network_count
 
     net_name = stats(n).name;
@@ -93,10 +94,16 @@ for n = 1:network_count
             
             
             
-            errorbar(times,dat_sp_mean,dat_sp_se,'linewidth',2);
+            sp_pt = errorbar(times,dat_sp_mean,dat_sp_se,'linewidth',2);
             hold on
-            errorbar(times,dat_not_mean,dat_not_se,'linewidth',2);
-            all_slopes = [dat_sp(:);dat_not(:)];
+            not_pt = errorbar(times,dat_not_mean,dat_not_se,'linewidth',2);
+            %all_slopes = [dat_sp(:);dat_not(:)];
+            all_slopes = [(dat_sp_mean-dat_sp_se),dat_sp_mean+dat_sp_se,...
+                dat_not_mean-dat_not_se,dat_not_mean+dat_not_se];
+            
+            if strcmp(met,'sd')
+                legend([sp_pt,not_pt],{'Spike','Spike-free'},'fontsize',20);
+            end
             
             %% Significance testing 
             % Test just the last point
@@ -111,15 +118,13 @@ for n = 1:network_count
             [~,pval] = ttest(dat_sp(:,last_non_nan),dat_not(:,last_non_nan));
             prettyp = pretty_p(pval,n_freq_abs+1);
             yl = get(gca,'ylim');
-            xl = get(gca,'xlim');
+            
             
             maxyloc = max([dat_sp_mean(last_non_nan)+dat_sp_se(last_non_nan),...
                 dat_not_mean(last_non_nan)+dat_not_se(last_non_nan)]);
                 
             line_height = maxyloc + 0.1*(yl(2)-yl(1));
-            text((xl(1)+xl(2))/2,line_height,...
-                sprintf('%s',prettyp),'fontsize',20,...
-                'horizontalalignment','center')
+            
             ylim([yl(1) line_height + 0.1*(yl(2)-yl(1))]);
             
             
@@ -159,6 +164,11 @@ for n = 1:network_count
                     xlabel('Time relative to spike peak (s)')
                 end
             end
+            
+            xl = get(gca,'xlim');
+            text((xl(1)+xl(2))/2,line_height,...
+                sprintf('%s',prettyp),'fontsize',20,...
+                'horizontalalignment','center')
         end
         
         
@@ -170,14 +180,14 @@ end
 for sp = 1:length(ha)
     axes(ha(sp))
     %t = ceil(sp/(n_freq_abs+1));
-    %ylim(z_range(t,:))
+    ylim(z_range(t,:))
     
-    if mod(sp,(n_freq_abs+1)) ~= 1
+    if mod(sp,(n_freq_abs+1)) ~= 1 && ~strcmp(met,'sd')
         yticklabels([])
     end
 end
 
-print(gcf,[out_folder,sprintf('%s',method)],'-depsc')
+print(gcf,[out_folder,sprintf('%s_%s_%d',met,method,which_pre_rise)],'-depsc')
 
 end
 

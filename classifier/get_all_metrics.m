@@ -134,6 +134,8 @@ for l = 1:length(listing)
                 ge = sim.freq(f).ge.data;
                 ge_name = sim.freq(f).ge.name;
                 ns_all = sim.freq(f).ns_all.data;
+                trans = sim.freq(f).trans.data;
+                trans_name = sim.freq(f).trans.name;
 
                 
                 % Avg ns_all across channels
@@ -145,25 +147,30 @@ for l = 1:length(listing)
                 stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).name = pt_name;
                 stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).name = pt_name;
                 stats(network_count).time(time_count).freq(f).ns_big.pt(pt_idx).name = pt_name;
+                stats(network_count).time(time_count).freq(f).trans.pt(pt_idx).name = pt_name;
                 
                 % spike vs not a spike
                 if contains(fname,'not') == 1
                     stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).not.data(:,:) = ge;
                     stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).not.data(:,:) = ns_avg;
                     stats(network_count).time(time_count).freq(f).ns_big.pt(pt_idx).not.data(:,:) = ns;
+                    stats(network_count).time(time_count).freq(f).trans.pt(pt_idx).not.data(:,:) = trans;
                 else
                     stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).spike.data(:,:) = ge;
                     stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).spike.data(:,:) = ns_avg;
                     stats(network_count).time(time_count).freq(f).ns_big.pt(pt_idx).spike.data(:,:) = ns;
+                    stats(network_count).time(time_count).freq(f).trans.pt(pt_idx).spike.data(:,:) = trans;
                 end
                 
                 stats(network_count).time(time_count).freq(f).ns_big.name = 'Node strength (spike channel)';
                 stats(network_count).time(time_count).freq(f).ns_avg.name = 'Node strength (average)';
                 stats(network_count).time(time_count).freq(f).ge.name = 'Global efficiency';
+                stats(network_count).time(time_count).freq(f).trans.name = 'Transitivity';
                 
                 stats(network_count).time(time_count).freq(f).ns_big.pt(pt_idx).times = times;
                 stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).times = times;
                 stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).times = times;
+                stats(network_count).time(time_count).freq(f).trans.pt(pt_idx).times = times;
                 
                 % Add ERS stuff
                 if add_ers == 1
@@ -185,7 +192,7 @@ for l = 1:length(listing)
                         for ff = 1:nfreq_ers
                             curr_ers = ers.spike(s).ers(:,ff);
                             if fix_freq == 0
-                                all_ers(f).data(s,:) = curr_ers;
+                                all_ers(ff).data(s,:) = curr_ers;
                             elseif fix_freq == 1
                                 if ff == 1 % delta/theta/alpha
                                     for fff = 1:3
