@@ -31,7 +31,7 @@ end
 locations = spike_network_files;
 main_folder = locations.main_folder;
 eeg_folder = [main_folder,'results/eeg_data/'];
-results_folder = [main_folder,'results/adj_mat/manual/'];
+results_folder = [main_folder,'results/'];
 data_folder = [main_folder,'data/'];
 script_folder = locations.script_folder;
 addpath(genpath(script_folder));
