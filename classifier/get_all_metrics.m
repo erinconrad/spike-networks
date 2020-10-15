@@ -264,7 +264,7 @@ for l = 1:length(listing)
 
 end
 
-% Add spike power
+%% Add spike power
 for n = 1:length(stats)
     for t = 1:length(stats(n).time)
         
@@ -292,5 +292,6 @@ for n = 1:length(stats)
         end
     end
 end
+
 
 end

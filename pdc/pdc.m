@@ -2,7 +2,7 @@ function pdc_out = pdc(y,Fs,index_windows,freq_bands)
 
 L = size(y,1); % Number of samples
 CH = size(y,2); % Number of channels
-N_freq = Fs; % Number of frequency points
+N_freq = round(Fs); % Number of frequency points
 Fmax = Fs/2;      % Maximum frequency limit in the PDC and DTF plots
 
 %% Time-invariant MVAR estimation -- to estimate the optimum moel order
