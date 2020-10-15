@@ -130,23 +130,29 @@ for l = 1:length(listing)
             for f = 1:nfreq
                 stats(network_count).time(time_count).freq(f).name = sim.freq(f).name;
                 ns = sim.freq(f).ns.data;
-                ns_name = sim.freq(f).ns.name;
                 ge = sim.freq(f).ge.data;
-                ge_name = sim.freq(f).ge.name;
                 ns_all = sim.freq(f).ns_all.data;
                 trans = sim.freq(f).trans.data;
-                trans_name = sim.freq(f).trans.name;
-
+                involved = logical(sim.freq(f).involved);
                 
                 % Avg ns_all across channels
                 ns_avg = squeeze(mean(ns_all,3));
-                ns_avg_name = 'average node strength';
+                
+                % Average ns_inv across involved channels
+                ns_inv = zeros(size(ns_avg));
+                for s = 1:size(ns_all,1)
+                    curr_sp = squeeze(ns_all(s,:,:));
+                    curr_inv = involved(s,:);
+                    curr_ns_inv = squeeze(mean(curr_sp(:,curr_inv),2));
+                    ns_inv(s,:) = curr_ns_inv;
+                end
                 
                 times = round((sim.index_windows(:,1)/sim.fs-3)*1e2)/(1e2);
                 
                 stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).name = pt_name;
                 stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).name = pt_name;
                 stats(network_count).time(time_count).freq(f).ns_big.pt(pt_idx).name = pt_name;
+                stats(network_count).time(time_count).freq(f).ns_inv.pt(pt_idx).name = pt_name;
                 stats(network_count).time(time_count).freq(f).trans.pt(pt_idx).name = pt_name;
                 
                 % spike vs not a spike
@@ -154,20 +160,24 @@ for l = 1:length(listing)
                     stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).not.data(:,:) = ge;
                     stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).not.data(:,:) = ns_avg;
                     stats(network_count).time(time_count).freq(f).ns_big.pt(pt_idx).not.data(:,:) = ns;
+                    stats(network_count).time(time_count).freq(f).ns_inv.pt(pt_idx).not.data(:,:) = ns_avg; % just average for not spike
                     stats(network_count).time(time_count).freq(f).trans.pt(pt_idx).not.data(:,:) = trans;
                 else
                     stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).spike.data(:,:) = ge;
                     stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).spike.data(:,:) = ns_avg;
                     stats(network_count).time(time_count).freq(f).ns_big.pt(pt_idx).spike.data(:,:) = ns;
+                    stats(network_count).time(time_count).freq(f).ns_inv.pt(pt_idx).spike.data(:,:) = ns_inv; 
                     stats(network_count).time(time_count).freq(f).trans.pt(pt_idx).spike.data(:,:) = trans;
                 end
                 
                 stats(network_count).time(time_count).freq(f).ns_big.name = 'Node strength (spike channel)';
+                stats(network_count).time(time_count).freq(f).ns_inv.name = 'Node strength (involved channels)';
                 stats(network_count).time(time_count).freq(f).ns_avg.name = 'Node strength (average)';
                 stats(network_count).time(time_count).freq(f).ge.name = 'Global efficiency';
                 stats(network_count).time(time_count).freq(f).trans.name = 'Transitivity';
                 
                 stats(network_count).time(time_count).freq(f).ns_big.pt(pt_idx).times = times;
+                stats(network_count).time(time_count).freq(f).ns_inv.pt(pt_idx).times = times;
                 stats(network_count).time(time_count).freq(f).ns_avg.pt(pt_idx).times = times;
                 stats(network_count).time(time_count).freq(f).ge.pt(pt_idx).times = times;
                 stats(network_count).time(time_count).freq(f).trans.pt(pt_idx).times = times;

@@ -143,6 +143,7 @@ adj_alpha = alpha/n_freq_total;
                             for s = 1:size(sp_or_not.data,1)
                                 data = sp_or_not.data(s,:)';
                                 first_non_nan_data = data(~isnan(data));
+                                if isempty(first_non_nan_data), continue; end
                                 first_non_nan_data = first_non_nan_data(1);
                                 if comp_points == 0
                                     zdat = data';

@@ -94,7 +94,6 @@ for whichPt = whichPts
             fprintf('File already exists, loading and starting from unfinished spike.\n');
         else
             start_spike = 1;
-            clear meta
             meta.name = name;
         end
     elseif overwrite == 1
@@ -196,6 +195,7 @@ for whichPt = whichPts
 
 
     clear meta
+    clear adj
 end
 
 
