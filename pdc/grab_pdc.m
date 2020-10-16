@@ -1,4 +1,4 @@
-function stats = grab_pdc(time_window)
+function grab_pdc(time_window)
 
 
 %% Get file locations, load spike times and pt structure
@@ -38,6 +38,7 @@ for l = 1:length(listing)
         pt_idx = length(all_names);
     end
 
+    if contains(fname,'all'), continue; end
     
     meta = load([time_folder,fname]);
     meta = meta.meta;
@@ -71,5 +72,7 @@ for l = 1:length(listing)
     end
     
 end
+
+save([time_folder,'all_pdc.mat'],'stats');
 
 end
