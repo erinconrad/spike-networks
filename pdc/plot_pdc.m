@@ -25,14 +25,15 @@ pdc_folder = [results_folder,'pdc/'];
 time_folder = [pdc_folder,sprintf('%1.1f/',time_window)];
 
 %% grab pdc
-stats = grab_pdc(time_window);
+stats = load([time_folder,'all_pdc.mat']);
+stats = stats.stats;
 nfreq = length(stats.time.freq);
 
 
 
 for f = 1:nfreq
     curr_met = stats.time.freq(f).(met);
-    for sp = {'spike'}%,'not'}
+    for sp = {'spike','not'}
         curr_met.(sp{1}).all_z = [];
         for p = 1:length(curr_met.pt)
 
@@ -56,10 +57,15 @@ for f = 1:nfreq
     axes(ha(f))
     times = stats.time.freq(f).(met).pt(1).times(:,1);
     dat_sp = stats.time.freq(f).(met).spike.all_z;
+    dat_not = stats.time.freq(f).(met).not.all_z;
     mean_sp = nanmean(dat_sp,1);
+    mean_not = nanmean(dat_not,1);
     
     ste_sp = nanstd(dat_sp,0,1)./sqrt(sum(~isnan(dat_sp),1));
+    ste_not = nanstd(dat_not,0,1)./sqrt(sum(~isnan(dat_not),1));
     errorbar(times,mean_sp,ste_sp)
+    hold on
+    errorbar(times,mean_not,ste_not)
 end
 
 

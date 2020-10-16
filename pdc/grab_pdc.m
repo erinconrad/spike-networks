@@ -52,8 +52,12 @@ for l = 1:length(listing)
             inv = meta.spike(s).is_sp_ch;
 
                 adj = meta.spike(s).adj(f).adj;
-                out_big = squeeze(sum(adj(:,big,:),3));
-                out_inv = squeeze(mean(sum(adj(:,inv,:),3),2));
+                
+                out_big = squeeze(sum(adj(:,:,big),2));
+                out_inv = squeeze(mean(sum(adj(:,:,inv),2),3));
+                
+                %out_big = squeeze(sum(adj(:,big,:),3));
+                %out_inv = squeeze(mean(sum(adj(:,inv,:),3),2));
                 
                 all_out_big = [all_out_big,out_big];
                 all_out_inv = [all_out_inv,out_inv];
