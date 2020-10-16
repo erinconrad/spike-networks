@@ -29,7 +29,14 @@ finterp = 1:Fmax;
 
 pdc_out = zeros(size(PDC_ST,1),size(PDC_ST,2),size(freq_bands,1),size(PDC_ST,4));
 for f = 1:size(freq_bands,1)
-    pdc_out(:,:,f,:) = sum(PDC_ST(:,:,finterp>=freq_bands(f,1)& finterp<=freq_bands(f,2),:),3);
+    % DTF instead of pdc since this emphasizes sources rather than sinks
+    pdc_out(:,:,f,:) = sum(DTF_ST(:,:,finterp>=freq_bands(f,1)& finterp<=freq_bands(f,2),:),3);
 end
+
+% pdc_out is nch x nch x nfreq x ntimes
+% for a given frequency and time, the i,j component is the directed inflow
+% from channel j to channel i, normalized by dividing by all the inflows to
+% channel i. And so a large value indicates that j has a lot of inflow into
+% i.
 
 end

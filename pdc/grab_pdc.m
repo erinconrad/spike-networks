@@ -47,31 +47,46 @@ for l = 1:length(listing)
     for f = 1:length(meta.spike(1).adj)
         all_out_big = [];
         all_out_inv = [];
+        all_in_big = [];
+        all_in_inv = [];
         for s = 1:length(meta.spike)
             big = meta.spike(s).biggest_dev;
             inv = meta.spike(s).is_sp_ch;
 
                 adj = meta.spike(s).adj(f).adj;
+               
                 
+                in_big = squeeze(sum(adj(:,big,:),3));
+                % Looks at the sum of inflows to big
+                
+                in_inv = squeeze(mean(sum(adj(:,inv,:),3),2));
+               
                 out_big = squeeze(sum(adj(:,:,big),2));
-                out_inv = squeeze(mean(sum(adj(:,:,inv),2),3));
+                % Looks at the sum of outflows from big
                 
-                %out_big = squeeze(sum(adj(:,big,:),3));
-                %out_inv = squeeze(mean(sum(adj(:,inv,:),3),2));
+                out_inv = squeeze(mean(sum(adj(:,:,inv),2),3));
                 
                 all_out_big = [all_out_big,out_big];
                 all_out_inv = [all_out_inv,out_inv];
+                all_in_big = [all_in_big,in_big];
+                all_in_inv = [all_in_inv,in_inv];
         end
         
         stats.time.freq(f).pdc_big.pt(pt_idx).times = times;
         
         if ~contains(fname,'not')
-            stats.time.freq(f).pdc_big.pt(pt_idx).spike.data = all_out_big';
-            stats.time.freq(f).pdc_inv.pt(pt_idx).spike.data = all_out_inv';
+            stats.time.freq(f).pdc_out_big.pt(pt_idx).spike.data = all_out_big';
+            stats.time.freq(f).pdc_out_inv.pt(pt_idx).spike.data = all_out_inv';
+            
+            stats.time.freq(f).pdc_in_big.pt(pt_idx).spike.data = all_in_big';
+            stats.time.freq(f).pdc_in_inv.pt(pt_idx).spike.data = all_in_inv';
 
         else
-            stats.time.freq(f).pdc_big.pt(pt_idx).not.data = all_out_big';
-            stats.time.freq(f).pdc_inv.pt(pt_idx).not.data = all_out_inv';
+            stats.time.freq(f).pdc_out_big.pt(pt_idx).not.data = all_out_big';
+            stats.time.freq(f).pdc_out_inv.pt(pt_idx).not.data = all_out_inv';
+            
+            stats.time.freq(f).pdc_in_big.pt(pt_idx).not.data = all_in_big';
+            stats.time.freq(f).pdc_in_inv.pt(pt_idx).not.data = all_in_inv';
         end
     end
     
