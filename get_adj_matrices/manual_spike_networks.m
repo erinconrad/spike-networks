@@ -145,6 +145,8 @@ for whichPt = whichPts
             start_spike = length(meta.spike) + 1;
             
             fprintf('File already exists, loading and starting from unfinished spike.\n');
+        else
+            start_spike = 1;
         end
     elseif overwrite == 1
         
