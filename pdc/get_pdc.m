@@ -1,5 +1,8 @@
 function get_pdc(whichPts,overwrite,time_window,not_a_spike)
 
+%{
+Consider not doing common average reference
+%}
 
 %% Parameters
 do_notch = 1; % notch filter?

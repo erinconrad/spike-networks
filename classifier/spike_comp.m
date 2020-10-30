@@ -20,7 +20,7 @@ do a more careful comparison of sd
 %% Parameters
 alpha = 0.05;
 rm_rise = 1; 
-met = 'F';
+met = 'ns_big';
 windows = [0.1];
 method = 'ttestp'; % ttestp is default
 which_pt = 1;
