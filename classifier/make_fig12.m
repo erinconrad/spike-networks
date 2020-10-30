@@ -63,7 +63,7 @@ for n = 1:network_count
     net_name = stats(n).name;
     tcount = 1;
     
-    times = stats(n).time(t).freq(1).ers.pt(1).times;
+    times = stats(n).time(t).freq(1).(met).pt(1).times;
     nfreq = length(stats(n).time(t).freq);
     
     for f = 1:nfreq

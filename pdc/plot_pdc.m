@@ -1,7 +1,7 @@
 function plot_pdc
 
-time_window = 0.5;
-met = 'pdc_big';
+time_window = 0.3;
+met = 'pdc_out_big';
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -55,7 +55,7 @@ set(gcf,'position',[1 100 1500 300])
 [ha, ~] = tight_subplot(1, nfreq, [0.08 0.01], [0.2 0.12], [0.07 0.005]);
 for f = 1:nfreq
     axes(ha(f))
-    times = stats.time.freq(f).(met).pt(1).times(:,1);
+    times = stats.time.freq(f).pdc_big.pt(1).times(:,1)-3;
     dat_sp = stats.time.freq(f).(met).spike.all_z;
     dat_not = stats.time.freq(f).(met).not.all_z;
     mean_sp = nanmean(dat_sp,1);

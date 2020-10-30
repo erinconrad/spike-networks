@@ -166,6 +166,7 @@ for n = 1:network_count
             end
             
             xl = get(gca,'xlim');
+           % yl = get(gca,'xlim');
             text((xl(1)+xl(2))/2,line_height,...
                 sprintf('%s',prettyp),'fontsize',20,...
                 'horizontalalignment','center')
