@@ -19,8 +19,9 @@ do a more careful comparison of sd
 
 %% Parameters
 alpha = 0.05;
+which_freq = 4;
 rm_rise = 1; 
-met = 'ns_big';
+met = 'F';
 windows = [0.1];
 method = 'ttestp'; % ttestp is default
 which_pt = 1;
@@ -89,7 +90,8 @@ metrics_red = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise,alpha)
 %% Significance testing across patients
 metrics_red = agg_pts_test(metrics_red);
 
-make_fig12(metrics_red,windows,met,which_pre_rise)
+%make_fig12(metrics_red,windows,met,which_pre_rise)
+make_secondary_fig(metrics_red,windows,met,which_pre_rise,which_freq);
 
 %% Plot the avg in time windows across patients
 %agg_pts_tw(metrics_red,met,windows,method,which_pre_rise)

@@ -1,6 +1,6 @@
 function plot_pdc
 
-time_window = 0.3;
+time_window = 0.1;
 met = 'pdc_out_big';
 
 %% Get file locations, load spike times and pt structure

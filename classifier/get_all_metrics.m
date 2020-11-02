@@ -127,6 +127,18 @@ for l = 1:length(listing)
             end
             %add_ers = 0;
             
+            % Also load the high gamma file if it exists
+            high_gamma_file = [ers_folder,...
+                time_name,'/',...
+                pt_name,nstext,'_highgamma_allch.mat'];
+            if exist(high_gamma_file,'file') ~= 0
+                add_high_gamma = 1;
+                hg = load(high_gamma_file);
+                hg = hg.ers;
+            else
+                add_high_gamma = 0;
+            end
+            
             for f = 1:nfreq
                 stats(network_count).time(time_count).freq(f).name = sim.freq(f).name;
                 ns = sim.freq(f).ns.data;
@@ -220,6 +232,20 @@ for l = 1:length(listing)
                         stats(network_count).time(time_count).freq(f).ers.pt(pt_idx).not.data = all_ers(f).data;
                     else
                         stats(network_count).time(time_count).freq(f).ers.pt(pt_idx).spike.data = all_ers(f).data;
+                    end
+                end
+                
+                % Add high gamma power stuff
+                if add_high_gamma == 1
+                    stats(network_count).time(time_count).freq(f).hg.pt(pt_idx).index_windows = hg.index_windows;
+                    times = round((hg.index_windows(:,1)/hg.fs-3)*1e2)/(1e2);
+                    stats(network_count).time(time_count).freq(f).hg.pt(pt_idx).times = times;
+                    stats(network_count).time(time_count).freq(f).hg.pt(pt_idx).name = ers.name;
+                    
+                    if contains(fname,'not') == 1
+                        stats(network_count).time(time_count).freq(f).hg.pt(pt_idx).not.data = squeeze(mean(hg.powers,4));
+                    else
+                        stats(network_count).time(time_count).freq(f).hg.pt(pt_idx).spike.data = squeeze(mean(hg.powers,4));
                     end
                 end
                 

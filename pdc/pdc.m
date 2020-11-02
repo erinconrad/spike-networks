@@ -1,4 +1,4 @@
-function pdc_out = pdc(y,Fs,index_windows,freq_bands)
+function [pdc_out,dtf_out] = pdc(y,Fs,index_windows,freq_bands)
 
 % Erin edited mvar to take out an error if the number of samples is too
 % small relative to the number of electrodes...
@@ -31,9 +31,11 @@ end
 finterp = 1:Fmax;
 
 pdc_out = zeros(size(PDC_ST,1),size(PDC_ST,2),size(freq_bands,1),size(PDC_ST,4));
+dtf_out = zeros(size(PDC_ST,1),size(PDC_ST,2),size(freq_bands,1),size(PDC_ST,4));
 for f = 1:size(freq_bands,1)
     % DTF instead of pdc since this emphasizes sources rather than sinks
     pdc_out(:,:,f,:) = sum(PDC_ST(:,:,finterp>=freq_bands(f,1)& finterp<=freq_bands(f,2),:),3);
+    dtf_out(:,:,f,:) = sum(DTF_ST(:,:,finterp>=freq_bands(f,1)& finterp<=freq_bands(f,2),:),3);
 end
 
 % pdc_out is nch x nch x nfreq x ntimes
