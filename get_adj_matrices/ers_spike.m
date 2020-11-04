@@ -93,6 +93,7 @@ for whichPt = whichPts
     values = spike(1).data;
     nchs = size(values,2);
     fs = spike(1).fs;
+    soz = pt(whichPt).newSOZChs;
     
     if length(time_window) == 1
         n_windows = round(size(values,1)/fs/time_window); % old way, same total time
@@ -118,6 +119,7 @@ for whichPt = whichPts
         values = spike(s).data;
         involved = spike(s).involved;
         biggest_dev = spike(s).biggest_dev;
+        
         
         %% Pre-processing
         % Parameters 2 and 3 indicate whether to do CAR and pre-whiten,
@@ -196,6 +198,7 @@ for whichPt = whichPts
         ers.spike(s).ers = squeeze(ers_array(s,:,:,biggest_dev)); % biggest dev channel
         ers.spike(s).ers_all = squeeze(ers_array(s,:,:,:));
         
+        
         %{
         % Restrict to biggest dev ch
         values = values(:,biggest_dev);
@@ -223,6 +226,7 @@ for whichPt = whichPts
     end
     
     % Fill struct
+    ers.soz = soz;
     ers.name = name;
     ers.time_window = time_window;
     ers.index_windows = index_windows;
