@@ -20,7 +20,7 @@ bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
 
 eeg_folder = [results_folder,'eeg_data/'];
-spike_rise_folder = [results_folder,'spike_rise/'];
+spike_rise_folder = [results_folder,'spike_rise_reviewer2/'];
 
 
 if exist(spike_rise_folder,'dir') == 0

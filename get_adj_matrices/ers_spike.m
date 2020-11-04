@@ -178,6 +178,25 @@ for whichPt = whichPts
         index_windows(1,1) = max(index_windows(1,1),1);
         index_windows(end,2) = min(index_windows(end,2),size(values,1));
         
+        % subtract baseline
+        X = values-median(values,1);
+        
+        % Get ERS
+        for ich = 1:size(X,2)
+            for t = 1:n_windows
+                Xtemp = X(max(1,round(index_windows(t,1))):...
+                    min(length(X),round(index_windows(t,2))),ich);
+                powers = get_power(Xtemp,fs,freq_bands(4,:));
+                ers_array(s,t,:,ich) = powers;
+            end
+        end
+        
+        ers.spike(s).biggest_dev = biggest_dev;
+        ers.spike(s).index_windows = index_windows;
+        ers.spike(s).ers = squeeze(ers_array(s,:,:,biggest_dev)); % biggest dev channel
+        ers.spike(s).ers_all = squeeze(ers_array(s,:,:,:));
+        
+        %{
         % Restrict to biggest dev ch
         values = values(:,biggest_dev);
         
@@ -196,6 +215,9 @@ for whichPt = whichPts
         ers.spike(s).biggest_dev = biggest_dev;
         ers.spike(s).index_windows = index_windows;
         ers.spike(s).ers = squeeze(ers_array(s,:,:));
+        %}
+        
+        
  
         
     end

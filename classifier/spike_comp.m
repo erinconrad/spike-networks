@@ -21,11 +21,11 @@ do a more careful comparison of sd
 alpha = 0.05;
 which_freq = 4;
 rm_rise = 1; 
-met = 'F';
+met = 'ns_big';
 windows = [0.1];
 method = 'ttestp'; % ttestp is default
 which_pt = 1;
-which_pre_rise = 2; % 2 is default
+which_pre_rise = 0; % 2 is default
 comp_points = 3;  %3 is default
 % 0 = absolute, 1 = z score, 2 = relative change from first one, 3 = like z
 % score but subtracting first one
@@ -87,11 +87,16 @@ metrics = remove_bad_spikes(metrics);
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
 metrics_red = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise,alpha);
 
+
 %% Significance testing across patients
 metrics_red = agg_pts_test(metrics_red);
 
-%make_fig12(metrics_red,windows,met,which_pre_rise)
-make_secondary_fig(metrics_red,windows,met,which_pre_rise,which_freq);
+%% Number positive
+%count_pts_sig(metrics_red,met,1,which_freq,1,0.05/7)
+
+%% Figs
+make_fig12(metrics_red,windows,met,which_pre_rise)
+%make_secondary_fig(metrics_red,windows,met,which_pre_rise,which_freq);
 
 %% Plot the avg in time windows across patients
 %agg_pts_tw(metrics_red,met,windows,method,which_pre_rise)
