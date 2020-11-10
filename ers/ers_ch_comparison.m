@@ -206,7 +206,7 @@ for f = 1:length(freq)
         freq(f).ers.pt(pt_idx).not.last = last_not;
         
         % Relative power in biggest dev ch
-        freq(f).ers.pt(pt_idx).spike.big_dev = 
+       % freq(f).ers.pt(pt_idx).spike.big_dev = 
         
     end
 end

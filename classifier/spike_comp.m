@@ -21,7 +21,7 @@ do a more careful comparison of sd
 alpha = 0.05;
 which_freq = 4;
 rm_rise = 1; 
-met = 'ns_big';
+met = 'ers';
 windows = [0.1];
 method = 'ttestp'; % ttestp is default
 which_pt = 1;

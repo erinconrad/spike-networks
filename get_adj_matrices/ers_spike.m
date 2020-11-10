@@ -188,7 +188,7 @@ for whichPt = whichPts
             for t = 1:n_windows
                 Xtemp = X(max(1,round(index_windows(t,1))):...
                     min(length(X),round(index_windows(t,2))),ich);
-                powers = get_power(Xtemp,fs,freq_bands(4,:));
+                powers = get_power(Xtemp,fs,freq_bands);
                 ers_array(s,t,:,ich) = powers;
             end
         end
