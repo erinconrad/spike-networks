@@ -1,5 +1,6 @@
 function [z_range,prettyp] = specific_plot(dat_sp,dat_not,do_legend,z_range,adjust_z_range,times,alpha)
 
+    %if isempty(dat_sp), z_range = z_range,prettyp = ''; return; end
     % Remove columns with only one non nan
     for j = 1:size(dat_sp,2)
         if sum(~isnan(dat_sp(:,j))) == 1

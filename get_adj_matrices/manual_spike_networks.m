@@ -30,6 +30,13 @@ do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 
+%% Proposed frequencies, following Ren et al., Neurology, 2015
+freq_bands = [0.5 30;... %sub-gamma
+    30 100;... % ;low gamma
+    100 256]; % high_gamma
+
+freq_names = {'sub-gamma','low gamma','high gamma'};
+%{
 freq_bands = [0.5 12;... %delta/theta/alpha
     12 25;... %beta
     30 40;... % low gamma
@@ -39,6 +46,7 @@ freq_bands = [0.5 12;... %delta/theta/alpha
     ]; 
 freq_names = {'delta/theta/alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
+%}
 
 %{
 freq_bands = [0 4;... %delta

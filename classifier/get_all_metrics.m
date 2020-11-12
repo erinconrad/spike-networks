@@ -218,6 +218,22 @@ for l = 1:length(listing)
                             if fix_freq == 0
                                 all_ers(ff).data(s,:) = curr_ers;
                             elseif fix_freq == 1
+                                if ff>nfreq_ers
+                                    all_ers(ff).data(s,:) = nan;
+                                end
+                                if ff == 1 %sub gamma
+                                    for fff = 1:2
+                                        all_ers(fff).data(s,:) = curr_ers; % d/t/a/b
+                                    end
+                                elseif ff == 2 % low gamma (30-100)
+                                    all_ers(3).data(s,:) = curr_ers; % old low (30-40)
+                                    all_ers(4).data(s,:) = curr_ers; % old high (96-106)
+                                elseif ff == 3 % high gamma
+                                    all_ers(5).data(s,:) = curr_ers; % old ultrahigh
+                                    all_ers(6).data(s,:) = curr_ers; % old broadband
+                                end
+                                    
+                                %{
                                 if ff == 1 % delta/theta/alpha
                                     for fff = 1:3
                                         all_ers(fff).data(s,:) = curr_ers;
@@ -226,6 +242,7 @@ for l = 1:length(listing)
                                     fff = ff + 2;
                                     all_ers(fff).data(s,:) = curr_ers;
                                 end
+                                %}
                             end
                         end
                     end

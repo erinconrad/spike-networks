@@ -178,6 +178,7 @@ adj_alpha = alpha/n_freq_total;
                                 %sp_or_not.slopes(s) = slope;
                                 
                                 %sp_or_not.slopes(s) = z(end)-z(1);
+                                %if isempty(z), continue; end
                                 sp_or_not.slopes(s) = z(end);
                                 
                             end

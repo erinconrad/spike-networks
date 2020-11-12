@@ -79,7 +79,8 @@ pre_spike = convert_sd(sig_dev,windows,pre_spike);
 %save([pre_spike_folder,'pre_spike.mat'],'pre_spike');
 
 %% Get network metrics
-metrics = get_all_metrics(windows,pre_spike,wpr);
+%metrics = get_all_metrics(windows,pre_spike,wpr);
+metrics = get_specified_metrics(windows,pre_spike,met);
 
 %% Remove bad spikes
 metrics = remove_bad_spikes(metrics);
@@ -95,7 +96,7 @@ metrics_red = agg_pts_test(metrics_red);
 %count_pts_sig(metrics_red,met,1,which_freq,1,0.05/7)
 
 %% Figs
-make_fig12(metrics_red,windows,met,which_pre_rise)
+make_fig13(metrics_red,windows,met,which_pre_rise)
 %make_secondary_fig(metrics_red,windows,met,which_pre_rise,which_freq);
 
 %% Plot the avg in time windows across patients

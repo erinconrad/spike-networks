@@ -20,7 +20,7 @@ freq_names = {'delta/theta/alpha','beta','low_gamma',...
 %}
 
 
-%% Proposed frequencies
+%% Proposed frequencies, following Ren et al., Neurology, 2015
 freq_bands = [0.5 30;... %sub-gamma
     30 100;... % ;low gamma
     100 256]; % high_gamma
