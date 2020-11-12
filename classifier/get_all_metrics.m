@@ -203,12 +203,14 @@ for l = 1:length(listing)
                     
                     % Concatenate spike data
                     all_ers(f).data = zeros(length(ers.spike),size(ers.spike(1).ers,1));
+
                     nfreq_ers = size(ers.freq_bands,1);
                     if nfreq_ers < nfreq
                         fix_freq = 1;
                     else
                         fix_freq = 0;
                     end
+                    
                     for s = 1:length(ers.spike)
                         % Fix for frequency inconsistency
                         for ff = 1:nfreq_ers
@@ -227,6 +229,7 @@ for l = 1:length(listing)
                             end
                         end
                     end
+                    %}
                     
                     if contains(fname,'not') == 1
                         stats(network_count).time(time_count).freq(f).ers.pt(pt_idx).not.data = all_ers(f).data;

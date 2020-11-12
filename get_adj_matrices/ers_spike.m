@@ -5,6 +5,7 @@ do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
 pre_whiten = 0; % remove the AR(1) component for a pre-whitening step?
 
+%{
 freq_bands = [0.5 12;... %delta/theta/alpha
     12 25;... %beta
     30 40;... % low gamma
@@ -13,23 +14,19 @@ freq_bands = [0.5 12;... %delta/theta/alpha
     0.5 256;... %broadband    
     ]; 
 
+
 freq_names = {'delta/theta/alpha','beta','low_gamma',...
     'high_gamma','ultra_high','broadband'};
+%}
 
-%{
-freq_bands = [0 4;... %delta
-    4 8;...%theta
-    8 12;...% alpha
-    12 24;... %beta
-    30 40;... % low gamma
-    96 106;... % high gamma
-    106 256;... %ultra-high
-    0.5 256;... %broadband    
-    ]; 
 
-freq_names = {'delta','theta','alpha','beta','low_gamma',...
-    'high_gamma','ultra_high','broadband'};
-    %}
+%% Proposed frequencies
+freq_bands = [0.5 30;... %sub-gamma
+    30 100;... % ;low gamma
+    100 256]; % high_gamma
+
+freq_names = {'sub-gamma','low gamma','high gamma'};
+
 n_f = size(freq_bands,1);
 
 if length(time_window) == 1

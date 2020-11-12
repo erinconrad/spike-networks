@@ -25,7 +25,7 @@ met = 'ers';
 windows = [0.1];
 method = 'ttestp'; % ttestp is default
 which_pt = 1;
-which_pre_rise = 0; % 2 is default
+which_pre_rise = 2; % 2 is default
 comp_points = 3;  %3 is default
 % 0 = absolute, 1 = z score, 2 = relative change from first one, 3 = like z
 % score but subtracting first one
