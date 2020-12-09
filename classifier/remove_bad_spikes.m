@@ -1,4 +1,4 @@
-function metrics = remove_bad_spikes(metrics)
+function [metrics,is_spike_soz] = remove_bad_spikes(metrics,is_spike_soz)
 
 old_metrics = metrics;
 
@@ -76,6 +76,11 @@ for i = 1:length(listing)
                 end
             end
         end
+    end
+    
+    % Also remove from soz struct
+    if ~contains(filename,'not')
+        is_spike_soz(pt_idx).is_soz(bad_spikes) = [];
     end
     
 end

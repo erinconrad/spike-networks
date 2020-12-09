@@ -19,12 +19,9 @@ do a more careful comparison of sd
 
 %% Parameters
 alpha = 0.05;
-which_freq = 4;
 rm_rise = 1; 
 met = 'ge';
 windows = [0.1];
-method = 'ttestp'; % ttestp is default
-which_pt = 1;
 which_pre_rise = 2; % 2 is default
 comp_points = 3;  %3 is default
 % 0 = absolute, 1 = z score, 2 = relative change from first one, 3 = like z
@@ -80,14 +77,18 @@ pre_spike = convert_sd(sig_dev,windows,pre_spike);
 
 %% Get network metrics
 %metrics = get_all_metrics(windows,pre_spike,wpr);
+%{
 if contains(met,'soz')
-    [metrics,~] = get_specified_metrics(windows,pre_spike,met,1);
+    [metrics,is_spike_soz] = get_specified_metrics(windows,pre_spike,met,1);
 else
-    [metrics,~] = get_specified_metrics(windows,pre_spike,met,0);
+    [metrics,is_spike_soz] = get_specified_metrics(windows,pre_spike,met,0);
 end
+%}
+[metrics,is_spike_soz] = get_specified_metrics(windows,pre_spike,met,1);
+
 
 %% Remove bad spikes
-metrics = remove_bad_spikes(metrics);
+[metrics,is_spike_soz] = remove_bad_spikes(metrics,is_spike_soz);
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
 metrics_red = remove_early_rise(metrics,pre_spike,wpr,comp_points,rm_rise,alpha);
@@ -100,7 +101,10 @@ metrics_red = agg_pts_test(metrics_red);
 %count_pts_sig(metrics_red,met,1,which_freq,1,0.05/7)
 
 %% Figs
-scatter_all_pts(metrics_red,windows,met,which_pre_rise)
+%scatter_all_pts(metrics_red,windows,met,which_pre_rise)
+
+%% Compare metric between spikes in soz and spikes outside soz
+soz_comparison(metrics_red,is_spike_soz,met,out_folder)
 %make_fig13(metrics_red,windows,met,which_pre_rise)
 %make_secondary_fig(metrics_red,windows,met,which_pre_rise,which_freq);
 

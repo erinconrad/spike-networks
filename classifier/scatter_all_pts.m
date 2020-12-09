@@ -11,7 +11,7 @@ elseif strcmp(met,'ge')
     met_text = ' global efficiency';
     skip_sd = 1;
 elseif strcmp(met,'ns_big')
-    met_text = [newline,'node strength of spike electrode'];
+    met_text = [' spike electrode',newline,'node strength'];
     skip_sd = 1;
 else
     met_text = met;
@@ -31,8 +31,13 @@ nfreq = length(stats(1).time(1).freq);
 figure
 
 if skip_sd == 1
+    
     set(gcf,'position',[1 100 900 300])
-    [ha, pos] = tight_subplot(1, nfreq, [0.10 0.01], [0.10 0.06], [0.11 0.01]);
+    if strcmp(met,'ns_big')
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.01], [0.10 0.06], [0.11 0.01]);
+    else
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.01], [0.10 0.06], [0.11 0.01]);
+    end
 else
     set(gcf,'position',[1 100 900 550])
     [ha, pos] = tight_subplot(2, nfreq, [0.10 0.01], [0.10 0.06], [0.11 0.01]);

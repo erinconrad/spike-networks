@@ -56,6 +56,11 @@ for i = 1:length(pt_listing)
 
     % load pt file
     load([time_folder,fname]);
+    
+    % Load spike file
+    spike = load([ers_folder,time_name,sprintf('%s_ers.mat',pt_name)]);
+    spike = spike.ers;
+    
 
 
     % Get number of frequencies
@@ -255,9 +260,10 @@ for i = 1:length(pt_listing)
     
     %% Add soz info
     if return_soz == 1 && contains(fname,'not') == 0
-        is_soz_pt = zeros(length(ers.spike),1);
-        for s = 1:length(ers.spike)
-            biggest_dev = ers.spike(s).biggest_dev;
+        %is_soz_pt = zeros(length(ers.spike),1);
+        is_soz_pt = zeros(length(spike.spike),1);
+        for s = 1:length(spike.spike)
+            biggest_dev = spike.spike(s).biggest_dev;
             if ismember(biggest_dev,soz_chs)
                 is_soz_pt(s) = 1;
             end
