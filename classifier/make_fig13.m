@@ -37,7 +37,7 @@ end
 
 %% First plot the SD
 axes(ha(1))
-set(ha(1),'Position',[pos{1}(1) pos{1}(2) pos{1}(3)*4 pos{1}(4)]);
+set(ha(1),'Position',[pos{1}(1) pos{1}(2) pos{1}(3)*n_freq_abs pos{1}(4)]);
 dat_sp = stats(1).time(t).freq(1).sd.all_z_spike;
 dat_not = stats(1).time(t).freq(1).sd.all_z_not;
 times = stats(1).time(t).freq(1).sd.pt(1).times;
@@ -90,7 +90,7 @@ for n = 1:network_count
             xlabel('Time relative to spike peak (s)')
         end
 
-        if n == network_count
+        if f == 1
             ylabel(sprintf('Normalized %s',met_text))    
         end
 

@@ -33,7 +33,7 @@ adj_alpha = alpha/n_freq_total;
                         if strcmp(wpr,'cons')
                             ps_windows = pre_spike(1).windows(t).cons_windows;
                         else
-                            ps_windows = pre_spike(1).windows(t).all_windows;
+                            ps_windows = pre_spike(1).windows(t).all_windows; % Manual before rise
                         end
                         shift = find(ps_windows == curr_met.pt(1).times(1));
                         

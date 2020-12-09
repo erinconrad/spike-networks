@@ -1,4 +1,4 @@
-function stats = get_specified_metrics(windows,pre_spike,met)
+function [stats,is_spike_soz] = get_specified_metrics(windows,pre_spike,met,return_soz)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -21,13 +21,15 @@ sp_diff_folder = [results_folder,'net_diff_stats/coherence/'];
 %% Now get F statistics for network differences
 time_name = sprintf('%1.1f/',windows);
 
-if strcmp(met,'ers')
+if contains(met,'ers')
     main_folder = ers_folder;
 elseif strcmp(met,'F')
     main_folder =  sp_diff_folder;
-elseif strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_all') || ...
+elseif strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_big') || ...
                 strcmp(met,'ns_avg') || strcmp(met,'trans')
     main_folder = ns_folder;
+elseif strcmp(met,'sd')
+    main_folder = sig_dev_folder;
 end
 
 time_folder = [main_folder,time_name];
@@ -57,7 +59,7 @@ for i = 1:length(pt_listing)
 
 
     % Get number of frequencies
-    if strcmp(met,'ers')
+    if contains(met,'ers')
         nfreq = size(ers.freq_bands,1);
         for f = 1:nfreq
             stats(1).time(1).freq(f).name = ers.freq_names{f};
@@ -68,12 +70,15 @@ for i = 1:length(pt_listing)
         for f = 1:nfreq
             stats(1).time(1).freq(f).name = sim.name;
         end
-    elseif strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_all') || ...
-                strcmp(met,'ns_avg') || strcmp(met,'trans')
+    elseif strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_big') || ...
+                strcmp(met,'ns_avg') || strcmp(met,'trans') 
         nfreq = length(metrics.freq);
         for f = 1:nfreq
             stats(1).time(1).freq(f).name = metrics.freq(f).name;
         end
+    elseif strcmp(met,'sd')
+        nfreq = 1;
+        stats.time.freq.name = sig_dev.name;
     else
 
         nfreq = length(sim);
@@ -82,9 +87,17 @@ for i = 1:length(pt_listing)
         end
     end
     stats(1).time(1).time_window = windows;
+    
+    %% Get soz channels
+    if return_soz && contains(fname,'not') == 0
+        soz_chs = get_soz_chs(pt_name);
+    elseif return_soz && contains(fname,'not') == 1
+    else
+        is_spike_soz = [];
+    end
 
     for f = 1:nfreq
-        if strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_all') || ...
+        if strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_big') || ...
                 strcmp(met,'ns_avg') || strcmp(met,'trans')
 
             sim = metrics;
@@ -144,24 +157,50 @@ for i = 1:length(pt_listing)
         end
 
         % Add ERS stuff
-        if strcmp(met,'ers')
+        if contains(met,'ers')
 
-            stats(1).time(1).freq(f).ers.pt(pt_idx).index_windows = ers.index_windows;
+            stats(1).time(1).freq(f).(met).pt(pt_idx).index_windows = ers.index_windows;
             times = round((ers.index_windows(:,1)/ers.fs-3)*1e2)/(1e2);
-            stats(1).time(1).freq(f).ers.pt(pt_idx).times = times;
-            stats(1).time(1).freq(f).ers.pt(pt_idx).name = ers.name;
+            stats(1).time(1).freq(f).(met).pt(pt_idx).times = times;
+            stats(1).time(1).freq(f).(met).pt(pt_idx).name = ers.name;
             
-            %
-            all_ers(f).data = zeros(length(ers.spike),size(ers.spike(1).ers,1));
-            for s = 1:length(ers.spike)
-                all_ers(f).data(s,:) = ers.spike(s).ers(:,f);
+            all_ers(f).data = zeros(length(ers.spike),size(ers.spike(1).ers,1)); % n spikes x n times
+            if strcmp(met,'ers')
+                
+                for s = 1:length(ers.spike)
+                    all_ers(f).data(s,:) = ers.spike(s).ers(:,f);
+                end
+            elseif strcmp(met,'rel_big_dev_ers')
+                for s = 1:length(ers.spike)
+                    all_ers(f).data(s,:) = ers.spike(s).ers_all(:,f,ers.spike(s).biggest_dev)./...
+                        nanmean(ers.spike(s).ers_all(:,f,:),3);
+                end
+            elseif strcmp(met,'ers_avg')
+                for s = 1:length(ers.spike)
+                    all_ers(f).data(s,:) = nanmean(ers.spike(s).ers_all(:,f,:),3);
+                        
+                end
+            elseif strcmp(met,'ers_soz')
+                for s = 1:length(ers.spike)
+                    all_ers(f).data(s,:) = nanmean(ers.spike(s).ers_all(:,f,soz_chs),3);    
+                end
+            elseif strcmp(met,'ers_only_keep_soz')
+                for s = 1:length(ers.spike)
+                    biggest_dev = ers.spike(s).biggest_dev;
+                    if ismember(biggest_dev,soz_chs)
+                        all_ers(f).data(s,:) = nanmean(ers.spike(s).ers_all(:,f,soz_chs),3);    
+                    else
+                        all_ers(f).data(s,:) = nan;  
+                    end
+                end
             end
+            
            
 
             if contains(fname,'not') == 1
-                stats(1).time(1).freq(f).ers.pt(pt_idx).not.data = all_ers(f).data;
+                stats(1).time(1).freq(f).(met).pt(pt_idx).not.data = all_ers(f).data;
             else
-                stats(1).time(1).freq(f).ers.pt(pt_idx).spike.data = all_ers(f).data;
+                stats(1).time(1).freq(f).(met).pt(pt_idx).spike.data = all_ers(f).data;
             end
         end
 
@@ -213,6 +252,18 @@ for i = 1:length(pt_listing)
         end
 
     end
+    
+    %% Add soz info
+    if return_soz == 1 && contains(fname,'not') == 0
+        is_soz_pt = zeros(length(ers.spike),1);
+        for s = 1:length(ers.spike)
+            biggest_dev = ers.spike(s).biggest_dev;
+            if ismember(biggest_dev,soz_chs)
+                is_soz_pt(s) = 1;
+            end
+        end
+        is_spike_soz(pt_idx).is_soz = is_soz_pt;
+    end
 
 
 end
@@ -247,6 +298,8 @@ for n = 1:length(stats)
         end
     end
 end
+
+
 
 
 end
