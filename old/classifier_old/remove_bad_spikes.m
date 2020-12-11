@@ -1,4 +1,4 @@
-function [metrics,is_spike_soz,pre_spike] = remove_bad_spikes(metrics,is_spike_soz,pre_spike)
+function [metrics,is_spike_soz] = remove_bad_spikes(metrics,is_spike_soz)
 
 old_metrics = metrics;
 
@@ -49,10 +49,6 @@ for i = 1:length(listing)
         end
     end
     bad_spikes = logical(bad_spikes);
-    
-    if ~contains(filename,'not')
-        pre_spike(pt_idx).windows.manual_before_rise(bad_spikes,:) = [];
-    end
     
     % Loop through metrics
     for n = 1:length(metrics)
