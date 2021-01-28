@@ -3,8 +3,10 @@
 %{
 WHY ARE THERE NANS IN GE???
 
-% check the spike window (t=0) rise for ns_avg, seems low. I think it's
-because i don't count
+Work on SOZ comparison
+check everything
+try 0.2 s windows
+post-spike
 %}
 
 %% Clear
