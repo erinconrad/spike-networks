@@ -1,6 +1,10 @@
 function new_rise_fig(metrics,met)
 
-nfreq = length(metrics.time.freq);
+if strcmp(met,'sd')
+    nfreq = 1;
+else
+    nfreq = length(metrics.time.freq);
+end
 
 %% Initialize figure
 figure
@@ -13,7 +17,7 @@ all_pp = cell(nfreq,1);
 for f = 1:nfreq
     axes(ha(f))
     
-    %% Get data
+    
     dat_sp = metrics.time.freq(f).(met).median_data.data(:,:,1);
     dat_not = metrics.time.freq(f).(met).median_data.data(:,:,2);
     pval = metrics.time.freq(f).(met).auc.pval;

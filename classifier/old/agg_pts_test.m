@@ -45,6 +45,7 @@ for n = 1:length(metrics)
                 curr_met.auc_spike = all_auc_spike;
                 curr_met.auc_not = all_auc_not;
                 
+                [~,curr_met.auc_pval] = ttest(all_auc_spike,all_auc_not);
                 metrics(n).time(t).freq(f).(met) = curr_met;
             end
             

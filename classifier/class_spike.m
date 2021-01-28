@@ -1,4 +1,4 @@
-function class_spike(stats,met)
+function tbl=class_spike(stats,met)
 
 nfreq = length(stats.time.freq);
 np = length(stats.time.freq(1).(met).pt);
@@ -10,8 +10,8 @@ for f = 1:nfreq
     freq(f).all_sp = [];
     freq(f).all_no = [];
     for p = 1:np
-        met_sp = stats.time.freq(1).(met).pt(p).spike.auc;
-        met_no = stats.time.freq(1).(met).pt(p).not.auc;
+        met_sp = stats.time.freq(f).(met).pt(p).spike.auc;
+        met_no = stats.time.freq(f).(met).pt(p).not.auc;
         
         %% Get the last non nan time
         all_nan_columns = sum(isnan(met_sp),1) == size(met_sp,1);

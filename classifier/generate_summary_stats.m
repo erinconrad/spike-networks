@@ -1,4 +1,4 @@
-function metrics = generate_summary_stats(metrics,met,include_times)
+function metrics = generate_summary_stats(metrics,met,include_times,rm_rise)
 
 nfreq = length(metrics.time.freq);
 
@@ -13,7 +13,10 @@ for f = 1:nfreq
         length(metrics.time.freq(f).(met).pt),...
         size(metrics.time.freq(f).(met).pt(1).spike.data,2),2); 
     metrics.time.freq(f).(met).median_data.info = {'spike','not'};
-
+    metrics.time.freq(f).(met).auc.times = metrics.time.freq(f).(met).pt(1).times;
+    metrics.time.freq(f).(met).auc.short.data = nan(...
+        length(metrics.time.freq(f).(met).auc.times),...
+        length(metrics.time.freq(f).(met).pt),2);  
     % Loop through patients
     for p = 1:length(metrics.time.freq(f).(met).pt)
 
@@ -37,7 +40,9 @@ for f = 1:nfreq
 
             % Turn everything not included into a nan
             %if p == 6, error('what'); end
-            data(~include) = nan;
+            if rm_rise == 1
+                data(~include) = nan;
+            end
 
             % Find first non nan column
             sum_all = sum(data,1);
@@ -49,29 +54,49 @@ for f = 1:nfreq
             data = (data-first_column)./abs(first_column);
 
             % AUC for each spike
-            auc = nansum(data,2);
+            auc = nansum(data(:,2:end),2);
 
             % Take median across all spikes (because a small number are crazy)
             median_auc = median(auc);
             median_rel_data = median(data,1);
+            iqr_auc = [prctile(auc,25),prctile(auc,75)];
 
             % Add it to larger struct
             metrics.time.freq(f).(met).auc.data(p,sp_count) = median_auc;
             metrics.time.freq(f).(met).median_data.data(p,:,sp_count) = median_rel_data;
+            metrics.time.freq(f).(met).auc.iqr(p,sp_count,1:2) = iqr_auc;
 
+            % Pt specific
+            metrics.time.freq(f).(met).pt(p).(sp{1}).auc = auc;
+            metrics.time.freq(f).(met).pt(p).(sp{1}).temp_data = data;
+            
+            % Now, to pinpoint the earliest change, loop through times
+            for tt = 2:length(metrics.time.freq(f).(met).auc.times)
+                short_auc = nansum(data(:,2:tt),2);
+                median_short_auc = median(short_auc);
+                metrics.time.freq(f).(met).auc.short.data(tt,p,sp_count) = median_short_auc;
+            end
 
         end
             
         
     end
     % Do paired ttest on auc
+    
     [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.data(:,1),...
         metrics.time.freq(f).(met).auc.data(:,2));
+    %{
+    pval = signrank(metrics.time.freq(f).(met).auc.data(:,1),...
+        metrics.time.freq(f).(met).auc.data(:,2));
+        %}
     metrics.time.freq(f).(met).auc.pval = pval;
     metrics.time.freq(f).(met).auc.tstat = st.tstat;
-        
-    
-    
+    metrics.time.freq(f).(met).auc.short.ps = nan(size(metrics.time.freq(f).(met).auc.short.data,1),1);
+    for tt = 1:size(metrics.time.freq(f).(met).auc.short.data,1)
+        short_auc = squeeze(metrics.time.freq(f).(met).auc.short.data(tt,:,:));
+        [~,p] = ttest(short_auc(:,1),short_auc(:,2));
+        metrics.time.freq(f).(met).auc.short.ps(tt) = p;
+    end
 end
 
 end

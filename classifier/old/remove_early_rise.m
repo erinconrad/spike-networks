@@ -187,6 +187,7 @@ adj_alpha = alpha/n_freq_total;
                             sp_or_not.mean_z = nanmean(sp_or_not.zs,1);
                             sp_or_not.median_z = nanmedian(sp_or_not.zs,1);
                             sp_or_not.auc = nansum(sp_or_not.zs(:,2:end),2);
+                            sp_or_not.temp_data = sp_or_not.zs;
                             
                             metrics(n).time(t).freq(f).(met).pt(p).(snames{sn}) = sp_or_not;
                             

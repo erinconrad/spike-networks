@@ -18,7 +18,7 @@ ers_folder = [results_folder,'ers/'];
 ns_folder = [results_folder,'metrics/manual/coherence/'];
 sp_diff_folder = [results_folder,'net_diff_stats/coherence/'];
 
-%% Now get F statistics for network differences
+%% Specify metric folders
 time_name = sprintf('%1.1f/',windows);
 
 if contains(met,'ers')
@@ -55,11 +55,11 @@ for i = 1:length(pt_listing)
     end
 
     % load pt file
-    load([time_folder,fname]);
+    load([time_folder,fname]); % this will produce a structure of different names depending on metric
     
     % Load spike file
     spike = load([ers_folder,time_name,sprintf('%s_ers.mat',pt_name)]);
-    spike = spike.ers;
+    spike = spike.ers; % ers file
     
 
 
