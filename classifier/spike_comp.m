@@ -15,7 +15,7 @@ clear
 %% Parameters
 alpha = 0.05;
 %rm_rise = 1; 
-met = 'sd';
+met = 'ns_big';
 windows = [0.1];
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
@@ -72,18 +72,16 @@ end
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
 include_times = include_which_times(metrics,met,pre_spike,nan);
-metrics = generate_summary_stats(metrics,met,include_times,rm_rise);
+metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz);
 
 %% Build a classifier to predict spike vs not spike
 tbl = class_spike(metrics,met);
 
 %% Figs
-%new_rise_fig(metrics,met)
-plot_auc(metrics,met)
-plot_short(metrics,met,2,earliest_rise);
-
-%% Compare metric between spikes in soz and spikes outside soz
-%soz_comparison(metrics_red,is_spike_soz,met,out_folder)
+%new_rise_fig(metrics,met,out_folder)
+plot_auc(metrics,met,out_folder)
+plot_short(metrics,met,2,earliest_rise,out_folder);
+soz_comparison(metrics,met,out_folder)
 
 
 

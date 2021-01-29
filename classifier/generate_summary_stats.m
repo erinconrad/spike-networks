@@ -1,4 +1,4 @@
-function metrics = generate_summary_stats(metrics,met,include_times,rm_rise)
+function metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz)
 
 nfreq = length(metrics.time.freq);
 
@@ -17,6 +17,7 @@ for f = 1:nfreq
     metrics.time.freq(f).(met).auc.short.data = nan(...
         length(metrics.time.freq(f).(met).auc.times),...
         length(metrics.time.freq(f).(met).pt),2);  
+    metrics.time.freq(f).(met).auc.soz.data = nan(length(metrics.time.freq(f).(met).pt),2);
     % Loop through patients
     for p = 1:length(metrics.time.freq(f).(met).pt)
 
@@ -60,11 +61,25 @@ for f = 1:nfreq
             median_auc = median(auc);
             median_rel_data = median(data,1);
             iqr_auc = [prctile(auc,25),prctile(auc,75)];
+            
+            % SOZ vs non soz
+            if strcmp(sp,'spike') % only makes sense to do it for the spikes
+                
+                % Get auc for spikes in soz
+                auc_soz = auc(logical(is_spike_soz(p).is_soz));
+                auc_not = auc(~logical(is_spike_soz(p).is_soz)); % for spikes not in soz
+                
+                % Take median
+                median_auc_soz = median(auc_soz);
+                median_auc_not = median(auc_not);
+            end
 
             % Add it to larger struct
             metrics.time.freq(f).(met).auc.data(p,sp_count) = median_auc;
             metrics.time.freq(f).(met).median_data.data(p,:,sp_count) = median_rel_data;
             metrics.time.freq(f).(met).auc.iqr(p,sp_count,1:2) = iqr_auc;
+            
+            metrics.time.freq(f).(met).auc.soz.data(p,:) = [median_auc_soz,median_auc_not];
 
             % Pt specific
             metrics.time.freq(f).(met).pt(p).(sp{1}).auc = auc;
@@ -97,6 +112,12 @@ for f = 1:nfreq
         [~,p] = ttest(short_auc(:,1),short_auc(:,2));
         metrics.time.freq(f).(met).auc.short.ps(tt) = p;
     end
+    
+    % Soz
+    [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.soz.data(:,1),...
+        metrics.time.freq(f).(met).auc.soz.data(:,2));
+    metrics.time.freq(f).(met).auc.soz.pval = pval;
+    metrics.time.freq(f).(met).auc.soz.tstat = st.tstat;
 end
 
 end

@@ -1,6 +1,16 @@
-function plot_short(metrics,met,f,earliest_rise)
+function plot_short(metrics,met,f,earliest_rise,out_folder)
 
 show_all = 0;
+
+%% Pretty names
+if strcmp(met,'sd')
+    pretty_name = 'absolute power';
+    nfreq = 1;
+else
+    pretty_name = met;
+    nfreq = length(metrics.time.freq);
+end
+
 
 %% Initialize figure
 figure
@@ -35,11 +45,13 @@ std_diff = std(auc_diff,0,2);
 if show_all == 1
     errorbar(times(1:end),...
         mean_auc_diff(1:end)...
-        ,std_diff(1:end),'ko','markersize',10)
+        ,std_diff(1:end),'ko','markersize',15,...
+        'linewidth',2)
 else
     errorbar(times(1:last_before_rise-1),...
         mean_auc_diff(1:last_before_rise-1)...
-        ,std_diff(1:last_before_rise-1),'ko','markersize',10)
+        ,std_diff(1:last_before_rise-1),'ko','markersize',15,...
+        'linewidth',2)
 end
 hold on
 
@@ -47,9 +59,14 @@ hold on
 
 xlabel('Time (s)');
 
-
-ylabel(sprintf('Relative %s %s summed\nacross pre-spike epoch\nSpike-non spike difference',...
-    metrics.time.freq(f).name,met));
+if strcmp(met,'sd')
+    ylabel(sprintf('Pre-IED %s change\nSpike-non spike difference',...
+        pretty_name));
+else
+    
+    ylabel(sprintf('Pre-IED %s %s change\nSpike-non spike difference',...
+        metrics.time.freq(f).name,pretty_name));
+end
 
 
 set(gca,'fontsize',20)
@@ -60,13 +77,16 @@ set(gca,'fontsize',20)
 sub_alpha = zeros(ntimes,1);
 for tt = 1:last_before_rise-1
     num_left = ntimes-tt+1;
-    num_sub_alpha = sum(pvals(tt:end) < 0.05/3);
+    num_sub_alpha = sum(pvals(tt:end) < 0.05/nfreq);
     if num_sub_alpha == num_left
         sub_alpha(tt) = 1;
     end
 end
 
-
+sig_times = find(sub_alpha == 1);
+first_sig_time = sig_times(1);
+fprintf('\nThe first significant AUC is %1.1f before the spike peak\n',...
+    -times(first_sig_time));
 
 yl = get(gca,'ylim');
 yl2 = yl(1) + 1.1*(yl(2)-yl(1));
@@ -79,12 +99,12 @@ for tt = 1:ntimes
     end
 end
 
-endh = plot([times(last_before_rise) times(last_before_rise)],get(gca,'ylim'),'k--','linewidth',2);
+endh = plot([mean_rise_spikes mean_rise_spikes],get(gca,'ylim'),'k--','linewidth',2);
 
 legend(endh,'Visual rise','fontsize',20,'location','northwest')
 
 
-
+print(gcf,[out_folder,sprintf('short_%s',met)],'-dpng');
     
     
 end
