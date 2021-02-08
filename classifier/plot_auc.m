@@ -1,4 +1,4 @@
-function plot_auc(metrics,met,out_folder)
+function plot_auc(metrics,met,out_folder,do_plot)
 
 do_all_pts = 0;
 jitter_amount = 0.05;
@@ -6,6 +6,8 @@ jitter_amount = 0.05;
 %% Pretty names
 if strcmp(met,'sd')
     pretty_name = 'absolute\newlinepower';
+elseif strcmp(met,'ns_avg')
+    pretty_name = 'average\newlinenode strength';
 else
     pretty_name = met;
 end
@@ -20,6 +22,10 @@ if do_all_pts
         nfreq = 1;
         set(gcf,'position',[1 100 650 270])
         [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.15 0.01]);
+    elseif strcmp(met,'ns_avg')
+        nfreq = length(metrics.time.freq);
+        set(gcf,'position',[1 100 1450 270])
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.2 0.01]);
     else
         nfreq = length(metrics.time.freq);
         set(gcf,'position',[1 100 1450 270])
@@ -94,6 +100,10 @@ else
         nfreq = 1;
         set(gcf,'position',[1 100 400 270])
         [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.24 0.01]);
+    elseif strcmp(met,'ns_avg')
+        nfreq = length(metrics.time.freq);
+        set(gcf,'position',[1 100 1100 270])
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.04], [0.12 0.11], [0.11 0.01]);
     else
         nfreq = length(metrics.time.freq);
         set(gcf,'position',[1 100 1100 270])
@@ -117,7 +127,11 @@ for f = 1:nfreq
     xticks([1 2])
     xticklabels({'IED','Not IED'})
     if f == 1
-        ylabel(sprintf('Pre-IED %s change',pretty_name))
+        ylabel(sprintf('Pre-IED %s change',pretty_name),'horizontalalignment','center')
+    end
+    
+    if ~strcmp(met,'sd')
+        title(sprintf(metrics.time.freq(f).name))
     end
     xlim([0.5 2.5])
     set(gca,'fontsize',20)
@@ -133,8 +147,9 @@ for f = 1:nfreq
 end
     
 end
-
+if do_plot == 1
 print(gcf,[out_folder,sprintf('auc_%s',met)],'-dpng');
+end
 
 end
 

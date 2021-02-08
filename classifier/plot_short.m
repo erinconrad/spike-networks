@@ -1,4 +1,4 @@
-function plot_short(metrics,met,f,earliest_rise,out_folder)
+function plot_short(metrics,met,f,earliest_rise,out_folder,do_plot)
 
 show_all = 0;
 
@@ -6,6 +6,9 @@ show_all = 0;
 if strcmp(met,'sd')
     pretty_name = 'absolute power';
     nfreq = 1;
+elseif strcmp(met,'ns_avg')
+    pretty_name = 'average node strength';
+    nfreq = length(metrics.time.freq);
 else
     pretty_name = met;
     nfreq = length(metrics.time.freq);
@@ -64,7 +67,7 @@ if strcmp(met,'sd')
         pretty_name));
 else
     
-    ylabel(sprintf('Pre-IED %s %s change\nSpike-non spike difference',...
+    ylabel(sprintf('Pre-IED %s\n%s change\nSpike-non spike difference',...
         metrics.time.freq(f).name,pretty_name));
 end
 
@@ -103,8 +106,9 @@ endh = plot([mean_rise_spikes mean_rise_spikes],get(gca,'ylim'),'k--','linewidth
 
 legend(endh,'Visual rise','fontsize',20,'location','northwest')
 
-
+if do_plot
 print(gcf,[out_folder,sprintf('short_%s',met)],'-dpng');
+end
     
     
 end

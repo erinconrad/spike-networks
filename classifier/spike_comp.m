@@ -2,8 +2,7 @@
 
 %{
 WHY ARE THERE NANS IN GE???
-
-Work on SOZ comparison
+confirm pre spike power rise, seems quite high quite early
 check everything
 try 0.2 s windows
 post-spike
@@ -13,10 +12,10 @@ post-spike
 clear
 
 %% Parameters
-alpha = 0.05;
+do_plot = 0;
 %rm_rise = 1; 
-met = 'ns_big';
-windows = [0.1];
+met = 'sd';
+windows = [0.2];
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
 %comp_points = 2;  %3 is default
@@ -54,7 +53,7 @@ pre_spike = multi_reviewer_pre_spike(windows);
 earliest_rise = compare_two_reviewers(pre_spike);
 
 %% Get signal power deviation
-sig_dev = get_sd(alpha,0,0);
+sig_dev = get_sd(0.05,0,0);
 
 % convert this to be similar to pre_spike
 pre_spike = convert_sd(sig_dev,windows,pre_spike);
@@ -75,13 +74,12 @@ include_times = include_which_times(metrics,met,pre_spike,nan);
 metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz);
 
 %% Build a classifier to predict spike vs not spike
-tbl = class_spike(metrics,met);
+%tbl = class_spike(metrics,met);
 
 %% Figs
-%new_rise_fig(metrics,met,out_folder)
-plot_auc(metrics,met,out_folder)
-plot_short(metrics,met,2,earliest_rise,out_folder);
-soz_comparison(metrics,met,out_folder)
+plot_auc(metrics,met,out_folder,do_plot)
+plot_short(metrics,met,2,earliest_rise,out_folder,do_plot);
+%soz_comparison(metrics,met,out_folder)
 
 
 

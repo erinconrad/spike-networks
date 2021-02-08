@@ -53,7 +53,7 @@ for i = 1:length(listing)
         
 
         temp_sig_dev = load([time_window_folder,sub_listing(k).name]);
-        
+
         
         if contains(sub_listing(k).name,'not') == 1
             sig_dev(count).is_spike(2).sig_dev = temp_sig_dev.sig_dev; 
