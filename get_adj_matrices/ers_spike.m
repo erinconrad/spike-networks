@@ -190,9 +190,15 @@ for whichPt = whichPts
             end
         end
         
-        ers.spike(s).biggest_dev = biggest_dev;
+        if not_a_spike == 0
+            ers.spike(s).biggest_dev = biggest_dev;
+            ers.spike(s).ers = squeeze(ers_array(s,:,:,biggest_dev)); % biggest dev channel
+        else
+            ers.spike(s).biggest_dev = nan;
+            ers.spike(s).ers = squeeze(mean(ers_array(s,:,:,:),4)); % avg across all channels
+        end
         ers.spike(s).index_windows = index_windows;
-        ers.spike(s).ers = squeeze(ers_array(s,:,:,biggest_dev)); % biggest dev channel
+        
         ers.spike(s).ers_all = squeeze(ers_array(s,:,:,:));
         
         
