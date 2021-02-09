@@ -151,6 +151,9 @@ for i = 1:length(listing)
 
     end
     sig_dev(pt_idx).dev_windows = dev_windows;
+    sig_dev(pt_idx).fs = fs;
+    sig_dev(pt_idx).time_window = time_window;
+    sig_dev(pt_idx).index_windows = index_windows;
 
 end
 

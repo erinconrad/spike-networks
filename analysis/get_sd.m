@@ -18,7 +18,8 @@ addpath(genpath(script_folder));
 bct_folder = locations.BCT;
 addpath(genpath(bct_folder));
 out_folder = [results_folder,'plots/'];
-sig_dev_folder = [results_folder,'signal_deviation/manual/',do_avg_text];
+%sig_dev_folder = [results_folder,'signal_deviation/manual/',do_avg_text];
+sig_dev_folder = [results_folder,'power/manual/'];
 perm_folder = [results_folder,'perm_stats/'];
 ers_folder = [results_folder,'ers/'];
 ns_folder = [results_folder,'metrics/manual/'];
@@ -74,6 +75,7 @@ end
 These t statistics are from a paired t test comparing the power in the
 first time window against subsequent time windows
 %}
+%{
 n_windows = count;
 for t = 1:n_windows % loop over time windows
     for s = 1:2 % loop over spike and not a spike
@@ -136,7 +138,7 @@ for t = 1:n_windows % loop over time windows
     sig_dev(t).tests.paired.sig(1) = 1;
     
 end
-
+%}
 
 
 end
