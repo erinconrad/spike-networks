@@ -36,7 +36,7 @@ else
     not_spike_text = '';
 end
 
-listing = dir([adj_folder,'*_adj.mat'])
+listing = dir([adj_folder,'*_adj.mat']);
 
 for i = 1:length(listing)
     
