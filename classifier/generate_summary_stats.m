@@ -51,14 +51,15 @@ for f = 1:nfreq
             first_non_nan = non_nan(1);
             last_non_nan = non_nan(end);
             first_column = data(:,first_non_nan);
-            last_column = data(:,last_non_nan);
+            
 
             % Change all data to be relative to first one
             data = (data-first_column)./abs(first_column);
+            last_column = data(:,last_non_nan);
 
             % AUC for each spike
             if do_cumulative == 1
-                auc = nansum(data(:,2:end),2); % cumulative sum of relative change
+                auc = nansum(data(:,2:last_non_nan),2); % cumulative sum of relative change
             else
                 auc = last_column; % just the last one
             end

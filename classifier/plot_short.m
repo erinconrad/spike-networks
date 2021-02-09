@@ -79,8 +79,8 @@ set(gca,'fontsize',20)
 %% Add p-value
 sub_alpha = zeros(ntimes,1);
 for tt = 1:last_before_rise-1
-    num_left = ntimes-tt+1;
-    num_sub_alpha = sum(pvals(tt:end) < 0.05/nfreq);
+    num_left = last_before_rise-1-tt+1;
+    num_sub_alpha = sum(pvals(tt:last_before_rise-1) < 0.05/nfreq);
     if num_sub_alpha == num_left
         sub_alpha(tt) = 1;
     end

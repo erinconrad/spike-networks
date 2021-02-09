@@ -102,8 +102,12 @@ for i = 1:length(listing)
                 
                 %% Calculate metrics  
                 % node strength of biggest dev channel
-                ns_temp = strengths_und(adj);                
-                ns(f,s,tt) = ns_temp(biggest_dev);
+                ns_temp = strengths_und(adj);  
+                if not_spike == 0
+                    ns(f,s,tt) = ns_temp(biggest_dev);
+                else
+                    ns(f,s,tt) = mean(ns_temp); % average ns if not spike
+                end
                 ns_all(f,s,tt,:) = ns_temp;
                 
                 % global efficiency of full matrix
