@@ -1,4 +1,4 @@
-function metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz)
+function metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,do_cumulative)
 
 nfreq = length(metrics.time.freq);
 
@@ -49,17 +49,23 @@ for f = 1:nfreq
             sum_all = sum(data,1);
             non_nan = find(~isnan(sum_all));
             first_non_nan = non_nan(1);
-            first_column = data(:,first_non_nan );
+            last_non_nan = non_nan(end);
+            first_column = data(:,first_non_nan);
+            last_column = data(:,last_non_nan);
 
             % Change all data to be relative to first one
             data = (data-first_column)./abs(first_column);
 
             % AUC for each spike
-            auc = nansum(data(:,2:end),2);
+            if do_cumulative == 1
+                auc = nansum(data(:,2:end),2); % cumulative sum of relative change
+            else
+                auc = last_column; % just the last one
+            end
 
             % Take median across all spikes (because a small number are crazy)
-            median_auc = median(auc);
-            median_rel_data = median(data,1);
+            median_auc = nanmedian(auc);
+            median_rel_data = nanmedian(data,1);
             iqr_auc = [prctile(auc,25),prctile(auc,75)];
             
             % SOZ vs non soz
@@ -87,8 +93,12 @@ for f = 1:nfreq
             
             % Now, to pinpoint the earliest change, loop through times
             for tt = 2:length(metrics.time.freq(f).(met).auc.times)
-                short_auc = nansum(data(:,2:tt),2);
-                median_short_auc = median(short_auc);
+                if do_cumulative == 1
+                    short_auc = nansum(data(:,2:tt),2);
+                else
+                    short_auc = data(:,tt);
+                end
+                median_short_auc = nanmedian(short_auc);
                 metrics.time.freq(f).(met).auc.short.data(tt,p,sp_count) = median_short_auc;
             end
 

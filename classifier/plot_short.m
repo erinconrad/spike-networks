@@ -42,8 +42,8 @@ end
 
 
 auc_diff = squeeze(data(:,:,1)-data(:,:,2));
-mean_auc_diff = mean(auc_diff,2);
-std_diff = std(auc_diff,0,2);
+mean_auc_diff = nanmean(auc_diff,2);
+std_diff = nanstd(auc_diff,0,2);
 
 if show_all == 1
     errorbar(times(1:end),...
@@ -87,9 +87,11 @@ for tt = 1:last_before_rise-1
 end
 
 sig_times = find(sub_alpha == 1);
-first_sig_time = sig_times(1);
-fprintf('\nThe first significant AUC is %1.1f before the spike peak\n',...
-    -times(first_sig_time));
+if ~isempty(sig_times)
+    first_sig_time = sig_times(1);
+    fprintf('\nThe first significant AUC is %1.1f before the spike peak\n',...
+        -times(first_sig_time));
+end
 
 yl = get(gca,'ylim');
 yl2 = yl(1) + 1.1*(yl(2)-yl(1));

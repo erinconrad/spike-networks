@@ -23,7 +23,6 @@ end
 
 
 
-nfreq = length(metrics.time.freq);
 for f = 1:nfreq
     axes(ha(f))
     dat_soz = metrics.time.freq(f).(met).auc.soz.data(:,1);

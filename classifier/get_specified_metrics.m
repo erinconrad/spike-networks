@@ -102,63 +102,37 @@ for i = 1:length(pt_listing)
     end
 
     for f = 1:nfreq
-        if strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_big') || ...
-                strcmp(met,'ns_avg') || strcmp(met,'trans')
+        if strcmp(met,'ns_big') || strcmp(met,'ns_avg')
 
             sim = metrics;
-
             ns = sim.freq(f).ns.data;
-            ge = sim.freq(f).ge.data;
             ns_all = sim.freq(f).ns_all.data;
-            trans = sim.freq(f).trans.data;
-            involved = logical(sim.freq(f).involved);
 
             % Avg ns_all across channels
             ns_avg = squeeze(mean(ns_all,3));
 
-            % Average ns_inv across involved channels
-            ns_inv = zeros(size(ns_avg));
-            for s = 1:size(ns_all,1)
-                curr_sp = squeeze(ns_all(s,:,:));
-                curr_inv = involved(s,:);
-                curr_ns_inv = squeeze(mean(curr_sp(:,curr_inv),2));
-                ns_inv(s,:) = curr_ns_inv;
-            end
-
             times = round((sim.index_windows(:,1)/sim.fs-3)*1e2)/(1e2);
             
-            stats(1).time(1).freq(f).ge.pt(pt_idx).name = pt_name;
             stats(1).time(1).freq(f).ns_avg.pt(pt_idx).name = pt_name;
             stats(1).time(1).freq(f).ns_big.pt(pt_idx).name = pt_name;
-            stats(1).time(1).freq(f).ns_inv.pt(pt_idx).name = pt_name;
-            stats(1).time(1).freq(f).trans.pt(pt_idx).name = pt_name;
 
             % spike vs not a spike
             if contains(fname,'not') == 1
-                stats(1).time(1).freq(f).ge.pt(pt_idx).not.data(:,:) = ge;
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).not.data(:,:) = ns_avg;
                 stats(1).time(1).freq(f).ns_big.pt(pt_idx).not.data(:,:) = ns;
-                stats(1).time(1).freq(f).ns_inv.pt(pt_idx).not.data(:,:) = ns_avg; % just average for not spike
-                stats(1).time(1).freq(f).trans.pt(pt_idx).not.data(:,:) = trans;
+
             else
-                stats(1).time(1).freq(f).ge.pt(pt_idx).spike.data(:,:) = ge;
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).spike.data(:,:) = ns_avg;
                 stats(1).time(1).freq(f).ns_big.pt(pt_idx).spike.data(:,:) = ns;
-                stats(1).time(1).freq(f).ns_inv.pt(pt_idx).spike.data(:,:) = ns_inv; 
-                stats(1).time(1).freq(f).trans.pt(pt_idx).spike.data(:,:) = trans;
             end
 
             stats(1).time(1).freq(f).ns_big.name = 'Node strength (spike channel)';
-            stats(1).time(1).freq(f).ns_inv.name = 'Node strength (involved channels)';
             stats(1).time(1).freq(f).ns_avg.name = 'Node strength (average)';
-            stats(1).time(1).freq(f).ge.name = 'Global efficiency';
-            stats(1).time(1).freq(f).trans.name = 'Transitivity';
+          
 
             stats(1).time(1).freq(f).ns_big.pt(pt_idx).times = times;
-            stats(1).time(1).freq(f).ns_inv.pt(pt_idx).times = times;
             stats(1).time(1).freq(f).ns_avg.pt(pt_idx).times = times;
-            stats(1).time(1).freq(f).ge.pt(pt_idx).times = times;
-            stats(1).time(1).freq(f).trans.pt(pt_idx).times = times;
+            
         end
 
         % Add ERS stuff

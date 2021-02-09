@@ -3,19 +3,24 @@
 %{
 WHY ARE THERE NANS IN GE???
 confirm pre spike power rise, seems quite high quite early
+why ers not significant for 0.2 s windows
 check everything
-try 0.2 s windows
 post-spike
+think more about auc measure
+
+fix abs power
+what about ers
 %}
 
 %% Clear
 clear
 
 %% Parameters
+do_cumulative = 0;
 do_plot = 0;
 %rm_rise = 1; 
 met = 'sd';
-windows = [0.2];
+windows = [0.1];
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
 %comp_points = 2;  %3 is default
@@ -71,7 +76,7 @@ end
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
 include_times = include_which_times(metrics,met,pre_spike,nan);
-metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz);
+metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,do_cumulative);
 
 %% Build a classifier to predict spike vs not spike
 %tbl = class_spike(metrics,met);
