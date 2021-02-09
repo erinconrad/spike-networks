@@ -70,6 +70,14 @@ for i = 1:length(listing)
     end
 end
 
+n_windows = count;
+for t = 1:n_windows % loop over time windows
+    for s = 1:2 % loop over spike and not a spike
+        sig_dev(t).is_spike(s).times = round(sig_dev(t).is_spike(s).sig_dev(1).time_window'*1e2)/(1e2); % get times
+    end
+end
+
+
 %% Now combine t statistics across patients to find the times of significant power change
 %{
 These t statistics are from a paired t test comparing the power in the
