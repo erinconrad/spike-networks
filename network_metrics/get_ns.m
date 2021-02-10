@@ -16,6 +16,8 @@ time_text = sprintf('%1.1f/',time_window);
 
 % EEG data folder
 eeg_folder = [results_folder,'eeg_data/'];
+biggest_dev_folder = [results_folder,'biggest_dev/'];
+
 
 % Adj mat folder
 if simple == 1
@@ -68,6 +70,15 @@ for i = 1:length(listing)
     spike = load([eeg_folder,name,not_spike_text,'_eeg.mat']);
     spike = spike.spike;
     
+    % Load manual biggest dev file
+    if not_spike == 0
+        manual_big = load([biggest_dev_folder,name,'_rise.mat']);
+        manual_big = manual_big.early;
+        if length(manual_big.spike) ~= length(spike)
+            error('what');
+        end
+    end
+    
     % get sizes for matrices
     n_f = length(meta.spike(1).adj);
     n_times = size(meta.spike(1).index_windows,1);
@@ -76,6 +87,7 @@ for i = 1:length(listing)
     
     % Initialize
     ns = nan(n_f,n_spikes,n_times);
+    ns_auto = nan(n_f,n_spikes,n_times);
     ns_all = nan(n_f,n_spikes,n_times,n_ch);
     ge = nan(n_f,n_spikes,n_times);
     trans = nan(n_f,n_spikes,n_times);
@@ -89,8 +101,11 @@ for i = 1:length(listing)
         s_count = s_count + 1;
         
         %fprintf('Doing spike %d of %d\n',s_count,n_spikes);
-        biggest_dev = spike(s).biggest_dev;
-        involved(s,:) = spike(s).involved;
+        if not_spike == 0
+            biggest_dev = spike(s).biggest_dev;
+            biggest_dev_manual = manual_big.spike(s).dev_ch;
+            involved(s,:) = spike(s).involved;
+        end
         
         for f = 1:n_f
             adj_all_t= meta.spike(s).adj(f).adj;
@@ -103,9 +118,11 @@ for i = 1:length(listing)
                 % node strength of biggest dev channel
                 ns_temp = strengths_und(adj);  
                 if not_spike == 0
-                    ns(f,s,tt) = ns_temp(biggest_dev);
+                    ns(f,s,tt) = ns_temp(biggest_dev_manual);
+                    ns_auto(f,s,tt) = ns_temp(biggest_dev);
                 else
                     ns(f,s,tt) = mean(ns_temp); % average ns if not spike
+                    ns_auto(f,s,tt) = mean(ns_temp);
                 end
                 ns_all(f,s,tt,:) = ns_temp;
                 
@@ -129,8 +146,11 @@ for i = 1:length(listing)
         else
             metrics.freq(f).name = 'correlation';
         end
-        metrics.freq(f).ns.name = 'node strength';
+        metrics.freq(f).ns.name = 'node strength biggest channel';
         metrics.freq(f).ns.data = squeeze(ns(f,:,:));
+        
+        metrics.freq(f).ns_auto.name = 'node strength auto biggest channel';
+        metrics.freq(f).ns_auto.data = squeeze(ns_auto(f,:,:));
         
         metrics.freq(f).ge.name = 'global efficiency';
         metrics.freq(f).ge.data = squeeze(ge(f,:,:));
