@@ -156,12 +156,12 @@ for i = 1:length(pt_listing)
             if contains(fname,'not') == 1
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).not.data(:,:) = ns_avg;
                 stats(1).time(1).freq(f).ns_big.pt(pt_idx).not.data(:,:) = ns;
-                stats(1).time(1).freq(f).ns_auto.pt(pt_idx).not.data(:,:) = ns;
+                stats(1).time(1).freq(f).ns_auto.pt(pt_idx).not.data(:,:) = ns_auto;
 
             else
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).spike.data(:,:) = ns_avg;
                 stats(1).time(1).freq(f).ns_big.pt(pt_idx).spike.data(:,:) = ns;
-                stats(1).time(1).freq(f).ns_auto.pt(pt_idx).spike.data(:,:) = ns;
+                stats(1).time(1).freq(f).ns_auto.pt(pt_idx).spike.data(:,:) = ns_auto;
             end
 
             stats(1).time(1).freq(f).ns_big.name = 'Node strength (spike channel)';
