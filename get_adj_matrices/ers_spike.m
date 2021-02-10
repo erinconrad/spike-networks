@@ -54,6 +54,8 @@ script_folder = locations.script_folder;
 addpath(genpath(script_folder));
 pt_file = [data_folder,'spike_structures/pt.mat'];
 output_folder = [results_folder,'ers/',time_text,'/'];
+biggest_dev_folder = [results_folder,'biggest_dev/'];
+
 if exist(output_folder,'dir') == 0
     mkdir(output_folder);
 end
@@ -84,6 +86,8 @@ for whichPt = whichPts
     name = pt(whichPt).name;
     fprintf('\nDoing %s\n',name);
     
+    
+    
     spike = load([eeg_folder,sprintf('%s%seeg.mat',name,not_a_spike_text)]);
     spike = spike.spike;
     n_spikes = length(spike);
@@ -91,6 +95,15 @@ for whichPt = whichPts
     nchs = size(values,2);
     fs = spike(1).fs;
     soz = pt(whichPt).newSOZChs;
+    
+    % Load manual biggest dev file
+    if not_a_spike == 0
+        manual_big = load([biggest_dev_folder,name,'_rise.mat']);
+        manual_big = manual_big.early;
+        if length(manual_big.spike) ~= length(spike)
+            error('what');
+        end
+    end
     
     if length(time_window) == 1
         n_windows = round(size(values,1)/fs/time_window); % old way, same total time
@@ -109,13 +122,17 @@ for whichPt = whichPts
     end
     
     % Initialize array of ERS
-    ers_array = nan(n_spikes,n_windows,n_f);
+    ers_array = nan(n_spikes,n_windows,n_f,nchs);
     
     for s = 1:length(spike)
         if isempty(spike(s).time) == 1, continue; end
         values = spike(s).data;
         involved = spike(s).involved;
-        biggest_dev = spike(s).biggest_dev;
+        
+        if not_a_spike == 0
+            biggest_dev = spike(s).biggest_dev;
+            biggest_dev_manual = manual_big.spike(s).dev_ch;
+        end
         
         
         %% Pre-processing
@@ -192,14 +209,15 @@ for whichPt = whichPts
         
         if not_a_spike == 0
             ers.spike(s).biggest_dev = biggest_dev;
-            ers.spike(s).ers = squeeze(ers_array(s,:,:,biggest_dev)); % biggest dev channel
+            ers.spike(s).ers = squeeze(ers_array(s,:,:,biggest_dev_manual)); % biggest dev channel
+            ers.spike(s).ers_auto = squeeze(ers_array(s,:,:,biggest_dev)); 
         else
             ers.spike(s).biggest_dev = nan;
             ers.spike(s).ers = squeeze(mean(ers_array(s,:,:,:),4)); % avg across all channels
+            ers.spike(s).ers_auto = squeeze(mean(ers_array(s,:,:,:),4)); % avg across all channels
         end
         ers.spike(s).index_windows = index_windows;
         
-        ers.spike(s).ers_all = squeeze(ers_array(s,:,:,:));
         
         
         %{
@@ -234,7 +252,6 @@ for whichPt = whichPts
     ers.time_window = time_window;
     ers.index_windows = index_windows;
     ers.n_windows = n_windows;
-    ers.powers = ers_array;
     ers.freq_names = freq_names;
     ers.freq_bands = freq_bands;
     ers.fs = fs;
