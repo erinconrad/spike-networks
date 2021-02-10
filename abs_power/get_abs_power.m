@@ -72,11 +72,7 @@ for i = 1:length(listing)
 
     sig_dev(pt_idx).name = name;
     
-    % Load manual biggest dev file
-    if not_a_spike == 0
-        manual_big = load([biggest_dev_folder,name,'_rise.mat']);
-        manual_big = manual_big.early;
-    end
+    
     
     
     fprintf('\nDoing %s...\n',name);
@@ -88,6 +84,15 @@ for i = 1:length(listing)
     nchs = size(values,2);
     fs = spike(1).fs;
     n_windows = ntimes;
+    
+    % Load manual biggest dev file
+    if not_a_spike == 0
+        manual_big = load([biggest_dev_folder,name,'_rise.mat']);
+        manual_big = manual_big.early;
+        if length(manual_big.spike) ~= spike
+            error('what');
+        end
+    end
     
     dev_windows = zeros(length(spike),n_windows);
     dev_windows_auto = zeros(length(spike),n_windows);
@@ -101,11 +106,13 @@ for i = 1:length(listing)
         % pre process
         data = pre_processing(data,do_car,pre_whiten,do_notch,fs);
         
-        % biggest dev
-        biggest_dev = spike(s).biggest_dev;
-        
-        % manual biggest dev
-        biggest_dev_manual = manual_big.spike(s).dev_ch;
+        if not_a_spike == 0
+            % biggest dev
+            biggest_dev = spike(s).biggest_dev;
+
+            % manual biggest dev
+            biggest_dev_manual = manual_big.spike(s).dev_ch;
+        end
         
         % get baseline (diff for each ch)
         baseline = median(data,1); 
