@@ -89,7 +89,7 @@ for i = 1:length(listing)
     if not_a_spike == 0
         manual_big = load([biggest_dev_folder,name,'_rise.mat']);
         manual_big = manual_big.early;
-        if length(manual_big.spike) ~= spike
+        if length(manual_big.spike) ~= length(spike)
             error('what');
         end
     end
