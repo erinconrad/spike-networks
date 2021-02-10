@@ -4,7 +4,7 @@ do_all_pts = 0;
 jitter_amount = 0.05;
 
 %% Pretty names
-if strcmp(met,'sd')
+if contains(met,'sd')
     pretty_name = 'absolute\newlinepower';
 elseif strcmp(met,'ns_avg')
     pretty_name = 'average\newlinenode strength';
@@ -18,7 +18,7 @@ if do_all_pts
 
     %% Initialize figure
     figure
-    if strcmp(met,'sd')
+    if contains(met,'sd')
         nfreq = 1;
         set(gcf,'position',[1 100 650 270])
         [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.15 0.01]);
@@ -96,7 +96,7 @@ if do_all_pts
 else
     figure
 
-    if strcmp(met,'sd')
+    if contains(met,'sd')
         nfreq = 1;
         set(gcf,'position',[1 100 400 270])
         [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.24 0.01]);

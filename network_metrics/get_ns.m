@@ -164,8 +164,11 @@ for i = 1:length(listing)
         metrics.freq(f).involved = involved;
 
     end
-    
-    metrics.biggest_dev = biggest_dev;
+    if not_spike == 0
+        metrics.biggest_dev = biggest_dev;
+    else
+        metrics.biggest_dev = nan;
+    end
     metrics.index_windows = meta.spike(1).index_windows;
     metrics.fs = meta.fs;
     

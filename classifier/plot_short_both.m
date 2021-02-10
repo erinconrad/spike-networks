@@ -1,6 +1,4 @@
-function plot_short(metrics,met,f,earliest_rise,out_folder,do_plot)
-
-show_all = 0;
+function plot_short_both(metrics,met,f,earliest_rise,out_folder,do_plot)
 
 %% Pretty names
 if contains(met,'sd')
@@ -41,33 +39,39 @@ for tt = 1:ntimes
 end
 
 
-auc_diff = squeeze(data(:,:,1)-data(:,:,2));
-mean_auc_diff = nanmean(auc_diff,2);
-std_diff = nanstd(auc_diff,0,2);
+auc_spike = squeeze(data(:,:,1));
+mean_auc_spike = nanmean(auc_spike,2);
+std_spike = nanstd(auc_spike,0,2);
 
-if show_all == 1
-    errorbar(times(1:end),...
-        mean_auc_diff(1:end)...
-        ,std_diff(1:end),'ko','markersize',15,...
-        'linewidth',2)
-else
-    errorbar(times(1:last_before_rise-1),...
-        mean_auc_diff(1:last_before_rise-1)...
-        ,std_diff(1:last_before_rise-1),'ko','markersize',15,...
-        'linewidth',2)
-end
+auc_not = squeeze(data(:,:,2));
+mean_auc_not = nanmean(auc_not,2);
+std_not = nanstd(auc_not,0,2);
+
+
+errorbar(times(1:last_before_rise-1),...
+    mean_auc_spike(1:last_before_rise-1)...
+    ,std_spike(1:last_before_rise-1),'ro','markersize',15,...
+    'linewidth',2)
+
 hold on
+
+errorbar(times(1:last_before_rise-1),...
+    mean_auc_not(1:last_before_rise-1)...
+    ,std_not(1:last_before_rise-1),'ko','markersize',15,...
+    'linewidth',2)
+
+
 
 %% Formatting
 
 xlabel('Time (s)');
 
 if strcmp(met,'sd')
-    ylabel(sprintf('Pre-IED %s change\nSpike-non spike difference',...
+    ylabel(sprintf('Pre-IED %s change',...
         pretty_name));
 else
     
-    ylabel(sprintf('Pre-IED %s\n%s change\nSpike-non spike difference',...
+    ylabel(sprintf('Pre-IED %s\n%s change',...
         metrics.time.freq(f).name,pretty_name));
 end
 
@@ -106,7 +110,8 @@ end
 
 endh = plot([mean_rise_spikes mean_rise_spikes],get(gca,'ylim'),'k--','linewidth',2);
 
-legend(endh,'Visual rise','fontsize',20,'location','northwest')
+%legend(endh,'Visual rise','fontsize',20,'location','northwest')
+legend('Spike','Not spike','Visual rise','fontsize',20,'location','northwest')
 
 if do_plot
 print(gcf,[out_folder,sprintf('short_%s',met)],'-dpng');

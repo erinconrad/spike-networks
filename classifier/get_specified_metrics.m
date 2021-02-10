@@ -1,4 +1,4 @@
-function [stats,is_spike_soz] = get_specified_metrics(windows,pre_spike,met,return_soz)
+function [stats,is_spike_soz] = get_specified_metrics(windows,pre_spike,met)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -17,6 +17,8 @@ perm_folder = [results_folder,'perm_stats/'];
 ers_folder = [results_folder,'ers/'];
 ns_folder = [results_folder,'metrics/manual/coherence/'];
 sp_diff_folder = [results_folder,'net_diff_stats/coherence/'];
+biggest_dev_folder = [results_folder,'biggest_dev/'];
+
 
 %% Specify metric folders
 time_name = sprintf('%1.1f/',windows);
@@ -28,14 +30,38 @@ elseif strcmp(met,'F')
 elseif strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_big') || ...
                 strcmp(met,'ns_avg') || strcmp(met,'trans')
     main_folder = ns_folder;
-elseif strcmp(met,'sd')
-    main_folder = sig_dev_folder;
+elseif contains(met,'sd')
+    main_folder = ers_folder;
 end
 
 time_folder = [main_folder,time_name];
 
 pt_listing = dir([time_folder,'*.mat']);
 
+
+if contains(met,'sd')
+    
+        
+    for f = 1:3
+
+
+        %times = round((ers.index_windows(:,1)/ers.fs-3)*1e2)/(1e2);
+        for p = 1:length(pre_spike)
+            stats.time.freq(f).(met).pt(p).times = pre_spike(p).windows.cons_windows;
+            %{
+            if strcmp(wpr,'cons')
+                stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).cons_windows;
+            else
+                stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).all_windows;
+            end
+            %}
+            stats.time.freq(f).(met).pt(p).name = pre_spike(p).name;
+            stats.time.freq(f).(met).pt(p).spike.data = pre_spike(p).windows.dev.spike;
+            stats.time.freq(f).(met).pt(p).not.data = pre_spike(p).windows.dev.not;
+        end
+    end
+    
+end
 
 all_names = {};
         % loop through pts
@@ -61,7 +87,13 @@ for i = 1:length(pt_listing)
     spike = load([ers_folder,time_name,sprintf('%s_ers.mat',pt_name)]);
     spike = spike.ers; % ers file
     
-
+    if contains(fname,'not') == 0
+        manual_big = load([biggest_dev_folder,pt_name,'_rise.mat']);
+        manual_big = manual_big.early;
+        if length(manual_big.spike) ~= length(spike.spike)
+            error('what');
+        end
+    end
 
     % Get number of frequencies
     if contains(met,'ers')
@@ -75,15 +107,18 @@ for i = 1:length(pt_listing)
         for f = 1:nfreq
             stats(1).time(1).freq(f).name = sim.name;
         end
-    elseif strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_big') || ...
-                strcmp(met,'ns_avg') || strcmp(met,'trans') 
+    elseif strcmp(met,'ns_inv') || strcmp(met,'ns_auto') || strcmp(met,'ns_big') || ...
+                strcmp(met,'ns_avg')
         nfreq = length(metrics.freq);
         for f = 1:nfreq
             stats(1).time(1).freq(f).name = metrics.freq(f).name;
         end
-    elseif strcmp(met,'sd')
-        nfreq = 1;
-        stats.time.freq.name = sig_dev.name;
+    elseif contains(met,'sd')
+        nfreq = size(ers.freq_bands,1);
+        for f = 1:nfreq
+            stats(1).time(1).freq(f).name = ers.freq_names{f};
+
+        end
     else
 
         nfreq = length(sim);
@@ -94,19 +129,20 @@ for i = 1:length(pt_listing)
     stats(1).time(1).time_window = windows;
     
     %% Get soz channels
-    if return_soz && contains(fname,'not') == 0
+    if contains(fname,'not') == 0
         soz_chs = get_soz_chs(pt_name);
-    elseif return_soz && contains(fname,'not') == 1
+    elseif contains(fname,'not') == 1
     else
         is_spike_soz = [];
     end
 
     for f = 1:nfreq
-        if strcmp(met,'ns_big') || strcmp(met,'ns_avg')
+        if strcmp(met,'ns_big') || strcmp(met,'ns_avg') || strcmp(met,'ns_auto')
 
             sim = metrics;
             ns = sim.freq(f).ns.data;
             ns_all = sim.freq(f).ns_all.data;
+            ns_auto = sim.freq(f).ns_auto.data;
 
             % Avg ns_all across channels
             ns_avg = squeeze(mean(ns_all,3));
@@ -120,10 +156,12 @@ for i = 1:length(pt_listing)
             if contains(fname,'not') == 1
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).not.data(:,:) = ns_avg;
                 stats(1).time(1).freq(f).ns_big.pt(pt_idx).not.data(:,:) = ns;
+                stats(1).time(1).freq(f).ns_auto.pt(pt_idx).not.data(:,:) = ns;
 
             else
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).spike.data(:,:) = ns_avg;
                 stats(1).time(1).freq(f).ns_big.pt(pt_idx).spike.data(:,:) = ns;
+                stats(1).time(1).freq(f).ns_auto.pt(pt_idx).spike.data(:,:) = ns;
             end
 
             stats(1).time(1).freq(f).ns_big.name = 'Node strength (spike channel)';
@@ -148,6 +186,10 @@ for i = 1:length(pt_listing)
                 
                 for s = 1:length(ers.spike)
                     all_ers(f).data(s,:) = ers.spike(s).ers(:,f);
+                end
+            elseif strcmp(met,'ers_auto')
+                for s = 1:length(ers.spike)
+                    all_ers(f).data(s,:) = ers.spike(s).ers_auto(:,f);
                 end
             elseif strcmp(met,'rel_big_dev_ers')
                 for s = 1:length(ers.spike)
@@ -233,11 +275,15 @@ for i = 1:length(pt_listing)
     end
     
     %% Add soz info
-    if return_soz == 1 && contains(fname,'not') == 0
+    if contains(fname,'not') == 0
         %is_soz_pt = zeros(length(ers.spike),1);
         is_soz_pt = zeros(length(spike.spike),1);
         for s = 1:length(spike.spike)
-            biggest_dev = spike.spike(s).biggest_dev;
+            if contains(met,'auto')
+                biggest_dev = spike.spike(s).biggest_dev;
+            else
+                biggest_dev = manual_big.spike(s).dev_ch;
+            end
             if ismember(biggest_dev,soz_chs)
                 is_soz_pt(s) = 1;
             end
@@ -251,6 +297,7 @@ end
     
 
 %% Add spike power
+%{
 for n = 1:length(stats)
     for t = 1:length(stats(n).time)
         
@@ -278,6 +325,7 @@ for n = 1:length(stats)
         end
     end
 end
+%}
 
 
 

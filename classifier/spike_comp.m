@@ -15,9 +15,9 @@ think more about auc measure = why so sig
 clear
 
 %% Parameters
+do_auto = 0;
 do_cumulative = 0;
 do_plot = 0;
-auto_dev = 0;
 %rm_rise = 1; 
 met = 'ers';
 windows = [0.1];
@@ -34,6 +34,10 @@ elseif which_pre_rise == 2
     wpr = 'cons';
 end
 %}
+
+if do_auto
+    met = [met,'_auto'];
+end
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -61,14 +65,10 @@ earliest_rise = compare_two_reviewers(pre_spike);
 sig_dev = get_sd;
 
 % convert this to be similar to pre_spike
-pre_spike = convert_sd(sig_dev,windows,pre_spike,auto_dev);
+pre_spike = convert_sd(sig_dev,windows,pre_spike,met);
 
 %% Get network metrics
-if strcmp(met,'sd')
-    [metrics,is_spike_soz] = get_specified_metrics(windows,pre_spike,'ers',1);
-else
-    [metrics,is_spike_soz] = get_specified_metrics(windows,pre_spike,met,1);
-end
+[metrics,is_spike_soz] = get_specified_metrics(windows,pre_spike,met);
 
 
 %% Remove bad spikes
@@ -83,8 +83,11 @@ metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,
 
 %% Figs
 plot_auc(metrics,met,out_folder,do_plot)
-plot_short(metrics,met,1,earliest_rise,out_folder,do_plot);
-%soz_comparison(metrics,met,out_folder)
+plot_short_both(metrics,met,2,earliest_rise,out_folder,do_plot);
+soz_comparison(metrics,met,out_folder)
+
+
+%plot_short(metrics,met,1,earliest_rise,out_folder,do_plot);
 
 
 

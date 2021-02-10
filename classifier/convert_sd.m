@@ -1,4 +1,4 @@
-function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,auto_dev)
+function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,met)
 
     tcount = 0;
     for t = 1:length(sig_dev)
@@ -19,7 +19,7 @@ function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,auto_dev)
             for sp_id = 1:length(sig_dev(t).is_spike)
                 
               
-                if auto_dev == 1
+                if strcmp(met,'sd_auto')
                     dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_auto;
                 else
                     dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows;
