@@ -39,6 +39,7 @@ end
 % Folders
 eeg_folder = [results_folder,'eeg_data/'];
 sig_dev_folder = [results_folder,'power/manual/',time_text];
+biggest_dev_folder = [results_folder,'biggest_dev/'];
 
 listing = dir([eeg_folder,'*',not_a_spike_text,'_eeg.mat']);
 
@@ -71,6 +72,12 @@ for i = 1:length(listing)
 
     sig_dev(pt_idx).name = name;
     
+    % Load manual biggest dev file
+    if not_a_spike == 0
+        manual_big = load([biggest_dev_folder,name,'_rise.mat']);
+        manual_big = manual_big.early;
+    end
+    
     
     fprintf('\nDoing %s...\n',name);
     
@@ -83,6 +90,7 @@ for i = 1:length(listing)
     n_windows = ntimes;
     
     dev_windows = zeros(length(spike),n_windows);
+    dev_windows_auto = zeros(length(spike),n_windows);
     
     % loop through spikes
     for s = 1:length(spike)
@@ -96,6 +104,9 @@ for i = 1:length(listing)
         % biggest dev
         biggest_dev = spike(s).biggest_dev;
         
+        % manual biggest dev
+        biggest_dev_manual = manual_big.spike(s).dev_ch;
+        
         % get baseline (diff for each ch)
         baseline = median(data,1); 
 
@@ -106,8 +117,10 @@ for i = 1:length(listing)
         % Restrict to biggest dev channel (or average if not a spike)
         if not_a_spike == 1
             dev_avg_ch = mean(dev,2);
+            dev_avg_ch_auto = mean(dev,2);
         else
-            dev_avg_ch = dev(:,biggest_dev);
+            dev_avg_ch = dev(:,biggest_dev_manual);
+            dev_avg_ch_auto = dev(:,biggest_dev);
         end
         %}
         
@@ -130,6 +143,9 @@ for i = 1:length(listing)
         for t = 1:size(index_windows,1)
             dev_windows(s,t) = mean(dev_avg_ch(max(1,round(index_windows(t,1)))...
                 :min(length(dev_avg_ch),round(index_windows(t,2)))));
+            
+            dev_windows_auto(s,t) = mean(dev_avg_ch_auto(max(1,round(index_windows(t,1)))...
+                :min(length(dev_avg_ch_auto),round(index_windows(t,2)))));
         end
         
         if 0
@@ -151,6 +167,7 @@ for i = 1:length(listing)
 
     end
     sig_dev(pt_idx).dev_windows = dev_windows;
+    sig_dev(pt_idx).dev_windows_auto = dev_windows_auto;
     sig_dev(pt_idx).fs = fs;
     sig_dev(pt_idx).time_window = time_window;
     sig_dev(pt_idx).index_windows = index_windows;

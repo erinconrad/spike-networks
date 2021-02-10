@@ -6,9 +6,11 @@ confirm pre spike power rise, seems quite high quite early
 why ers not significant for 0.2 s windows
 check everything
 post-spike
-think more about auc measure
+think more about auc measure = why so sig
 
-consider doing average instead of biggest dev ch
+manually get biggest dev ch  =  need this because by automatically finding
+it and then taking biggest for spike and average for not spike, I am
+biasing myself toward finding bigger earlier changes for spike
 %}
 
 %% Clear
@@ -18,7 +20,7 @@ clear
 do_cumulative = 0;
 do_plot = 0;
 %rm_rise = 1; 
-met = 'ns_avg';
+met = 'ers';
 windows = [0.1];
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
@@ -83,7 +85,7 @@ metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,
 %% Figs
 plot_auc(metrics,met,out_folder,do_plot)
 plot_short(metrics,met,3,earliest_rise,out_folder,do_plot);
-%soz_comparison(metrics,met,out_folder)
+soz_comparison(metrics,met,out_folder)
 
 
 
