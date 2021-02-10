@@ -1,10 +1,7 @@
-function sig_dev = get_sd(alpha,bf,do_avg)
+function sig_dev = get_sd
 
-if do_avg == 1
-    do_avg_text = 'avg_chs/';
-else
-    do_avg_text = '';
-end
+
+do_avg_text = '';
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;

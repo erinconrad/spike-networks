@@ -8,19 +8,18 @@ check everything
 post-spike
 think more about auc measure = why so sig
 
-manually get biggest dev ch  =  need this because by automatically finding
-it and then taking biggest for spike and average for not spike, I am
-biasing myself toward finding bigger earlier changes for spike
+
 %}
 
 %% Clear
 clear
 
 %% Parameters
-do_cumulative = 0;
+do_cumulative = 1;
 do_plot = 0;
+auto_dev = 0;
 %rm_rise = 1; 
-met = 'ers';
+met = 'sd';
 windows = [0.1];
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
@@ -59,10 +58,10 @@ pre_spike = multi_reviewer_pre_spike(windows);
 earliest_rise = compare_two_reviewers(pre_spike);
 
 %% Get signal power deviation
-sig_dev = get_sd(0.05,0,0);
+sig_dev = get_sd;
 
 % convert this to be similar to pre_spike
-pre_spike = convert_sd(sig_dev,windows,pre_spike);
+pre_spike = convert_sd(sig_dev,windows,pre_spike,auto_dev);
 
 %% Get network metrics
 if strcmp(met,'sd')
@@ -85,7 +84,7 @@ metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,
 %% Figs
 plot_auc(metrics,met,out_folder,do_plot)
 plot_short(metrics,met,3,earliest_rise,out_folder,do_plot);
-soz_comparison(metrics,met,out_folder)
+%soz_comparison(metrics,met,out_folder)
 
 
 
