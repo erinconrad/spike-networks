@@ -28,7 +28,7 @@ if contains(met,'ers')
 elseif strcmp(met,'F')
     main_folder =  sp_diff_folder;
 elseif strcmp(met,'ns_inv') || strcmp(met,'ge') || strcmp(met,'ns_big') || ...
-                strcmp(met,'ns_avg') || strcmp(met,'trans')
+                strcmp(met,'ns_avg') || strcmp(met,'ns_auto')
     main_folder = ns_folder;
 elseif contains(met,'sd')
     main_folder = ers_folder;
@@ -108,7 +108,7 @@ for i = 1:length(pt_listing)
             stats(1).time(1).freq(f).name = sim.name;
         end
     elseif strcmp(met,'ns_inv') || strcmp(met,'ns_auto') || strcmp(met,'ns_big') || ...
-                strcmp(met,'ns_avg')
+                strcmp(met,'ns_avg') || strcmp(met,'ge')
         nfreq = length(metrics.freq);
         for f = 1:nfreq
             stats(1).time(1).freq(f).name = metrics.freq(f).name;
@@ -137,12 +137,13 @@ for i = 1:length(pt_listing)
     end
 
     for f = 1:nfreq
-        if strcmp(met,'ns_big') || strcmp(met,'ns_avg') || strcmp(met,'ns_auto')
+        if strcmp(met,'ns_big') || strcmp(met,'ns_avg') || strcmp(met,'ns_auto') || strcmp(met,'ge')
 
             sim = metrics;
             ns = sim.freq(f).ns.data;
             ns_all = sim.freq(f).ns_all.data;
             ns_auto = sim.freq(f).ns_auto.data;
+            ge = sim.freq(f).ge.data;
 
             % Avg ns_all across channels
             ns_avg = squeeze(mean(ns_all,3));
@@ -157,11 +158,13 @@ for i = 1:length(pt_listing)
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).not.data(:,:) = ns_avg;
                 stats(1).time(1).freq(f).ns_big.pt(pt_idx).not.data(:,:) = ns;
                 stats(1).time(1).freq(f).ns_auto.pt(pt_idx).not.data(:,:) = ns_auto;
+                stats(1).time(1).freq(f).ge.pt(pt_idx).not.data(:,:) = ge;
 
             else
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).spike.data(:,:) = ns_avg;
                 stats(1).time(1).freq(f).ns_big.pt(pt_idx).spike.data(:,:) = ns;
                 stats(1).time(1).freq(f).ns_auto.pt(pt_idx).spike.data(:,:) = ns_auto;
+                stats(1).time(1).freq(f).ge.pt(pt_idx).spike.data(:,:) = ge;
             end
 
             stats(1).time(1).freq(f).ns_big.name = 'Node strength (spike channel)';
@@ -170,7 +173,8 @@ for i = 1:length(pt_listing)
 
             stats(1).time(1).freq(f).ns_big.pt(pt_idx).times = times;
             stats(1).time(1).freq(f).ns_avg.pt(pt_idx).times = times;
-            
+            stats(1).time(1).freq(f).ns_auto.pt(pt_idx).times = times;
+            stats(1).time(1).freq(f).ge.pt(pt_idx).times = times;
         end
 
         % Add ERS stuff

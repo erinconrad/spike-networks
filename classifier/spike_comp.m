@@ -6,7 +6,6 @@ confirm pre spike power rise, seems quite high quite early
 why ers not significant for 0.2 s windows
 check everything
 post-spike
-think more about auc measure = why so sig
 
 
 %}
@@ -20,7 +19,7 @@ do_cumulative = 0;
 do_plot = 0;
 %rm_rise = 1; 
 met = 'ns_avg';
-windows = [0.1];
+windows = 0.1;
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
 %comp_points = 2;  %3 is default
@@ -36,7 +35,13 @@ end
 %}
 
 if do_auto
-    met = [met,'_auto'];
+    if strcmp(met,'ns_big')
+        met = 'ns_auto';
+    elseif strcmp(met,'ns_avg')
+        met = 'ns_avg';
+    else
+        met = [met,'_auto'];
+    end
 end
 
 %% Get file locations, load spike times and pt structure
@@ -59,7 +64,7 @@ end
 pre_spike = multi_reviewer_pre_spike(windows);
 
 %% Compare two reviewers
-earliest_rise = compare_two_reviewers(pre_spike);
+[earliest_rise,pt_rise] = compare_two_reviewers(pre_spike);
 
 %% Get signal power deviation
 sig_dev = get_sd;
@@ -72,7 +77,7 @@ pre_spike = convert_sd(sig_dev,windows,pre_spike,met);
 
 
 %% Remove bad spikes
-[metrics,is_spike_soz,pre_spike] = remove_bad_spikes(metrics,is_spike_soz,pre_spike);
+[metrics,is_spike_soz,pre_spike,pt_rise] = remove_bad_spikes(metrics,is_spike_soz,pre_spike,pt_rise);
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
 include_times = include_which_times(metrics,met,pre_spike,nan);
@@ -81,9 +86,12 @@ metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,
 %% Build a classifier to predict spike vs not spike
 %tbl = class_spike(metrics,met);
 
+%% Sanity checks
+% sanity_checks(metrics,met,pt_rise)
+
 %% Figs
 plot_auc(metrics,met,out_folder,do_plot)
-plot_short_both(metrics,met,2,earliest_rise,out_folder,do_plot);
+plot_short_both(metrics,met,3,earliest_rise,out_folder,do_plot,rm_rise);
 soz_comparison(metrics,met,out_folder)
 
 

@@ -1,11 +1,12 @@
-function all = compare_two_reviewers(pre_spike)
+function [all,pt_all] = compare_two_reviewers(pre_spike)
 
 all = [];
+
 
 for p = 1:length(pre_spike)
     both = pre_spike(p).windows.before_rise_both_times;
     all = [all;both];
-
+    pt_all(p).both = both;
 end
 
 if 0
