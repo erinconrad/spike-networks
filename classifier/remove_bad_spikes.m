@@ -76,6 +76,8 @@ for i = 1:length(listing)
                             bad_spikes = bad_spikes(1:size(metrics(n).time(t).freq(f).(met).pt(pt_idx).spike.data,1),:);
                         end
                         metrics(n).time(t).freq(f).(met).pt(pt_idx).spike.data(bad_spikes,:) = [];
+                        metrics(n).time(t).freq(f).(met).pt(pt_idx).first(bad_spikes,:) = [];
+                        metrics(n).time(t).freq(f).(met).pt(pt_idx).other(bad_spikes,:) = [];
                     end
                 end
             end

@@ -3,6 +3,7 @@
 %{
 post-spike
 
+look at uninvolved chs
 
 %}
 
@@ -14,7 +15,7 @@ do_auto = 1;
 do_cumulative = 0;
 do_plot = 0;
 %rm_rise = 1; 
-met = 'ers';
+met = 'sd';
 windows = 0.1;
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default

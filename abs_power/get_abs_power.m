@@ -186,7 +186,7 @@ for i = 1:length(listing)
                 :min(length(dev_first_ch),round(index_windows(t,2)))));
             
                 dev_windows_other(s,t) = mean(mean(dev_other_ch(max(1,round(index_windows(t,1)))...
-                :min(length(dev_other_ch),round(index_windows(t,2))))));
+                :min(length(dev_other_ch),round(index_windows(t,2))),:)));
             
                 
             end

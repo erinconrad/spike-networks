@@ -58,6 +58,8 @@ if contains(met,'sd')
             stats.time.freq(f).(met).pt(p).name = pre_spike(p).name;
             stats.time.freq(f).(met).pt(p).spike.data = pre_spike(p).windows.dev.spike;
             stats.time.freq(f).(met).pt(p).not.data = pre_spike(p).windows.dev.not;
+            stats.time.freq(f).(met).pt(p).first = pre_spike(p).windows.dev.first;
+            stats.time.freq(f).(met).pt(p).other = pre_spike(p).windows.dev.other;
         end
     end
     
@@ -186,10 +188,19 @@ for i = 1:length(pt_listing)
             stats(1).time(1).freq(f).(met).pt(pt_idx).name = ers.name;
             
             all_ers(f).data = zeros(length(ers.spike),size(ers.spike(1).ers,1)); % n spikes x n times
+            all_ers(f).first = nan(length(ers.spike),size(ers.spike(1).ers,1));
+            all_ers(f).other = nan(length(ers.spike),size(ers.spike(1).ers,1));
+            for s = 1:length(ers.spike)
+                if ~isempty(ers.spike(s).ers_first)
+                    all_ers(f).first(s,:) = ers.spike(s).ers_first(:,f);
+                    all_ers(f).other(s,:) = ers.spike(s).ers_others(:,f);
+                end
+            end
             if strcmp(met,'ers')
                 
                 for s = 1:length(ers.spike)
                     all_ers(f).data(s,:) = ers.spike(s).ers(:,f);
+                    
                 end
             elseif strcmp(met,'ers_auto')
                 for s = 1:length(ers.spike)
@@ -226,6 +237,8 @@ for i = 1:length(pt_listing)
                 stats(1).time(1).freq(f).(met).pt(pt_idx).not.data = all_ers(f).data;
             else
                 stats(1).time(1).freq(f).(met).pt(pt_idx).spike.data = all_ers(f).data;
+                stats(1).time(1).freq(f).(met).pt(pt_idx).first = all_ers(f).first;
+                stats(1).time(1).freq(f).(met).pt(pt_idx).other = all_ers(f).other;
             end
         end
 

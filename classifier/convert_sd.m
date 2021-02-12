@@ -27,7 +27,10 @@ function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,met)
                 alt_pre_spike(p).windows(tcount).cons_windows = sig_dev(t).is_spike(1).times;
                 if sp_id == 1
                     alt_pre_spike(p).windows(tcount).dev.spike = dev_all;
-                    
+                    first = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_first;
+                    other = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_other;
+                    alt_pre_spike(p).windows(tcount).dev.first = first;
+                    alt_pre_spike(p).windows(tcount).dev.other = other;
                     
                 else
                     alt_pre_spike(p).windows(tcount).dev.not = dev_all;

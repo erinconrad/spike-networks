@@ -79,7 +79,20 @@ for f = 1:nfreq
                 % Take median
                 median_auc_soz = median(auc_soz);
                 median_auc_not = median(auc_not);
+                
+                
+                % First versus other
+                first = metrics.time.freq(f).(met).pt(p).first;
+                other = metrics.time.freq(f).(met).pt(p).other;
+                first_auc = (first(:,last_non_nan)-first(:,first_non_nan))./abs(first(:,first_non_nan));
+                other_auc = (other(:,last_non_nan)-other(:,first_non_nan))./abs(other(:,first_non_nan));
+                first_median = nanmedian(first_auc);
+                other_median = nanmedian(other_auc);
+                
+                metrics.time.freq(f).(met).auc.first_v_other.data(p,:) = [first_median,other_median];
             end
+            
+            
 
             % Add it to larger struct
             metrics.time.freq(f).(met).auc.data(p,sp_count) = median_auc;
@@ -129,6 +142,12 @@ for f = 1:nfreq
         metrics.time.freq(f).(met).auc.soz.data(:,2));
     metrics.time.freq(f).(met).auc.soz.pval = pval;
     metrics.time.freq(f).(met).auc.soz.tstat = st.tstat;
+    
+    % First vs other
+    [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.first_v_other.data(:,1),...
+        metrics.time.freq(f).(met).auc.first_v_other.data(:,2));
+    metrics.time.freq(f).(met).auc.first_v_other.pval = pval;
+    metrics.time.freq(f).(met).auc.first_v_other.tstat = st.tstat;
 end
 
 end
