@@ -1,6 +1,6 @@
 function plot_auc(metrics,met,out_folder,do_plot)
 
-do_all_pts = 0;
+do_all_pts = 1;
 jitter_amount = 0.05;
 
 %% Pretty names
@@ -25,7 +25,7 @@ if do_all_pts
     elseif strcmp(met,'ns_avg')
         nfreq = length(metrics.time.freq);
         set(gcf,'position',[1 100 1450 270])
-        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.2 0.01]);
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.11 0.01]);
     else
         nfreq = length(metrics.time.freq);
         set(gcf,'position',[1 100 1450 270])

@@ -40,6 +40,8 @@ end
 eeg_folder = [results_folder,'eeg_data/'];
 sig_dev_folder = [results_folder,'power/manual/',time_text];
 biggest_dev_folder = [results_folder,'biggest_dev/'];
+seq_folder = [results_folder,'seq_data/'];
+
 
 listing = dir([eeg_folder,'*',not_a_spike_text,'_eeg.mat']);
 
@@ -94,8 +96,20 @@ for i = 1:length(listing)
         end
     end
     
+    % Load sequence folder
+    if not_a_spike == 0
+        seq = load([seq_folder,name,'_seq.mat']);
+        seq = seq.seq;
+        if length(seq) ~= length(spike)
+            error('what');
+        end
+    end
+    
     dev_windows = zeros(length(spike),n_windows);
     dev_windows_auto = zeros(length(spike),n_windows);
+    
+    dev_windows_first = zeros(length(spike),n_windows);
+    dev_windows_other = zeros(length(spike),n_windows);
     
     % loop through spikes
     for s = 1:length(spike)
@@ -112,6 +126,13 @@ for i = 1:length(listing)
 
             % manual biggest dev
             biggest_dev_manual = manual_big.spike(s).dev_ch;
+            
+            % first channel in seq
+            first_ch = seq(s).first_ch;
+            
+            % other channels in seq
+            other_seq_chs = seq(s).seq(:,1);
+            other_seq_chs(other_seq_chs == first_ch) = [];
         end
         
         % get baseline (diff for each ch)
@@ -128,6 +149,8 @@ for i = 1:length(listing)
         else
             dev_avg_ch = dev(:,biggest_dev_manual);
             dev_avg_ch_auto = dev(:,biggest_dev);
+            dev_first_ch = dev(:,first_ch);
+            dev_other_ch = dev(:,other_seq_chs);
         end
         %}
         
@@ -153,6 +176,17 @@ for i = 1:length(listing)
             
             dev_windows_auto(s,t) = mean(dev_avg_ch_auto(max(1,round(index_windows(t,1)))...
                 :min(length(dev_avg_ch_auto),round(index_windows(t,2)))));
+            
+            if not_a_spike == 0
+                dev_windows_first(s,t) = mean(dev_first_ch(max(1,round(index_windows(t,1)))...
+                :min(length(dev_first_ch),round(index_windows(t,2)))));
+            
+                dev_windows_other(s,t) = mean(dev_other_ch(max(1,round(index_windows(t,1)))...
+                :min(length(dev_other_ch),round(index_windows(t,2)))));
+            
+                
+            end
+            
         end
         
         if 0
@@ -175,6 +209,8 @@ for i = 1:length(listing)
     end
     sig_dev(pt_idx).dev_windows = dev_windows;
     sig_dev(pt_idx).dev_windows_auto = dev_windows_auto;
+    sig_dev(pt_idx).dev_windows_first = dev_windows_first;
+    sig_dev(pt_idx).dev_windows_other = dev_windows_other;
     sig_dev(pt_idx).fs = fs;
     sig_dev(pt_idx).time_window = time_window;
     sig_dev(pt_idx).index_windows = index_windows;

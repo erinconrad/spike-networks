@@ -1,10 +1,6 @@
 %function spike_comp
 
 %{
-WHY ARE THERE NANS IN GE???
-confirm pre spike power rise, seems quite high quite early
-why ers not significant for 0.2 s windows
-check everything
 post-spike
 
 
@@ -14,11 +10,11 @@ post-spike
 clear
 
 %% Parameters
-do_auto = 0;
+do_auto = 1;
 do_cumulative = 0;
 do_plot = 0;
 %rm_rise = 1; 
-met = 'ns_avg';
+met = 'ers';
 windows = 0.1;
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
@@ -91,7 +87,7 @@ metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,
 
 %% Figs
 plot_auc(metrics,met,out_folder,do_plot)
-plot_short_both(metrics,met,3,earliest_rise,out_folder,do_plot,rm_rise);
+plot_short_both(metrics,met,1,earliest_rise,out_folder,do_plot,rm_rise);
 soz_comparison(metrics,met,out_folder)
 
 
