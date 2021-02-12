@@ -232,7 +232,7 @@ for whichPt = whichPts
             
             if ~isempty(seq(s).seq)
                 ers.spike(s).ers_first = squeeze(ers_array(s,:,:,first_ch));
-                ers.spike(s).ers_others = squeeze(ers_array(s,:,:,other_seq_chs));
+                ers.spike(s).ers_others = squeeze(mean(ers_array(s,:,:,other_seq_chs),4));
             else
                 ers.spike(s).ers_first = [];
                 ers.spike(s).ers_others = [];
