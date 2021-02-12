@@ -131,8 +131,11 @@ for i = 1:length(listing)
             first_ch = seq(s).first_ch;
             
             % other channels in seq
-            other_seq_chs = seq(s).seq(:,1);
-            other_seq_chs(other_seq_chs == first_ch) = [];
+            if ~isempty(seq(s).seq)
+                
+                other_seq_chs = seq(s).seq(:,1);
+                other_seq_chs(other_seq_chs == first_ch) = [];
+            end
         end
         
         % get baseline (diff for each ch)
@@ -149,8 +152,10 @@ for i = 1:length(listing)
         else
             dev_avg_ch = dev(:,biggest_dev_manual);
             dev_avg_ch_auto = dev(:,biggest_dev);
-            dev_first_ch = dev(:,first_ch);
-            dev_other_ch = dev(:,other_seq_chs);
+            if ~isempty(seq(s).seq)
+                dev_first_ch = dev(:,first_ch);
+                dev_other_ch = dev(:,other_seq_chs);
+            end
         end
         %}
         
@@ -177,7 +182,8 @@ for i = 1:length(listing)
             dev_windows_auto(s,t) = mean(dev_avg_ch_auto(max(1,round(index_windows(t,1)))...
                 :min(length(dev_avg_ch_auto),round(index_windows(t,2)))));
             
-            if not_a_spike == 0
+            if not_a_spike == 0 && ~isempty(seq(s).seq)
+                
                 dev_windows_first(s,t) = mean(dev_first_ch(max(1,round(index_windows(t,1)))...
                 :min(length(dev_first_ch),round(index_windows(t,2)))));
             
@@ -209,8 +215,13 @@ for i = 1:length(listing)
     end
     sig_dev(pt_idx).dev_windows = dev_windows;
     sig_dev(pt_idx).dev_windows_auto = dev_windows_auto;
-    sig_dev(pt_idx).dev_windows_first = dev_windows_first;
-    sig_dev(pt_idx).dev_windows_other = dev_windows_other;
+    if not_a_spike == 0 && ~isempty(seq(s).seq)
+        sig_dev(pt_idx).dev_windows_first = dev_windows_first;
+        sig_dev(pt_idx).dev_windows_other = dev_windows_other;
+    else
+        sig_dev(pt_idx).dev_windows_first = [];
+        sig_dev(pt_idx).dev_windows_other = [];
+    end
     sig_dev(pt_idx).fs = fs;
     sig_dev(pt_idx).time_window = time_window;
     sig_dev(pt_idx).index_windows = index_windows;
