@@ -108,8 +108,8 @@ for i = 1:length(listing)
     dev_windows = zeros(length(spike),n_windows);
     dev_windows_auto = zeros(length(spike),n_windows);
     
-    dev_windows_first = zeros(length(spike),n_windows);
-    dev_windows_other = zeros(length(spike),n_windows);
+    dev_windows_first = nan(length(spike),n_windows);
+    dev_windows_other = nan(length(spike),n_windows);
     
     % loop through spikes
     for s = 1:length(spike)
