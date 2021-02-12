@@ -127,12 +127,10 @@ for i = 1:length(listing)
             % manual biggest dev
             biggest_dev_manual = manual_big.spike(s).dev_ch;
             
-            % first channel in seq
-            first_ch = seq(s).first_ch;
-            
-            % other channels in seq
+                       
             if ~isempty(seq(s).seq)
-                
+                % first channel in seq
+                first_ch = seq(s).first_ch;
                 other_seq_chs = seq(s).seq(:,1);
                 other_seq_chs(other_seq_chs == first_ch) = [];
             end

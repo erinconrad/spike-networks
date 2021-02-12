@@ -55,6 +55,8 @@ addpath(genpath(script_folder));
 pt_file = [data_folder,'spike_structures/pt.mat'];
 output_folder = [results_folder,'ers/',time_text,'/'];
 biggest_dev_folder = [results_folder,'biggest_dev/'];
+seq_folder = [results_folder,'seq_data/'];
+
 
 if exist(output_folder,'dir') == 0
     mkdir(output_folder);
@@ -105,6 +107,15 @@ for whichPt = whichPts
         end
     end
     
+    % Load sequence folder
+    if not_a_spike == 0
+        seq = load([seq_folder,name,'_seq.mat']);
+        seq = seq.seq;
+        if length(seq) ~= length(spike)
+            error('what');
+        end
+    end
+    
     if length(time_window) == 1
         n_windows = round(size(values,1)/fs/time_window); % old way, same total time
     else
@@ -132,6 +143,13 @@ for whichPt = whichPts
         if not_a_spike == 0
             biggest_dev = spike(s).biggest_dev;
             biggest_dev_manual = manual_big.spike(s).dev_ch;
+            
+            
+            if ~isempty(seq(s).seq)
+                first_ch = seq(s).first_ch;
+                other_seq_chs = seq(s).seq(:,1);
+                other_seq_chs(other_seq_chs == first_ch) = [];
+            end
         end
         
         
@@ -211,10 +229,20 @@ for whichPt = whichPts
             ers.spike(s).biggest_dev = biggest_dev;
             ers.spike(s).ers = squeeze(ers_array(s,:,:,biggest_dev_manual)); % biggest dev channel
             ers.spike(s).ers_auto = squeeze(ers_array(s,:,:,biggest_dev)); 
+            
+            if ~isempty(seq(s).seq)
+                ers.spike(s).ers_first = squeeze(ers_array(s,:,:,first_ch));
+                ers.spike(s).ers_others = squeeze(ers_array(s,:,:,other_seq_chs));
+            else
+                ers.spike(s).ers_first = [];
+                ers.spike(s).ers_others = [];
+            end
         else
             ers.spike(s).biggest_dev = nan;
             ers.spike(s).ers = squeeze(mean(ers_array(s,:,:,:),4)); % avg across all channels
             ers.spike(s).ers_auto = squeeze(mean(ers_array(s,:,:,:),4)); % avg across all channels
+            ers.spike(s).ers_first = [];
+            ers.spike(s).ers_others = [];
         end
         ers.spike(s).index_windows = index_windows;
         
