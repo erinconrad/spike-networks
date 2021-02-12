@@ -185,8 +185,8 @@ for i = 1:length(listing)
                 dev_windows_first(s,t) = mean(dev_first_ch(max(1,round(index_windows(t,1)))...
                 :min(length(dev_first_ch),round(index_windows(t,2)))));
             
-                dev_windows_other(s,t) = mean(dev_other_ch(max(1,round(index_windows(t,1)))...
-                :min(length(dev_other_ch),round(index_windows(t,2)))));
+                dev_windows_other(s,t) = mean(mean(dev_other_ch(max(1,round(index_windows(t,1)))...
+                :min(length(dev_other_ch),round(index_windows(t,2))))));
             
                 
             end
@@ -213,7 +213,7 @@ for i = 1:length(listing)
     end
     sig_dev(pt_idx).dev_windows = dev_windows;
     sig_dev(pt_idx).dev_windows_auto = dev_windows_auto;
-    if not_a_spike == 0 && ~isempty(seq(s).seq)
+    if not_a_spike == 0 
         sig_dev(pt_idx).dev_windows_first = dev_windows_first;
         sig_dev(pt_idx).dev_windows_other = dev_windows_other;
     else
