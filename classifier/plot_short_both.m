@@ -2,7 +2,7 @@ function plot_short_both(metrics,met,f,earliest_rise,out_folder,do_plot,rm_rise)
 
 %% Pretty names
 if contains(met,'sd')
-    pretty_name = 'absolute power';
+    pretty_name = 'power';
     nfreq = 1;
 elseif strcmp(met,'ns_avg')
     pretty_name = 'average node strength';
@@ -61,14 +61,14 @@ if rm_rise
         'linewidth',2)
 else
     
-    errorbar(times,...
+    errorbar(times-0.1,...
         mean_auc_spike...
         ,std_spike,'ro','markersize',15,...
         'linewidth',2)
 
     hold on
 
-    errorbar(times,...
+    errorbar(times+0.1,...
         mean_auc_not...
         ,std_not,'ko','markersize',15,...
         'linewidth',2)
@@ -80,12 +80,12 @@ end
 
 xlabel('Time (s)');
 
-if strcmp(met,'sd')
-    ylabel(sprintf('Pre-IED %s change',...
+if contains(met,'sd')
+    ylabel(sprintf('Pre-IED\nrelative %s change',...
         pretty_name));
 else
     
-    ylabel(sprintf('Pre-IED %s\n%s change',...
+    ylabel(sprintf('Pre-IED relative %s\n%s change',...
         metrics.time.freq(f).name,pretty_name));
 end
 
@@ -125,10 +125,10 @@ end
 endh = plot([mean_rise_spikes mean_rise_spikes],get(gca,'ylim'),'k--','linewidth',2);
 
 %legend(endh,'Visual rise','fontsize',20,'location','northwest')
-legend('Spike','Not spike','Visual rise','fontsize',20,'location','northwest')
+legend('IED','Not IED','Mean visual rise time','fontsize',20,'location','northwest')
 
 if do_plot
-print(gcf,[out_folder,sprintf('short_%s',met)],'-dpng');
+print(gcf,[out_folder,sprintf('short_%s',met)],'-depsc');
 end
     
     

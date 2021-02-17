@@ -15,7 +15,7 @@ do_auto = 1;
 do_cumulative = 0;
 do_plot = 0;
 %rm_rise = 1; 
-met = 'sd';
+met = 'ns_avg';
 windows = 0.1;
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
@@ -87,9 +87,9 @@ metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,
 % sanity_checks(metrics,met,pt_rise)
 
 %% Figs
-plot_auc(metrics,met,out_folder,do_plot)
+plot_auc(metrics,met,out_folder,do_plot);
 plot_short_both(metrics,met,1,earliest_rise,out_folder,do_plot,rm_rise);
-soz_comparison(metrics,met,out_folder)
+%soz_comparison(metrics,met,out_folder)
 
 
 %plot_short(metrics,met,1,earliest_rise,out_folder,do_plot);

@@ -1,11 +1,13 @@
 function plot_auc(metrics,met,out_folder,do_plot)
 
-do_all_pts = 1;
+do_all_pts = 0;
 jitter_amount = 0.05;
 
 %% Pretty names
 if contains(met,'sd')
-    pretty_name = 'absolute\newlinepower';
+    pretty_name = 'power';
+elseif contains(met,'ers')
+    pretty_name = 'frequency-specific power';
 elseif strcmp(met,'ns_avg')
     pretty_name = 'average\newlinenode strength';
 else
@@ -67,7 +69,7 @@ if do_all_pts
 
 
         %% Formatting
-        if f == 2 || strcmp(met,'sd')
+        if f == 2 || contains(met,'sd')
             xlabel('Patient');
         end
         xticklabels([])
@@ -75,9 +77,9 @@ if do_all_pts
             legend('Spike','No spike','fontsize',20,'location','northwest')
         end
         if f == 1
-            ylabel(sprintf('Pre-IED %s change',pretty_name));
+            ylabel(sprintf('Pre-IED relative %s change',pretty_name));
         end
-        if ~strcmp(met,'sd')
+        if ~contains(met,'sd')
             title(sprintf(metrics.time.freq(f).name))
         end
         set(gca,'fontsize',20)
@@ -107,7 +109,7 @@ else
     else
         nfreq = length(metrics.time.freq);
         set(gcf,'position',[1 100 1100 270])
-        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.04], [0.12 0.11], [0.06 0.01]);
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.04], [0.12 0.11], [0.11 0.01]);
     end
     
 
@@ -127,10 +129,10 @@ for f = 1:nfreq
     xticks([1 2])
     xticklabels({'IED','Not IED'})
     if f == 1
-        ylabel(sprintf('Pre-IED %s change',pretty_name),'horizontalalignment','center')
+        ylabel(sprintf('Pre-IED\n%s\nchange',pretty_name),'horizontalalignment','center')
     end
     
-    if ~strcmp(met,'sd')
+    if ~contains(met,'sd')
         title(sprintf(metrics.time.freq(f).name))
     end
     xlim([0.5 2.5])
@@ -148,7 +150,7 @@ end
     
 end
 if do_plot == 1
-print(gcf,[out_folder,sprintf('auc_%s',met)],'-dpng');
+print(gcf,[out_folder,sprintf('auc_%s',met)],'-depsc');
 end
 
 end

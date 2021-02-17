@@ -17,6 +17,8 @@ time_text = sprintf('%1.1f/',time_window);
 % EEG data folder
 eeg_folder = [results_folder,'eeg_data/'];
 biggest_dev_folder = [results_folder,'biggest_dev/'];
+seq_folder = [results_folder,'seq_data/'];
+
 
 
 % Adj mat folder
@@ -79,6 +81,15 @@ for i = 1:length(listing)
         end
     end
     
+    % Load sequence folder
+    if not_spike == 0
+        seq = load([seq_folder,name,'_seq.mat']);
+        seq = seq.seq;
+        if length(seq) ~= length(spike)
+            error('what');
+        end
+    end
+    
     % get sizes for matrices
     n_f = length(meta.spike(1).adj);
     n_times = size(meta.spike(1).index_windows,1);
@@ -89,6 +100,8 @@ for i = 1:length(listing)
     ns = nan(n_f,n_spikes,n_times);
     ns_auto = nan(n_f,n_spikes,n_times);
     ns_all = nan(n_f,n_spikes,n_times,n_ch);
+    ns_first = nan(n_f,n_spikes,n_times);
+    ns_other = nan(n_f,n_spikes,n_times);
     ge = nan(n_f,n_spikes,n_times);
     trans = nan(n_f,n_spikes,n_times);
     involved = nan(n_spikes,n_ch);
@@ -105,6 +118,13 @@ for i = 1:length(listing)
             biggest_dev = spike(s).biggest_dev;
             biggest_dev_manual = manual_big.spike(s).dev_ch;
             involved(s,:) = spike(s).involved;
+            
+            if ~isempty(seq(s).seq)
+                % first channel in seq
+                first_ch = seq(s).first_ch;
+                other_seq_chs = seq(s).seq(:,1);
+                other_seq_chs(other_seq_chs == first_ch) = [];
+            end
         end
         
         for f = 1:n_f
@@ -120,9 +140,12 @@ for i = 1:length(listing)
                 if not_spike == 0
                     ns(f,s,tt) = ns_temp(biggest_dev_manual);
                     ns_auto(f,s,tt) = ns_temp(biggest_dev);
+                    ns_first(f,s,tt) = ns_temp(first_ch);
+                    ns_other(f,s,tt) = mean(ns_temp(other_seq_chs));
                 else
                     ns(f,s,tt) = mean(ns_temp); % average ns if not spike
                     ns_auto(f,s,tt) = mean(ns_temp);
+                    
                 end
                 ns_all(f,s,tt,:) = ns_temp;
                 
@@ -162,6 +185,11 @@ for i = 1:length(listing)
         metrics.freq(f).ns_all.data = squeeze(ns_all(f,:,:,:));
 
         metrics.freq(f).involved = involved;
+        
+        if not_spike == 0
+            metrics.freq(f).ns_first.data = squeeze(ns_first(f,:,:));
+            metrics.freq(f).ns_other.data = squeeze(ns_first(f,:,:));
+        end
 
     end
     if not_spike == 0
