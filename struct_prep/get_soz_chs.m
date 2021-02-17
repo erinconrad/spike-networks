@@ -1,19 +1,15 @@
-function soz_chs = get_soz_chs(name)
+function soz_chs = get_soz_chs(pt,name)
 
-new_method = 1; % should give same result if 1 or 0
+new_method = 1;
 
-%% Get file locations, load spike times and pt structure
-locations = spike_network_files;
-main_folder = locations.main_folder;
-results_folder = [main_folder,'results/'];
-data_folder = [main_folder,'data/'];
-eeg_folder = [main_folder,'results/eeg_data/'];
-script_folder = locations.script_folder;
-addpath(genpath(script_folder));
+%{
+if contains(name,'Study')
+    new_method = 1;
+else
+    new_method = 1; % should give same result if 1 or 0; 2 means to use the new soz channels
+end
+%}
 
-%% load pt file
-pt = load([data_folder,'spike_structures/pt.mat']);
-pt = pt.pt;
 
 %% Find which pt
 for i = 1:length(pt)
@@ -23,7 +19,8 @@ for i = 1:length(pt)
         
 end
 
-if new_method
+%fprintf('\nSOZ channels:\n');
+if new_method == 1
 
     %% Get newsozchs (in old electrode space)
     soz_chs_old = pt(p).newSOZChs;
@@ -34,6 +31,7 @@ if new_method
     for i = 1:length(soz_chs_old)
         ch = soz_chs_old(i);
         % Get old electrode space label
+        %fprintf('%s\n',pt(p).electrodeData.electrodes(ch).name);
         soz_labels_old{i} = pt(p).electrodeData.electrodes(ch).name;
     end
 
@@ -60,7 +58,7 @@ if new_method
 
     soz_chs = soz_chs_new;
 
-else
+elseif new_method == 0
 
 
     % Old approach
@@ -89,7 +87,24 @@ else
         end
        % if found_it == 0, error('what'); end
     end
+    
+elseif new_method == 2
+    out_labels = turn_new_soz_into_struct(name);
 
+    %% Get the new indices of these labels (noting some will have none)
+    soz_chs = nan(length(out_labels),1);
+    for i = 1:length(out_labels)
+
+        % Loop through new labels and find corresponding ch
+        for j = 1:length(pt(p).new_elecs.electrodes)
+            curr_name = pt(p).new_elecs.electrodes(j).name;
+
+            if strcmp(out_labels{i},curr_name)
+                soz_chs(i) = j;
+                break
+            end
+        end
+    end
 
 
 end

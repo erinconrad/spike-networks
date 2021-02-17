@@ -1,4 +1,4 @@
-function [stats,is_spike_soz] = get_specified_metrics(windows,pre_spike,met)
+function [stats,is_spike_soz,is_spike_depth] = get_specified_metrics(windows,pre_spike,met)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -19,6 +19,9 @@ ns_folder = [results_folder,'metrics/manual/coherence/'];
 sp_diff_folder = [results_folder,'net_diff_stats/coherence/'];
 biggest_dev_folder = [results_folder,'biggest_dev/'];
 
+%% load pt file
+pt = load([data_folder,'spike_structures/pt.mat']);
+pt = pt.pt;
 
 %% Specify metric folders
 time_name = sprintf('%1.1f/',windows);
@@ -132,7 +135,7 @@ for i = 1:length(pt_listing)
     
     %% Get soz channels
     if contains(fname,'not') == 0
-        soz_chs = get_soz_chs(pt_name);
+        soz_chs = get_soz_chs(pt,pt_name);
     elseif contains(fname,'not') == 1
     else
         is_spike_soz = [];
@@ -146,6 +149,7 @@ for i = 1:length(pt_listing)
             ns_all = sim.freq(f).ns_all.data;
             ns_auto = sim.freq(f).ns_auto.data;
             ge = sim.freq(f).ge.data;
+            
 
             % Avg ns_all across channels
             ns_avg = squeeze(mean(ns_all,3));
@@ -163,10 +167,25 @@ for i = 1:length(pt_listing)
                 stats(1).time(1).freq(f).ge.pt(pt_idx).not.data(:,:) = ge;
 
             else
+                ns_first = sim.freq(f).ns_first.data;
+                ns_other = sim.freq(f).ns_other.data;
+                
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).spike.data(:,:) = ns_avg;
                 stats(1).time(1).freq(f).ns_big.pt(pt_idx).spike.data(:,:) = ns;
                 stats(1).time(1).freq(f).ns_auto.pt(pt_idx).spike.data(:,:) = ns_auto;
                 stats(1).time(1).freq(f).ge.pt(pt_idx).spike.data(:,:) = ge;
+                
+                stats(1).time(1).freq(f).ns_avg.pt(pt_idx).first = ns_first;
+                stats(1).time(1).freq(f).ns_avg.pt(pt_idx).other = ns_other;
+                
+                stats(1).time(1).freq(f).ns_big.pt(pt_idx).first = ns_first;
+                stats(1).time(1).freq(f).ns_big.pt(pt_idx).other = ns_other;
+                
+                stats(1).time(1).freq(f).ns_auto.pt(pt_idx).first = ns_first;
+                stats(1).time(1).freq(f).ns_auto.pt(pt_idx).other = ns_other;
+                
+                stats(1).time(1).freq(f).ge.pt(pt_idx).first = ns_first;
+                stats(1).time(1).freq(f).ge.pt(pt_idx).other = ns_other;
             end
 
             stats(1).time(1).freq(f).ns_big.name = 'Node strength (spike channel)';
@@ -295,6 +314,7 @@ for i = 1:length(pt_listing)
     if contains(fname,'not') == 0
         %is_soz_pt = zeros(length(ers.spike),1);
         is_soz_pt = zeros(length(spike.spike),1);
+        is_depth = zeros(length(spike.spike),1);
         for s = 1:length(spike.spike)
             if contains(met,'auto')
                 biggest_dev = spike.spike(s).biggest_dev;
@@ -304,8 +324,11 @@ for i = 1:length(pt_listing)
             if ismember(biggest_dev,soz_chs)
                 is_soz_pt(s) = 1;
             end
+            
+            is_depth(s) = is_it_depth(pt,biggest_dev,pt_name);
         end
         is_spike_soz(pt_idx).is_soz = is_soz_pt;
+        is_spike_depth(pt_idx).is_depth = is_depth;
     end
 
 

@@ -5,6 +5,7 @@ post-spike
 
 look at uninvolved chs
 
+how many pts
 %}
 
 %% Clear
@@ -15,7 +16,7 @@ do_auto = 1;
 do_cumulative = 0;
 do_plot = 0;
 %rm_rise = 1; 
-met = 'ns_avg';
+met = 'ns_big';
 windows = 0.1;
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
@@ -70,15 +71,17 @@ sig_dev = get_sd;
 pre_spike = convert_sd(sig_dev,windows,pre_spike,met);
 
 %% Get network metrics
-[metrics,is_spike_soz] = get_specified_metrics(windows,pre_spike,met);
+[metrics,is_spike_soz,is_spike_depth] = get_specified_metrics(windows,pre_spike,met);
 
 
 %% Remove bad spikes
-[metrics,is_spike_soz,pre_spike,pt_rise] = remove_bad_spikes(metrics,is_spike_soz,pre_spike,pt_rise);
+[metrics,is_spike_soz,pre_spike,pt_rise,is_spike_depth] = ...
+    remove_bad_spikes(metrics,is_spike_soz,pre_spike,pt_rise,is_spike_depth);
 
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
 include_times = include_which_times(metrics,met,pre_spike,nan);
-metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,do_cumulative);
+metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,...
+    do_cumulative,is_spike_depth);
 
 %% Build a classifier to predict spike vs not spike
 %tbl = class_spike(metrics,met);
@@ -90,7 +93,7 @@ metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,
 plot_auc(metrics,met,out_folder,do_plot);
 plot_short_both(metrics,met,1,earliest_rise,out_folder,do_plot,rm_rise);
 %soz_comparison(metrics,met,out_folder)
-
+%count_sig_pts(metrics,met)
 
 %plot_short(metrics,met,1,earliest_rise,out_folder,do_plot);
 

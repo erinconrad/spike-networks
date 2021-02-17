@@ -1,4 +1,4 @@
-function [metrics,is_spike_soz,pre_spike,pt_rise] = remove_bad_spikes(metrics,is_spike_soz,pre_spike,pt_rise)
+function [metrics,is_spike_soz,pre_spike,pt_rise,is_spike_depth] = remove_bad_spikes(metrics,is_spike_soz,pre_spike,pt_rise,is_spike_depth)
 
 old_metrics = metrics;
 
@@ -93,6 +93,10 @@ for i = 1:length(listing)
     if ~contains(filename,'not')
         pt_rise(pt_idx).both(bad_spikes,:) = [];
     end
+    
+    if ~contains(filename,'not')
+        is_spike_depth(pt_idx).is_depth(bad_spikes) = [];
+        
     
 end
 

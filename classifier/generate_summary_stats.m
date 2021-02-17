@@ -1,4 +1,5 @@
-function metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,do_cumulative)
+function metrics = generate_summary_stats(metrics,met,include_times,rm_rise,...
+    is_spike_soz,do_cumulative,is_spike_depth)
 
 nfreq = length(metrics.time.freq);
 
@@ -8,6 +9,8 @@ for f = 1:nfreq
     % Prep array
     metrics.time.freq(f).(met).auc.data = zeros(...
         length(metrics.time.freq(f).(met).pt),2);  
+    metrics.time.freq(f).(met).auc.individual_ranksum_p = zeros(...
+        length(metrics.time.freq(f).(met).pt),1);
     metrics.time.freq(f).(met).auc.info = {'spike','not'};
     metrics.time.freq(f).(met).median_data.data = zeros(...
         length(metrics.time.freq(f).(met).pt),...
@@ -69,6 +72,8 @@ for f = 1:nfreq
             median_rel_data = nanmedian(data,1);
             iqr_auc = [prctile(auc,25),prctile(auc,75)];
             
+            metrics.time.freq(f).(met).pt(p).(sp{1}).all_auc = auc;
+            
             % SOZ vs non soz
             if strcmp(sp,'spike') % only makes sense to do it for the spikes
                 
@@ -90,6 +95,13 @@ for f = 1:nfreq
                 other_median = nanmedian(other_auc);
                 
                 metrics.time.freq(f).(met).auc.first_v_other.data(p,:) = [first_median,other_median];
+                
+                % Depth
+                auc_depth = auc(logical(is_spike_depth(p).is_depth));
+                auc_not_depth = auc(~logical(is_spike_depth(p).is_depth));
+                
+                median_auc_depth = median(auc_depth);
+                median_auc_not_depth = median(auc_not_depth);
             end
             
             
@@ -100,7 +112,8 @@ for f = 1:nfreq
             metrics.time.freq(f).(met).auc.iqr(p,sp_count,1:2) = iqr_auc;
             
             metrics.time.freq(f).(met).auc.soz.data(p,:) = [median_auc_soz,median_auc_not];
-
+            metrics.time.freq(f).(met).auc.depth.data(p,:) = [median_auc_depth,median_auc_not_depth];
+            
             % Pt specific
             metrics.time.freq(f).(met).pt(p).(sp{1}).auc = auc;
             metrics.time.freq(f).(met).pt(p).(sp{1}).temp_data = data;
@@ -118,7 +131,23 @@ for f = 1:nfreq
 
         end
             
+        % Do a two-sample test on the within-patient auc
+        sp = metrics.time.freq(f).(met).pt(p).spike.auc;
+        not = metrics.time.freq(f).(met).pt(p).not.auc;
         
+        if 0
+            plot(1+randn(length(sp),1)*0.05,sp,'o')
+            hold on
+            plot(2+randn(length(sp),1)*0.05,not,'o') 
+        end
+        
+        % t-test
+        %[~,pval,~,st] = ttest2(sp,not);
+        
+        % ranksum
+        p_alt = ranksum(sp,not);
+        
+        metrics.time.freq(f).(met).auc.individual_ranksum_p(p) = p_alt; 
     end
     % Do paired ttest on auc
     
@@ -142,6 +171,12 @@ for f = 1:nfreq
         metrics.time.freq(f).(met).auc.soz.data(:,2));
     metrics.time.freq(f).(met).auc.soz.pval = pval;
     metrics.time.freq(f).(met).auc.soz.tstat = st.tstat;
+    
+    % Depth
+    [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.depth.data(:,1),...
+        metrics.time.freq(f).(met).auc.depth.data(:,2));
+    metrics.time.freq(f).(met).auc.depth.pval = pval;
+    metrics.time.freq(f).(met).auc.depth.tstat = st.tstat;
     
     % First vs other
     [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.first_v_other.data(:,1),...

@@ -190,7 +190,7 @@ for i = 1:length(listing)
         
         if not_spike == 0
             metrics.freq(f).ns_first.data = squeeze(ns_first(f,:,:));
-            metrics.freq(f).ns_other.data = squeeze(ns_first(f,:,:));
+            metrics.freq(f).ns_other.data = squeeze(ns_other(f,:,:));
         end
 
     end

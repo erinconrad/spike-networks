@@ -136,7 +136,7 @@ for i = 1:length(listing)
             error('what');
         end
         
-        if 0
+        if 1
         data = spike(s).data;
         data = pre_processing(data,do_car,pre_whiten,do_notch,fs);
         figure
