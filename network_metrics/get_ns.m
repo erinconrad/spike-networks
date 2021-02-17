@@ -140,8 +140,10 @@ for i = 1:length(listing)
                 if not_spike == 0
                     ns(f,s,tt) = ns_temp(biggest_dev_manual);
                     ns_auto(f,s,tt) = ns_temp(biggest_dev);
-                    ns_first(f,s,tt) = ns_temp(first_ch);
-                    ns_other(f,s,tt) = mean(ns_temp(other_seq_chs));
+                    if ~isempty(seq(s).seq)
+                        ns_first(f,s,tt) = ns_temp(first_ch);
+                        ns_other(f,s,tt) = mean(ns_temp(other_seq_chs));
+                    end
                 else
                     ns(f,s,tt) = mean(ns_temp); % average ns if not spike
                     ns_auto(f,s,tt) = mean(ns_temp);
