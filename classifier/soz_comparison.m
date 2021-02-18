@@ -54,7 +54,7 @@ for f = 1:nfreq
     
 end
 
-print(gcf,[out_folder,sprintf('soz_%s',met)],'-dpng')
+%print(gcf,[out_folder,sprintf('soz_%s',met)],'-dpng')
 
 end
 

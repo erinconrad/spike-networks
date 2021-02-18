@@ -5,11 +5,13 @@ jitter_amount = 0.05;
 
 %% Pretty names
 if contains(met,'sd')
-    pretty_name = 'power';
+    pretty_name = 'Pre-IED relative power change';
 elseif contains(met,'ers')
-    pretty_name = 'frequency-specific power';
+    pretty_name = 'Pre-IED relative frequency-specific power change';
 elseif strcmp(met,'ns_avg')
-    pretty_name = 'average\newlinenode strength';
+    pretty_name = {'Pre-IED relative','node strength change','(electrode average)'};
+elseif strcmp(met,'ns_auto')
+    pretty_name = {'Pre-IED relative','node strength change','(peak IED electrode)'};
 else
     pretty_name = met;
 end
@@ -23,15 +25,15 @@ if do_all_pts
     if contains(met,'sd')
         nfreq = 1;
         set(gcf,'position',[1 100 650 270])
-        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.15 0.01]);
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.06], [0.12 0.11], [0.15 0.01]);
     elseif strcmp(met,'ns_avg')
         nfreq = length(metrics.time.freq);
         set(gcf,'position',[1 100 1450 270])
-        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.11 0.01]);
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.06], [0.12 0.11], [0.11 0.01]);
     else
         nfreq = length(metrics.time.freq);
         set(gcf,'position',[1 100 1450 270])
-        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.11 0.01]);
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.06], [0.12 0.11], [0.11 0.01]);
     end
 
 
@@ -77,7 +79,7 @@ if do_all_pts
             legend('Spike','No spike','fontsize',20,'location','northwest')
         end
         if f == 1
-            ylabel(sprintf('Pre-IED relative %s change',pretty_name));
+            ylabel(pretty_name);
         end
         if ~contains(met,'sd')
             title(sprintf(metrics.time.freq(f).name))
@@ -102,14 +104,14 @@ else
         nfreq = 1;
         set(gcf,'position',[1 100 400 270])
         [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.24 0.01]);
-    elseif strcmp(met,'ns_avg')
+    elseif contains(met,'ns')
         nfreq = length(metrics.time.freq);
         set(gcf,'position',[1 100 1100 270])
-        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.04], [0.12 0.11], [0.11 0.01]);
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.12 0.01]);
     else
         nfreq = length(metrics.time.freq);
         set(gcf,'position',[1 100 1100 270])
-        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.04], [0.12 0.11], [0.11 0.01]);
+        [ha, pos] = tight_subplot(1, nfreq, [0.10 0.05], [0.12 0.11], [0.11 0.01]);
     end
     
 
@@ -129,7 +131,7 @@ for f = 1:nfreq
     xticks([1 2])
     xticklabels({'IED','Not IED'})
     if f == 1
-        ylabel(sprintf('Pre-IED\n%s\nchange',pretty_name),'horizontalalignment','center')
+        ylabel(pretty_name)
     end
     
     if ~contains(met,'sd')
