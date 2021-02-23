@@ -18,6 +18,8 @@ ers_folder = [results_folder,'ers/'];
 ns_folder = [results_folder,'metrics/manual/coherence/'];
 sp_diff_folder = [results_folder,'net_diff_stats/coherence/'];
 biggest_dev_folder = [results_folder,'biggest_dev/'];
+seq_folder = [results_folder,'seq_data/'];
+
 
 %% load pt file
 pt = load([data_folder,'spike_structures/pt.mat']);
@@ -89,13 +91,22 @@ for i = 1:length(pt_listing)
     load([time_folder,fname]); % this will produce a structure of different names depending on metric
     
     % Load spike file
+    %{
     spike = load([ers_folder,time_name,sprintf('%s_ers.mat',pt_name)]);
     spike = spike.ers; % ers file
+    %}
+    spike = load([eeg_folder,pt_name,'_eeg.mat']);
     
     if contains(fname,'not') == 0
         manual_big = load([biggest_dev_folder,pt_name,'_rise.mat']);
         manual_big = manual_big.early;
         if length(manual_big.spike) ~= length(spike.spike)
+            error('what');
+        end
+        
+        seq = load([seq_folder,pt_name,'_seq.mat']);
+        seq = seq.seq;
+        if length(seq) ~= length(spike.spike)
             error('what');
         end
     end
@@ -316,14 +327,34 @@ for i = 1:length(pt_listing)
         is_soz_pt = zeros(length(spike.spike),1);
         is_depth = zeros(length(spike.spike),1);
         for s = 1:length(spike.spike)
+            %
             if contains(met,'auto')
                 biggest_dev = spike.spike(s).biggest_dev;
             else
                 biggest_dev = manual_big.spike(s).dev_ch;
             end
-            if ismember(biggest_dev,soz_chs)
-                is_soz_pt(s) = 1;
+
+            involved = find(spike.spike(s).involved);
+ 
+            %{
+            if isempty(seq(s).seq)
+                is_soz_pt(s) = nan;
+            else
+                if ~isempty(intersect(seq(s).seq(:,1),soz_chs))
+                    is_soz_pt(s) = 1;
+                else
+                    is_soz_pt(s) = 0;
+                end
             end
+            %}
+            
+            %
+            if ~isempty(intersect(involved,soz_chs))
+                is_soz_pt(s) = 1;
+            else
+                is_soz_pt(s) = 0;
+            end
+            %}
             
             is_depth(s) = is_it_depth(pt,biggest_dev,pt_name);
         end

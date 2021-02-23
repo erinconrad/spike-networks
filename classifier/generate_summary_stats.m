@@ -9,6 +9,8 @@ for f = 1:nfreq
     % Prep array
     metrics.time.freq(f).(met).auc.data = zeros(...
         length(metrics.time.freq(f).(met).pt),2);  
+    metrics.time.freq(f).(met).first_last = zeros(...
+        length(metrics.time.freq(f).(met).pt),1);
     metrics.time.freq(f).(met).auc.individual_ranksum_p = zeros(...
         length(metrics.time.freq(f).(met).pt),1);
     metrics.time.freq(f).(met).auc.info = {'spike','not'};
@@ -55,7 +57,9 @@ for f = 1:nfreq
             last_non_nan = non_nan(end);
             first_column = data(:,first_non_nan);
             
-
+            
+            metrics.time.freq(f).(met).pt(p).(sp{1}).all_first_last = [data(:,first_non_nan),data(:,last_non_nan)];
+            
             % Change all data to be relative to first one
             data = (data-first_column)./abs(first_column);
             last_column = data(:,last_non_nan);
@@ -78,12 +82,18 @@ for f = 1:nfreq
             if strcmp(sp,'spike') % only makes sense to do it for the spikes
                 
                 % Get auc for spikes in soz
-                auc_soz = auc(logical(is_spike_soz(p).is_soz));
-                auc_not = auc(~logical(is_spike_soz(p).is_soz)); % for spikes not in soz
+                auc_soz = auc(logical(is_spike_soz(p).is_soz==1));
+                auc_not = auc(logical(is_spike_soz(p).is_soz==0)); % for spikes not in soz
                 
                 % Take median
                 median_auc_soz = median(auc_soz);
                 median_auc_not = median(auc_not);
+                
+                if 0
+                    plot(1+randn(length(auc_soz),1)*0.05,auc_soz,'o')
+                    hold on
+                    plot(2+randn(length(auc_not),1)*0.05,auc_not,'o') 
+                end
                 
                 
                 % First versus other
@@ -142,12 +152,26 @@ for f = 1:nfreq
         end
         
         % t-test
-        %[~,pval,~,st] = ttest2(sp,not);
+        %[~,p_alt,~,st] = ttest2(sp,not);
         
         % ranksum
         p_alt = ranksum(sp,not);
         
         metrics.time.freq(f).(met).auc.individual_ranksum_p(p) = p_alt; 
+        
+        % Compare first and last for spikes
+        first_and_last = metrics.time.freq(f).(met).pt(p).spike.all_first_last;
+        
+        if 0
+            plot(1+randn(length(first_and_last),1)*0.05,first_and_last(:,1),'o')
+            hold on
+            plot(2+randn(length(first_and_last),1)*0.05,first_and_last(:,2),'o') 
+            pause
+            close(gcf)
+        end
+        
+        p_alt = signrank(first_and_last(:,1),first_and_last(:,2));
+        metrics.time.freq(f).(met).first_last(p) = p_alt;
     end
     % Do paired ttest on auc
     

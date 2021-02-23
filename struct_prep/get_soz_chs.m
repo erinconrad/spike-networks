@@ -6,7 +6,7 @@ new_method = 1;
 if contains(name,'Study')
     new_method = 1;
 else
-    new_method = 1; % should give same result if 1 or 0; 2 means to use the new soz channels
+    new_method = 2; % should give same result if 1 or 0; 2 means to use the new soz channels
 end
 %}
 

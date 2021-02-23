@@ -4,6 +4,8 @@
 post-spike
 
 look at uninvolved chs
+decide whether to use criteria for any involved being in soz or just max
+dev
 
 how many pts
 %}
@@ -14,9 +16,9 @@ clear
 %% Parameters
 do_auto = 1;
 do_cumulative = 0;
-do_plot = 1;
+do_plot = 0;
 %rm_rise = 1; 
-met = 'ns_avg';
+%met = 'sd';
 windows = 0.1;
 rm_rise = 1;
 %which_pre_rise = 0; % 2 is default
@@ -31,16 +33,6 @@ elseif which_pre_rise == 2
     wpr = 'cons';
 end
 %}
-
-if do_auto
-    if strcmp(met,'ns_big')
-        met = 'ns_auto';
-    elseif strcmp(met,'ns_avg')
-        met = 'ns_avg';
-    else
-        met = [met,'_auto'];
-    end
-end
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -58,11 +50,26 @@ if exist(out_folder,'dir') == 0
 end
 
 
+for met_all = {'sd','ers'}
+met = met_all{1};
+if do_auto
+    if strcmp(met,'ns_big')
+        met = 'ns_auto';
+    elseif strcmp(met,'ns_avg')
+        met = 'ns_avg';
+    else
+        met = [met,'_auto'];
+    end
+end
+
+
+
 %% Find windows for each spike in which no early spike rise
 pre_spike = multi_reviewer_pre_spike(windows);
 
 %% Compare two reviewers
 [earliest_rise,pt_rise] = compare_two_reviewers(pre_spike);
+orig_pt_rise = pt_rise;
 
 %% Get signal power deviation
 sig_dev = get_sd;
@@ -89,9 +96,18 @@ metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,
 %% Sanity checks
 % sanity_checks(metrics,met,pt_rise)
 
+if strcmp(met,'sd_auto')
+    metrics_sd = metrics;
+elseif strcmp(met,'ers_auto')
+    metrics_ers = metrics;
+end
+
+end
 %% Figs
+%methods_fig_2(metrics_sd,metrics_ers,earliest_rise,orig_pt_rise)
+
 %plot_auc(metrics,met,out_folder,do_plot);
-%plot_short_both(metrics,met,1,earliest_rise,out_folder,do_plot,rm_rise);
+%plot_short_both(metrics,met,2,earliest_rise,out_folder,do_plot,rm_rise);
 %soz_comparison(metrics,met,out_folder)
 %count_sig_pts(metrics,met)
 
