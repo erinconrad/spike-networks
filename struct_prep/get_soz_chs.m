@@ -1,8 +1,8 @@
 function soz_chs = get_soz_chs(pt,name)
 
-new_method = 1;
+%new_method = 1;
 
-%{
+
 if contains(name,'Study')
     new_method = 1;
 else

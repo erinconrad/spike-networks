@@ -50,7 +50,7 @@ if exist(out_folder,'dir') == 0
 end
 
 
-for met_all = {'sd','ers'}
+for met_all = {'sd'}%{'sd','ers','ns_big','ns_avg'}
 met = met_all{1};
 if do_auto
     if strcmp(met,'ns_big')
@@ -100,6 +100,10 @@ if strcmp(met,'sd_auto')
     metrics_sd = metrics;
 elseif strcmp(met,'ers_auto')
     metrics_ers = metrics;
+elseif strcmp(met,'ns_auto')
+    metrics_ns_big = metrics;
+elseif strcmp(met,'ns_avg')
+    metrics_ns_avg = metrics;
 end
 
 end

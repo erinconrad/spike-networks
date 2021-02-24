@@ -6,6 +6,6 @@ function text_out = get_asterisks(p,alpha_adjust)
     elseif p < 0.05/alpha_adjust
         text_out = sprintf('*');
     else
-        text_out = '';
+        text_out = 'ns';
     end
 end

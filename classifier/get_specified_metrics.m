@@ -348,7 +348,12 @@ for i = 1:length(pt_listing)
             end
             %}
             
-            %
+            if ismember(biggest_dev,soz_chs)
+                is_soz_pt(s) = 1;
+            else
+                is_soz_pt(s) = 0;
+            end
+            %{
             if ~isempty(intersect(involved,soz_chs))
                 is_soz_pt(s) = 1;
             else

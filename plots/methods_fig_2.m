@@ -292,7 +292,7 @@ for f =1:3
     yl = get(gca,'ylim');
     p_xloc = 1.5;
     p_yloc = yl(1) + 0.92*(yl(2)-yl(1));
-    text(p_xloc,p_yloc,p_pretty,'HorizontalAlignment','Center','fontsize',30)
+    text(p_xloc,p_yloc,ps{f},'HorizontalAlignment','Center','fontsize',30)
     line_yloc =  yl(1) + 0.90*(yl(2)-yl(1));
     plot([1 2],[line_yloc line_yloc],'k')
     
