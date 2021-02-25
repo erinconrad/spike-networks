@@ -1,4 +1,4 @@
-function soz_info
+function [percs,all] = soz_info
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -104,4 +104,6 @@ for i = 1:length(pt_listing)
     all_lead_in_soz = [all_lead_in_soz;main_lead_in_soz];
 end
 
+percs = [perc_lead_in_soz,perc_big_in_soz];
+all = [all_lead_in_soz,all_big_in_soz];
 end

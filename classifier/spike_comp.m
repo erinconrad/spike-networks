@@ -50,7 +50,7 @@ if exist(out_folder,'dir') == 0
 end
 
 
-for met_all = {'sd'}%{'sd','ers','ns_big','ns_avg'}
+for met_all = {'sd','ers','ns_big','ns_avg'}
 met = met_all{1};
 if do_auto
     if strcmp(met,'ns_big')
@@ -109,6 +109,8 @@ end
 end
 %% Figs
 %methods_fig_2(metrics_sd,metrics_ers,earliest_rise,orig_pt_rise)
+%methods_fig_3(metrics_ns_big,metrics_ns_avg,earliest_rise,orig_pt_rise)
+%methods_fig_4(metrics_sd)
 
 %plot_auc(metrics,met,out_folder,do_plot);
 %plot_short_both(metrics,met,2,earliest_rise,out_folder,do_plot,rm_rise);
