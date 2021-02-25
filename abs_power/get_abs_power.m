@@ -1,5 +1,6 @@
 function get_abs_power(time_window,not_a_spike)
 
+%% Description
 %{
 This function get the absolute signal power in different time windows
 %}
@@ -51,12 +52,14 @@ end
 
 all_names = {};
 
+% Loop through patients
 for i = 1:length(listing)
     
     filename = listing(i).name;
     name_sp = split(filename,'_');
     name = name_sp{1};
     
+    % Do either just spikes or just not spikes
     if not_a_spike == 1
         if contains(filename,'not') == 0, continue; end
     else
@@ -114,6 +117,7 @@ for i = 1:length(listing)
     % loop through spikes
     for s = 1:length(spike)
         
+        %% Initial processing
         % get eeg data
         data = spike(s).data; % ntimes x nch
         
@@ -121,21 +125,26 @@ for i = 1:length(listing)
         data = pre_processing(data,do_car,pre_whiten,do_notch,fs);
         
         if not_a_spike == 0
-            % biggest dev
+            
+            % biggest dev (automatic measurement)
             biggest_dev = spike(s).biggest_dev;
 
             % manual biggest dev
             biggest_dev_manual = manual_big.spike(s).dev_ch;
             
                        
+            % Get sequence info
             if ~isempty(seq(s).seq)
                 % first channel in seq
                 first_ch = seq(s).first_ch;
+                
+                % Other channels in sequence (remove first channel)
                 other_seq_chs = seq(s).seq(:,1);
                 other_seq_chs(other_seq_chs == first_ch) = [];
             end
         end
         
+        %% Get power
         % get baseline (diff for each ch)
         baseline = median(data,1); 
 
@@ -143,13 +152,17 @@ for i = 1:length(listing)
         % get power
         dev = (abs((data - repmat(baseline,size(data,1),1))).^2); 
         
-        % Restrict to biggest dev channel (or average if not a spike)
+        % Restrict to biggest dev channel (or average across all channels
+        % if not a spike)
         if not_a_spike == 1
             dev_avg_ch = mean(dev,2);
             dev_avg_ch_auto = mean(dev,2);
         else
             dev_avg_ch = dev(:,biggest_dev_manual);
             dev_avg_ch_auto = dev(:,biggest_dev);
+            
+            % For spikes that have a sequence, take the power in the
+            % first channel and that in the other channels
             if ~isempty(seq(s).seq)
                 dev_first_ch = dev(:,first_ch);
                 dev_other_ch = dev(:,other_seq_chs);
@@ -157,6 +170,7 @@ for i = 1:length(listing)
         end
         %}
         
+        %% Get time windows
         % The peak should be the very center of each file
         peak = round(size(data,1)/2); % size of data should be same as size of values
         
@@ -172,6 +186,8 @@ for i = 1:length(listing)
         index_windows(1,1) = max(index_windows(1,1),1);
         index_windows(end,2) = min(index_windows(end,2),size(values,1));
         
+        
+        %% Get the average power in the time window
         % now, get the average power in each time window for that spike
         for t = 1:size(index_windows,1)
             dev_windows(s,t) = mean(dev_avg_ch(max(1,round(index_windows(t,1)))...
@@ -180,11 +196,13 @@ for i = 1:length(listing)
             dev_windows_auto(s,t) = mean(dev_avg_ch_auto(max(1,round(index_windows(t,1)))...
                 :min(length(dev_avg_ch_auto),round(index_windows(t,2)))));
             
+            % first vs other channels in sequence
             if not_a_spike == 0 && ~isempty(seq(s).seq)
                 
                 dev_windows_first(s,t) = mean(dev_first_ch(max(1,round(index_windows(t,1)))...
                 :min(length(dev_first_ch),round(index_windows(t,2)))));
             
+            % need to also take the mean across the channels
                 dev_windows_other(s,t) = mean(mean(dev_other_ch(max(1,round(index_windows(t,1)))...
                 :min(length(dev_other_ch),round(index_windows(t,2))),:)));
             
@@ -211,6 +229,8 @@ for i = 1:length(listing)
         
 
     end
+    
+    % Add to structure
     sig_dev(pt_idx).dev_windows = dev_windows;
     sig_dev(pt_idx).dev_windows_auto = dev_windows_auto;
     if not_a_spike == 0 

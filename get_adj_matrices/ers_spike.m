@@ -1,5 +1,10 @@
 function ers_spike(overwrite,time_window,not_a_spike)
 
+%% Description
+%{
+This function calculates frequency specific power
+%}
+
 %% Parameters
 do_notch = 1; % notch filter?
 do_car = 1; % common average reference?
@@ -141,10 +146,13 @@ for whichPt = whichPts
         involved = spike(s).involved;
         
         if not_a_spike == 0
+            
+            % Get peak IED channel
             biggest_dev = spike(s).biggest_dev;
             biggest_dev_manual = manual_big.spike(s).dev_ch;
             
             
+            % First vs other channels in sequence
             if ~isempty(seq(s).seq)
                 first_ch = seq(s).first_ch;
                 other_seq_chs = seq(s).seq(:,1);
@@ -212,14 +220,19 @@ for whichPt = whichPts
         index_windows(1,1) = max(index_windows(1,1),1);
         index_windows(end,2) = min(index_windows(end,2),size(values,1));
         
+        %% Get ERS
         % subtract baseline
         X = values-median(values,1);
         
         % Get ERS
         for ich = 1:size(X,2)
             for t = 1:n_windows
+                
+                % Restrict to specific channel and time window
                 Xtemp = X(max(1,round(index_windows(t,1))):...
-                    min(length(X),round(index_windows(t,2))),ich);
+                    min(size(X,1),round(index_windows(t,2))),ich);
+                
+                % Get the frequency-specific powers
                 powers = get_power(Xtemp,fs,freq_bands);
                 ers_array(s,t,:,ich) = powers;
             end
@@ -227,8 +240,8 @@ for whichPt = whichPts
         
         if not_a_spike == 0
             ers.spike(s).biggest_dev = biggest_dev;
-            ers.spike(s).ers = squeeze(ers_array(s,:,:,biggest_dev_manual)); % biggest dev channel
-            ers.spike(s).ers_auto = squeeze(ers_array(s,:,:,biggest_dev)); 
+            ers.spike(s).ers = squeeze(ers_array(s,:,:,biggest_dev_manual)); % biggest dev channel, manually calculated
+            ers.spike(s).ers_auto = squeeze(ers_array(s,:,:,biggest_dev)); % biggest dev, automatically calculated
             
             if ~isempty(seq(s).seq)
                 ers.spike(s).ers_first = squeeze(ers_array(s,:,:,first_ch));
@@ -237,7 +250,7 @@ for whichPt = whichPts
                 ers.spike(s).ers_first = [];
                 ers.spike(s).ers_others = [];
             end
-        else
+        else % if not a spike, take the average across all channels
             ers.spike(s).biggest_dev = nan;
             ers.spike(s).ers = squeeze(mean(ers_array(s,:,:,:),4)); % avg across all channels
             ers.spike(s).ers_auto = squeeze(mean(ers_array(s,:,:,:),4)); % avg across all channels

@@ -233,7 +233,8 @@ for whichPt = whichPts
         index_windows(1,1) = max(index_windows(1,1),1);
         index_windows(end,2) = min(index_windows(end,2),size(values,1));
         
-        % Try to line up with old time windows
+        % Try to line up with old time windows (for when I do a longer run
+        % to add more times onto existing times)
         if overwrite == 2
             old_index_windows = meta.spike(s).index_windows;
             old_adj = meta.spike(s).adj;
@@ -261,6 +262,7 @@ for whichPt = whichPts
         %% Get adjacency matrices
         %fprintf('Calculating functional networks...\n');
 
+        % Frequency-specific coherence
         if do_simple_corr == 0
             % Initialize adjacency matrix
             for ff = 1:size(freq_bands,1)
@@ -297,6 +299,7 @@ for whichPt = whichPts
 
             end
 
+        % Just Pearson correlation
         elseif do_simple_corr == 1
             
             if append == 1

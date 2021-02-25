@@ -1,7 +1,11 @@
 function spike_processing(whichPts,do_save,overwrite,not_a_spike)
 
+%% Description
 %{
-This function stores eeg data for manually detected spikes
+This function stores eeg data for manually detected spikes. It also
+performs automatic calculations of the peak IED channel (biggest deviation
+channel) and the "involved" channels (which will later be used to calculate
+spike sequences)
 %}
 
 %% Parameters
@@ -36,6 +40,7 @@ end
 
 %% Get the spike times
 sp_folder = [main_folder,'data/manual_spikes/'];
+% My manually identified spike times
 sp = get_manual_times_from_excel(not_a_spike);
 
 % Get the patients
@@ -172,6 +177,7 @@ for whichPt = whichPts
 
 
             % restrict times to 1 s before to 1 s after the written time
+            % this is to find the involved channels and peak IED channel
             narrow_indices = max(round(length(indices)/2 - fs),1):...
                 min(round(length(indices)/2 + fs),length(indices));
             narrow_data = hp_data(narrow_indices,:);
