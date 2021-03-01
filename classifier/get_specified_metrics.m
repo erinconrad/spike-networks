@@ -43,7 +43,8 @@ time_folder = [main_folder,time_name];
 
 pt_listing = dir([time_folder,'*.mat']);
 
-
+% for absolute power, fill up the info from the pre_spike structure that we
+% already got
 if contains(met,'sd')
     
         
@@ -117,11 +118,6 @@ for i = 1:length(pt_listing)
         for f = 1:nfreq
             stats(1).time(1).freq(f).name = ers.freq_names{f};
 
-        end
-    elseif strcmp(met,'F')
-        nfreq = length(sim);
-        for f = 1:nfreq
-            stats(1).time(1).freq(f).name = sim.name;
         end
     elseif strcmp(met,'ns_inv') || strcmp(met,'ns_auto') || strcmp(met,'ns_big') || ...
                 strcmp(met,'ns_avg') || strcmp(met,'ge')
@@ -236,29 +232,7 @@ for i = 1:length(pt_listing)
                 for s = 1:length(ers.spike)
                     all_ers(f).data(s,:) = ers.spike(s).ers_auto(:,f);
                 end
-            elseif strcmp(met,'rel_big_dev_ers')
-                for s = 1:length(ers.spike)
-                    all_ers(f).data(s,:) = ers.spike(s).ers_all(:,f,ers.spike(s).biggest_dev)./...
-                        nanmean(ers.spike(s).ers_all(:,f,:),3);
-                end
-            elseif strcmp(met,'ers_avg')
-                for s = 1:length(ers.spike)
-                    all_ers(f).data(s,:) = nanmean(ers.spike(s).ers_all(:,f,:),3);
-                        
-                end
-            elseif strcmp(met,'ers_soz')
-                for s = 1:length(ers.spike)
-                    all_ers(f).data(s,:) = nanmean(ers.spike(s).ers_all(:,f,soz_chs),3);    
-                end
-            elseif strcmp(met,'ers_only_keep_soz')
-                for s = 1:length(ers.spike)
-                    biggest_dev = ers.spike(s).biggest_dev;
-                    if ismember(biggest_dev,soz_chs)
-                        all_ers(f).data(s,:) = nanmean(ers.spike(s).ers_all(:,f,soz_chs),3);    
-                    else
-                        all_ers(f).data(s,:) = nan;  
-                    end
-                end
+           
             end
             
            
@@ -272,52 +246,7 @@ for i = 1:length(pt_listing)
             end
         end
 
-        % Add high gamma power stuff
-        if strcmp(met,'hg')
-            stats(1).time(1).freq(f).hg.pt(pt_idx).index_windows = hg.index_windows;
-            times = round((hg.index_windows(:,1)/hg.fs-3)*1e2)/(1e2);
-            stats(1).time(1).freq(f).hg.pt(pt_idx).times = times;
-            stats(1).time(1).freq(f).hg.pt(pt_idx).name = ers.name;
-
-            if contains(fname,'not') == 1
-                stats(1).time(1).freq(f).hg.pt(pt_idx).not.data = squeeze(mean(hg.powers,4));
-            else
-                stats(1).time(1).freq(f).hg.pt(pt_idx).spike.data = squeeze(mean(hg.powers,4));
-            end
-        end
-
-        % Add spike diff stuff
-        if strcmp(met,'F')
-            spd.sim = sim;
-            if f>length(spd.sim)
-                fprintf('\nWarning, non-aligning frequencies\n');
-                continue;
-            end
-            stats(1).time(1).freq(f).F.pt(pt_idx).index_windows = spd.sim(f).index_windows;
-            times = round((spd.sim(f).index_windows(:,1)/spd.sim(f).fs-3)*1e2)/(1e2);
-            stats(1).time(1).freq(f).score.pt(pt_idx).index_windows = spd.sim(f).index_windows;
-            stats(1).time(1).freq(f).score.pt(pt_idx).times = times;
-            stats(1).time(1).freq(f).F.pt(pt_idx).times = times;
-
-            stats(1).time(1).freq(f).F.pt(pt_idx).name = spd.sim(f).pt_name;
-            stats(1).time(1).freq(f).score.pt(pt_idx).name = spd.sim(f).pt_name;
-            % convert score to a 2 dimensional vector
-            score = spd.sim(f).score;
-            time_idx = spd.sim(f).time_idx;
-            num_time_idx = length(unique(time_idx));
-            new_score = zeros(length(score)/num_time_idx,num_time_idx);
-            for tt = 1:num_time_idx
-                new_score(:,tt) = score(time_idx == tt);
-            end
-
-            if contains(fname,'not') == 1
-                stats(1).time(1).freq(f).F.pt(pt_idx).not.data = spd.sim(f).F';
-                stats(1).time(1).freq(f).score.pt(pt_idx).not.data = new_score;
-            else
-                stats(1).time(1).freq(f).F.pt(pt_idx).spike.data = spd.sim(f).F';
-                stats(1).time(1).freq(f).score.pt(pt_idx).spike.data = new_score;
-            end
-        end
+        
 
     end
     
@@ -334,33 +263,14 @@ for i = 1:length(pt_listing)
                 biggest_dev = manual_big.spike(s).dev_ch;
             end
 
-            involved = find(spike.spike(s).involved);
- 
-            %{
-            if isempty(seq(s).seq)
-                is_soz_pt(s) = nan;
-            else
-                if ~isempty(intersect(seq(s).seq(:,1),soz_chs))
-                    is_soz_pt(s) = 1;
-                else
-                    is_soz_pt(s) = 0;
-                end
-            end
-            %}
+
             
             if ismember(biggest_dev,soz_chs)
                 is_soz_pt(s) = 1;
             else
                 is_soz_pt(s) = 0;
             end
-            %{
-            if ~isempty(intersect(involved,soz_chs))
-                is_soz_pt(s) = 1;
-            else
-                is_soz_pt(s) = 0;
-            end
-            %}
-            
+
             is_depth(s) = is_it_depth(pt,biggest_dev,pt_name);
         end
         is_spike_soz(pt_idx).is_soz = is_soz_pt;
@@ -372,36 +282,6 @@ end
 
     
 
-%% Add spike power
-%{
-for n = 1:length(stats)
-    for t = 1:length(stats(n).time)
-        
-        % confirm times align
-        tw = stats(n).time(t).time_window;
-        if tw ~= pre_spike(1).windows(t).which, error('what'); end
-        
-        for f = 1:length(stats(n).time(t).freq)
-            
-            
-            %times = round((ers.index_windows(:,1)/ers.fs-3)*1e2)/(1e2);
-            for p = 1:length(pre_spike)
-                stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).cons_windows;
-                %{
-                if strcmp(wpr,'cons')
-                    stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).cons_windows;
-                else
-                    stats(n).time(t).freq(f).sd.pt(p).times = pre_spike(p).windows(t).all_windows;
-                end
-                %}
-                stats(n).time(t).freq(f).sd.pt(p).name = pre_spike(p).name;
-                stats(n).time(t).freq(f).sd.pt(p).spike.data = pre_spike(p).windows(t).dev.spike;
-                stats(n).time(t).freq(f).sd.pt(p).not.data = pre_spike(p).windows(t).dev.not;
-            end
-        end
-    end
-end
-%}
 
 
 

@@ -5,7 +5,7 @@ times = metrics.time.freq(1).(met).pt(1).times;
 
 %% If start_sec is nan, reset to the first time
 if isnan(start_sec)
-    start_sec = times(1); % why was this 4??????
+    start_sec = times(1); 
 end
 
 % Loop through patients

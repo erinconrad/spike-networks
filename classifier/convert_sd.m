@@ -1,12 +1,16 @@
 function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,met)
 
     tcount = 0;
+    
+    % Loop over time scales
     for t = 1:length(sig_dev)
        % sd = sig_dev(t).is_spike(1);
        % sd_not = sig_dev(t).is_spike(2);
         tw = sig_dev(t).is_spike(1).time_window;
         if ~ismember(tw,windows), continue; end
         tcount = tcount + 1;
+        
+        % Loop over patients
         for p = 1:length(sig_dev(t).is_spike(1).sig_dev)
             
             alt_pre_spike(p).name = pre_spike(p).name;
@@ -16,16 +20,21 @@ function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,met)
             
             alt_pre_spike(p).windows(tcount).manual_before_rise = pre_spike(p).windows(tcount).before_rise;
             
+            % Loop over spike vs not spike
             for sp_id = 1:length(sig_dev(t).is_spike)
                 
               
                 if strcmp(met,'sd_auto')
+                    % Get power in automatically measured biggest dev
+                    % channel
                     dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_auto;
                 else
                     dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows;
                 end
                 alt_pre_spike(p).windows(tcount).cons_windows = sig_dev(t).is_spike(1).times;
                 if sp_id == 1
+                    
+                    % Fill spike structure
                     alt_pre_spike(p).windows(tcount).dev.spike = dev_all;
                     first = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_first;
                     other = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_other;
@@ -33,6 +42,8 @@ function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,met)
                     alt_pre_spike(p).windows(tcount).dev.other = other;
                     
                 else
+                    
+                    % Fill not a spike structure
                     alt_pre_spike(p).windows(tcount).dev.not = dev_all;
                 end
             end

@@ -50,7 +50,10 @@ for f = 1:nfreq
                 data(~include) = nan;
             end
 
-            % Find first non nan column
+            % Find first and last non nan column. (The first non-nan column
+            % is the first time (2 s before the spike peak). The last
+            % non-nan column is the last time before the IED rise.
+            
             sum_all = sum(data,1);
             non_nan = find(~isnan(sum_all));
             first_non_nan = non_nan(1);
@@ -62,7 +65,7 @@ for f = 1:nfreq
             
             % Change all data to be relative to first one
             data = (data-first_column)./abs(first_column);
-            last_column = data(:,last_non_nan);
+            last_column = data(:,last_non_nan); % this is now the relative metric change
 
             % AUC for each spike
             if do_cumulative == 1
@@ -71,7 +74,7 @@ for f = 1:nfreq
                 auc = last_column; % just the last one
             end
 
-            % Take median across all spikes (because a small number are crazy)
+            % Take median across all spikes (not mean because a small number are crazy)
             median_auc = nanmedian(auc);
             median_rel_data = nanmedian(data,1);
             iqr_auc = [prctile(auc,25),prctile(auc,75)];
@@ -141,7 +144,7 @@ for f = 1:nfreq
 
         end
             
-        % Do a two-sample test on the within-patient auc
+        %% Do a rank sum test on the within-patient auc
         sp = metrics.time.freq(f).(met).pt(p).spike.auc;
         not = metrics.time.freq(f).(met).pt(p).not.auc;
         
@@ -159,7 +162,8 @@ for f = 1:nfreq
         
         metrics.time.freq(f).(met).auc.individual_ranksum_p(p) = p_alt; 
         
-        % Compare first and last for spikes
+        % Compare first and last for spikes in a sequence with a sign rank
+        % test (within pt analysis)
         first_and_last = metrics.time.freq(f).(met).pt(p).spike.all_first_last;
         
         if 0
@@ -173,8 +177,9 @@ for f = 1:nfreq
         p_alt = signrank(first_and_last(:,1),first_and_last(:,2));
         metrics.time.freq(f).(met).first_last(p) = p_alt;
     end
-    % Do paired ttest on auc
     
+    
+    %% Compare metric change for spikes vs not spikes across pts with a paired ttest
     [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.data(:,1),...
         metrics.time.freq(f).(met).auc.data(:,2));
     %{
@@ -190,7 +195,7 @@ for f = 1:nfreq
         metrics.time.freq(f).(met).auc.short.ps(tt) = p;
     end
     
-    % Soz
+    %% Compare metric change for SOZ vs not SOZ across pts with a paired ttest
     [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.soz.data(:,1),...
         metrics.time.freq(f).(met).auc.soz.data(:,2));
     metrics.time.freq(f).(met).auc.soz.pval = pval;
@@ -202,7 +207,7 @@ for f = 1:nfreq
     metrics.time.freq(f).(met).auc.depth.pval = pval;
     metrics.time.freq(f).(met).auc.depth.tstat = st.tstat;
     
-    % First vs other
+    %% Compare metric change for lead IED vs other IEDs in seq across pts with a paired ttest
     [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.first_v_other.data(:,1),...
         metrics.time.freq(f).(met).auc.first_v_other.data(:,2));
     metrics.time.freq(f).(met).auc.first_v_other.pval = pval;

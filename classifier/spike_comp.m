@@ -14,25 +14,14 @@ how many pts
 clear
 
 %% Parameters
-do_auto = 1;
-do_cumulative = 0;
+windows = 0.1; % can be 0.1 or 0.2
 do_plot = 0;
-%rm_rise = 1; 
-%met = 'sd';
-windows = 0.1;
-rm_rise = 1;
-%which_pre_rise = 0; % 2 is default
-%comp_points = 2;  %3 is default
-% 0 = absolute, 1 = z score, 2 = relative change from first one, 3 = like z
-% score but subtracting first one
 
-%{
-if which_pre_rise == 0
-    wpr = 'manual_before_rise';
-elseif which_pre_rise == 2
-    wpr = 'cons';
-end
-%}
+% Don't change these
+do_auto = 1; % should be 1
+do_cumulative = 0; % should be zero
+rm_rise = 1; % should be 1
+
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -52,6 +41,9 @@ end
 
 for met_all = {'sd','ers','ns_big','ns_avg'}
 met = met_all{1};
+
+% this just says that I am using the automatically calculated peak IED
+% channel for doing calculations of metric change
 if do_auto
     if strcmp(met,'ns_big')
         met = 'ns_auto';
@@ -61,8 +53,6 @@ if do_auto
         met = [met,'_auto'];
     end
 end
-
-
 
 %% Find windows for each spike in which no early spike rise
 pre_spike = multi_reviewer_pre_spike(windows);
