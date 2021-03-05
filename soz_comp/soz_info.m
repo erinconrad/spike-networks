@@ -31,7 +31,7 @@ perc_big_in_soz = [];
 perc_lead_in_soz = [];
 
         % loop through pts
-for i = 1:length(pt_listing)
+for i = 2:length(pt_listing)
     
     fname = pt_listing(i).name;
     pt_name = strsplit(fname,'_');

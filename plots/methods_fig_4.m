@@ -57,7 +57,8 @@ surround_idx = round(size(values,1)/2-fs*surround_time):round(size(values,1)/2+f
 offset = 0;
 ch_bl = zeros(size(curr_seq,1),1);
 for ich = 1:size(curr_seq,1)
-    plot(linspace(-surround_time,surround_time,size(data(surround_idx,:),1)),data(surround_idx,out_chs(ich))+offset,'k')
+    plot(linspace(-surround_time,surround_time,size(data(surround_idx,:),1)),...
+        data(surround_idx,out_chs(ich))+offset,'k','linewidth',2)
     hold on
     ch_bl(ich) = offset + median(data(surround_idx,out_chs(ich)));
     if curr_seq(ich) == first
@@ -75,7 +76,11 @@ for ich = 1:size(curr_seq,1)
             'markersize',10,'markerfacecolor',[0.8500, 0.3250, 0.0980],'markeredgecolor','k');
     end
     if ich<size(curr_seq,1)
-        offset = offset - 1.2*(max(data(surround_idx,out_chs(ich))) - min(data(surround_idx,out_chs(ich+1))));
+        if ich == 1
+            offset = offset - 2.5*(max(data(surround_idx,out_chs(ich))) - min(data(surround_idx,out_chs(ich+1))));
+        else
+            offset = offset - 1.0*(max(data(surround_idx,out_chs(ich))) - min(data(surround_idx,out_chs(ich+1))));
+        end
     end
     
 
@@ -114,7 +119,7 @@ np = length(dat_soz);
 x_soz = ones(np,1) + add_jitter(np,0.05);
 x_not = 2*ones(np,1) + add_jitter(np,0.05);
 
-plot(x_soz,dat_soz,'ro','markersize',10,'linewidth',2)
+plot(x_soz,dat_soz,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_not,dat_not,'ko','markersize',10,'linewidth',2)
 
@@ -146,7 +151,7 @@ np = length(dat_lead);
 x_lead = ones(np,1) + add_jitter(np,0.05);
 x_other = 2*ones(np,1) + add_jitter(np,0.05);
 
-plot(x_lead,dat_lead,'ro','markersize',10,'linewidth',2)
+plot(x_lead,dat_lead,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_other,dat_other,'ko','markersize',10,'linewidth',2)
 
@@ -172,6 +177,8 @@ annotation('textbox',[0.48 0.92 0.1 0.1],'String','B','linestyle','none','fontsi
 annotation('textbox',[0.01 0.40 0.1 0.1],'String','C','linestyle','none','fontsize',30);
 annotation('textbox',[0.48 0.40 0.1 0.1],'String','D','linestyle','none','fontsize',30);
 
+
+print(gcf,[out_folder,'fig3'],'-depsc');
 end
 
 function myarrow(x,y)

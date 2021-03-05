@@ -257,11 +257,11 @@ for i = 1:length(pt_listing)
         is_depth = zeros(length(spike.spike),1);
         for s = 1:length(spike.spike)
             %
-            if contains(met,'auto')
+            %if contains(met,'auto')
                 biggest_dev = spike.spike(s).biggest_dev;
-            else
-                biggest_dev = manual_big.spike(s).dev_ch;
-            end
+           % else
+            %    biggest_dev = manual_big.spike(s).dev_ch;
+            %end
 
 
             

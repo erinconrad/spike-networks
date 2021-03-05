@@ -1,13 +1,7 @@
 %function spike_comp
 
 %{
-post-spike
-
-look at uninvolved chs
-decide whether to use criteria for any involved being in soz or just max
-dev
-
-how many pts
+why is df for ns_avg 8
 %}
 
 %% Clear
@@ -78,7 +72,7 @@ pre_spike = convert_sd(sig_dev,windows,pre_spike,met);
 %% Remove the time windows with an early spike rise, get slopes, and do significance testing
 include_times = include_which_times(metrics,met,pre_spike,nan);
 metrics = generate_summary_stats(metrics,met,include_times,rm_rise,is_spike_soz,...
-    do_cumulative,is_spike_depth);
+    do_cumulative,is_spike_depth,earliest_rise);
 
 %% Build a classifier to predict spike vs not spike
 %tbl = class_spike(metrics,met);
@@ -96,7 +90,90 @@ elseif strcmp(met,'ns_avg')
     metrics_ns_avg = metrics;
 end
 
+%% Print some summary stats
+if contains(met,'sd')
+    nfreq = 1;
+else
+    nfreq = 3;
 end
+for f = 1:nfreq
+    fprintf(['\n\nFor %s %s, the relative metric for IEDs was (M = %1.1e, SD = %1.1e)'...
+        ' and for non-IEDs was (M = %1.1e, SD = %1.1e), t(%d) = %1.1f, p = %1.3f\n'],...
+        met,metrics.time.freq(f).name,...
+        mean(metrics.time.freq(f).(met).auc.data(:,1)),std(metrics.time.freq(f).(met).auc.data(:,1)),...
+        mean(metrics.time.freq(f).(met).auc.data(:,2)),std(metrics.time.freq(f).(met).auc.data(:,2)),...
+        metrics.time.freq(f).(met).auc.df,metrics.time.freq(f).(met).auc.tstat,...
+        metrics.time.freq(f).(met).auc.pval);
+    
+    if metrics.time.freq(f).(met).auc.pval < 0.05/nfreq
+        fprintf('\nThe earliest pre-IED change is %1.1f\n',metrics.time.freq(f).(met).auc.short.first_sig_time);
+    end
+    
+    %{
+    fprintf(['\nThe relative metric for SOZ was (M = %1.1e, SD = %1.1e)'...
+        ' and for non-SOZ was (M = %1.1e, SD = %1.1e), t(%d) = %1.1f, p = %1.3f\n'],...
+        nanmean(metrics.time.freq(f).(met).auc.soz.data(:,1)),nanstd(metrics.time.freq(f).(met).auc.soz.data(:,1)),...
+        nanmean(metrics.time.freq(f).(met).auc.soz.data(:,2)),nanstd(metrics.time.freq(f).(met).auc.soz.data(:,2)),...
+        metrics.time.freq(f).(met).auc.soz.df,metrics.time.freq(f).(met).auc.soz.tstat,...
+        metrics.time.freq(f).(met).auc.soz.pval); 
+    %}
+    
+    fprintf(['\nThe relative metric for lead IED was (M = %1.1e, SD = %1.1e)'...
+        ' and for other sequence IED was (M = %1.1e, SD = %1.1e), t(%d) = %1.1f, p = %1.3f\n'],...
+        nanmean(metrics.time.freq(f).(met).auc.first_v_other.data(:,1)),nanstd(metrics.time.freq(f).(met).auc.first_v_other.data(:,1)),...
+        nanmean(metrics.time.freq(f).(met).auc.first_v_other.data(:,2)),nanstd(metrics.time.freq(f).(met).auc.first_v_other.data(:,2)),...
+        metrics.time.freq(f).(met).auc.first_v_other.df,metrics.time.freq(f).(met).auc.first_v_other.tstat,...
+        metrics.time.freq(f).(met).auc.first_v_other.pval); 
+end
+end
+
+%% Make a table for SOZ
+which_mets = {'sd_auto','ers_auto','ns_auto','ns_avg'};
+all_metrics = [metrics_sd,metrics_ers,metrics_ns_big,metrics_ns_avg];
+pretty_met_names = {'absolute power','power','peak-IED electrode node strength','node strength averaged across electrodes'};
+nfreq = [1 3 3 3];
+soz_means = {};
+non_soz_means = {};
+soz_t = {};
+soz_p = {};
+all_names = {};
+
+% Print SOZ stuff
+fprintf('\n');
+for m = 1:length(which_mets)
+    met = which_mets{m};
+    %fprintf('\n%s\n',met);
+    
+    metrics = all_metrics(m);
+    nf = nfreq(m);
+    for f = 1:nf
+        if contains(met,'sd')
+            fname = '';
+        else
+            fname = [metrics.time.freq(f).name,' '];
+        end
+        
+        all_names = [all_names;[fname,pretty_met_names{m}]];
+        soz_means = [soz_means;sprintf('%1.2f (%1.2f)',...
+            nanmean(metrics.time.freq(f).(met).auc.soz.data(:,1)),...
+            nanstd(metrics.time.freq(f).(met).auc.soz.data(:,1)))];
+        
+        non_soz_means = [non_soz_means;sprintf('%1.2f (%1.2f)',...
+            nanmean(metrics.time.freq(f).(met).auc.soz.data(:,2)),...
+            nanstd(metrics.time.freq(f).(met).auc.soz.data(:,2)))];
+        
+        soz_t = [soz_t;sprintf('t(%d) = %1.1f',...
+            metrics.time.freq(f).(met).auc.soz.df,...
+            metrics.time.freq(f).(met).auc.soz.tstat)];
+        
+        soz_p = [soz_p;sprintf('p = %1.3f',...
+            metrics.time.freq(f).(met).auc.soz.pval)];
+        
+    end
+end
+
+soz_table = table((all_names),soz_means,non_soz_means,soz_t,soz_p);
+writetable(soz_table,[results_folder,'tables/','soz_table.csv']);
 %% Figs
 %methods_fig_2(metrics_sd,metrics_ers,earliest_rise,orig_pt_rise)
 %methods_fig_3(metrics_ns_big,metrics_ns_avg,earliest_rise,orig_pt_rise)

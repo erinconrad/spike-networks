@@ -152,7 +152,7 @@ pval = metrics.time.freq(f).(met).auc.pval;
 np = length(dat_sp);
 x_sp = ones(np,1) + add_jitter(np,0.05);
 x_not = 2*ones(np,1) + add_jitter(np,0.05);
-plot(x_sp,dat_sp,'ro','markersize',10,'linewidth',2)
+plot(x_sp,dat_sp,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_not,dat_not,'ko','markersize',10,'linewidth',2)
 xticks([1 2])
@@ -197,18 +197,47 @@ std_spike = nanstd(auc_spike,0,2);
 auc_not = squeeze(data(:,:,2));
 mean_auc_not = nanmean(auc_not,2);
 std_not = nanstd(auc_not,0,2);
+color_main = [0, 0.4470, 0.7410];
 
-errorbar(times(1:last_before_rise-1),...
-    mean_auc_spike(1:last_before_rise-1)...
-    ,std_spike(1:last_before_rise-1),'ro','markersize',15,...
-    'linewidth',2)
+if 0
+    plot(times(1:last_before_rise-1),...
+      mean_auc_spike(1:last_before_rise-1),...
+      'linewidth',2);
+    hold on
+    plot(times(1:last_before_rise-1),...
+      mean_auc_not(1:last_before_rise-1),'k',...
+      'linewidth',2);
+    X = [times(1:last_before_rise-1)',fliplr(times(1:last_before_rise-1)')];
+    Ysp = [(mean_auc_spike(1:last_before_rise-1)-std_spike(1:last_before_rise-1))',...
+        fliplr((mean_auc_spike(1:last_before_rise-1)+std_spike(1:last_before_rise-1))')];
+    Ysp(1) = 0; Ysp(end) = 0;
+    fsp = fill(X,Ysp,color_main);
+    set(fsp,'facealpha',0.4)
+    %set(fsp,'edgecolor','none')
+    set(fsp,'facecolor',color_main)
+    
+    Ynot = [(mean_auc_not(1:last_before_rise-1)-std_not(1:last_before_rise-1))',...
+        fliplr((mean_auc_not(1:last_before_rise-1)+std_not(1:last_before_rise-1))')];
+    Ynot(1) = 0; Ynot(end) = 0;
+    fnot = fill(X,Ynot,[0.2 0.2 0.2]);
+    set(fnot,'facealpha',0.4)
+    set(fnot,'edgecolor','none')
+    set(fnot,'facecolor',[0.2 0.2 0.2])
+else
 
-hold on
+    errorbar(times(1:last_before_rise-1),...
+        mean_auc_spike(1:last_before_rise-1)...
+        ,std_spike(1:last_before_rise-1),'o','markersize',15,...
+        'linewidth',2)
 
-errorbar(times(1:last_before_rise-1),...
-    mean_auc_not(1:last_before_rise-1)...
-    ,std_not(1:last_before_rise-1),'ko','markersize',15,...
-    'linewidth',2)
+    hold on
+
+    errorbar(times(1:last_before_rise-1),...
+        mean_auc_not(1:last_before_rise-1)...
+        ,std_not(1:last_before_rise-1),'ko','markersize',15,...
+        'linewidth',2)
+%}
+end
 
 %xlabel('Time (s)');
 set(gca,'fontsize',20)
@@ -256,7 +285,7 @@ pval = metrics.time.freq(f).(met).auc.pval;
 np = length(dat_sp);
 x_sp = ones(np,1) + add_jitter(np,0.05);
 x_not = 2*ones(np,1) + add_jitter(np,0.05);
-plot(x_sp,dat_sp,'ro','markersize',10,'linewidth',2)
+plot(x_sp,dat_sp,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_not,dat_not,'ko','markersize',10,'linewidth',2)
 xticks([1 2])

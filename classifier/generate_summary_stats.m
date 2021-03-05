@@ -1,7 +1,11 @@
 function metrics = generate_summary_stats(metrics,met,include_times,rm_rise,...
-    is_spike_soz,do_cumulative,is_spike_depth)
+    is_spike_soz,do_cumulative,is_spike_depth,earliest_rise)
 
-nfreq = length(metrics.time.freq);
+if contains(met,'sd_')
+    nfreq = 1;
+else
+    nfreq = length(metrics.time.freq);
+end
 
 for f = 1:nfreq
     
@@ -188,6 +192,7 @@ for f = 1:nfreq
         %}
     metrics.time.freq(f).(met).auc.pval = pval;
     metrics.time.freq(f).(met).auc.tstat = st.tstat;
+    metrics.time.freq(f).(met).auc.df = st.df;
     metrics.time.freq(f).(met).auc.short.ps = nan(size(metrics.time.freq(f).(met).auc.short.data,1),1);
     for tt = 1:size(metrics.time.freq(f).(met).auc.short.data,1)
         short_auc = squeeze(metrics.time.freq(f).(met).auc.short.data(tt,:,:));
@@ -195,11 +200,62 @@ for f = 1:nfreq
         metrics.time.freq(f).(met).auc.short.ps(tt) = p;
     end
     
+    %% Find earliest pre-IED change
+    % Limit to those with a significant pre-IED change
+    alpha = 0.05/nfreq;
+    times = metrics.time.freq(f).(met).auc.times;
+    data = metrics.time.freq(f).(met).auc.short.data;
+    pvals = metrics.time.freq(f).(met).auc.short.ps;
+    ntimes = size(data,1);
+    if metrics.time.freq(f).(met).auc.pval >= alpha
+        metrics.time.freq(f).(met).auc.short.sig = [];
+    else
+        
+        % Get the average of the earliest visual rise
+        min_rise = min(earliest_rise,[],2); % earliest reviewer notation for each spike
+        mean_rise_spikes = mean(min_rise); % mean across spikes
+        before_rise = zeros(ntimes,1);
+        last_before_rise = 1;
+        
+        % Find the time windows occurring before the rise (note that the
+        % last one will INCLUDE the rise)
+        for tt = 1:ntimes
+            if mean_rise_spikes > times(tt)
+                before_rise(tt) = 1;
+                last_before_rise = tt;
+            end
+        end
+        
+        % Find the significant times within this. Note that I am going up
+        % to last_before_rise - 1 because I want to exclude
+        % last_before_rise
+        sub_alpha = zeros(ntimes,1);
+        for tt = 1:last_before_rise-1
+            num_left = last_before_rise-1-tt+1;
+            num_sub_alpha = sum(pvals(tt:last_before_rise-1) < 0.05);
+            if num_sub_alpha == num_left
+                sub_alpha(tt) = 1;
+            end
+        end
+        sig = (sub_alpha == 1);
+        metrics.time.freq(f).(met).auc.short.sig = sig;
+        if ~isempty(sig)
+            sig_times = find(sig);
+            first_sig_time = times(sig_times(1));
+        else
+            first_sig_time = nan;
+        end
+        metrics.time.freq(f).(met).auc.short.first_sig_time = first_sig_time;
+        
+
+    end
+    
     %% Compare metric change for SOZ vs not SOZ across pts with a paired ttest
     [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.soz.data(:,1),...
         metrics.time.freq(f).(met).auc.soz.data(:,2));
     metrics.time.freq(f).(met).auc.soz.pval = pval;
     metrics.time.freq(f).(met).auc.soz.tstat = st.tstat;
+    metrics.time.freq(f).(met).auc.soz.df = st.df;
     
     % Depth
     [~,pval,~,st] = ttest(metrics.time.freq(f).(met).auc.depth.data(:,1),...
@@ -212,6 +268,7 @@ for f = 1:nfreq
         metrics.time.freq(f).(met).auc.first_v_other.data(:,2));
     metrics.time.freq(f).(met).auc.first_v_other.pval = pval;
     metrics.time.freq(f).(met).auc.first_v_other.tstat = st.tstat;
+    metrics.time.freq(f).(met).auc.first_v_other.df = st.df;
 end
 
 end

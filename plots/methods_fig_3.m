@@ -202,7 +202,7 @@ pval = metrics.time.freq(f).(met).auc.pval;
 np = length(dat_sp);
 x_sp = ones(np,1) + add_jitter(np,0.05);
 x_not = 2*ones(np,1) + add_jitter(np,0.05);
-plot(x_sp,dat_sp,'ro','markersize',10,'linewidth',2)
+plot(x_sp,dat_sp,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_not,dat_not,'ko','markersize',10,'linewidth',2)
 xticks([1 2])
@@ -263,7 +263,7 @@ pval = metrics.time.freq(f).(met).auc.pval;
 np = length(dat_sp);
 x_sp = ones(np,1) + add_jitter(np,0.05);
 x_not = 2*ones(np,1) + add_jitter(np,0.05);
-plot(x_sp,dat_sp,'ro','markersize',10,'linewidth',2)
+plot(x_sp,dat_sp,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_not,dat_not,'ko','markersize',10,'linewidth',2)
 xticks([1 2])
@@ -310,6 +310,17 @@ for f =1:3
     plot([1 2],[line_yloc line_yloc],'k')
     
 end
+
+%% annotations
+annotation('textbox',[0.11 0.90 0.1 0.1],'String','A','linestyle','none','fontsize',30);
+annotation('textbox',[0.54 0.90 0.1 0.1],'String','B','linestyle','none','fontsize',30);
+annotation('textbox',[0.11 0.57 0.1 0.1],'String','C','linestyle','none','fontsize',30);
+annotation('textbox',[0.40 0.57 0.1 0.1],'String','D','linestyle','none','fontsize',30);
+annotation('textbox',[0.69 0.57 0.1 0.1],'String','E','linestyle','none','fontsize',30);
+annotation('textbox',[0.11 0.24 0.1 0.1],'String','F','linestyle','none','fontsize',30);
+annotation('textbox',[0.40 0.24 0.1 0.1],'String','G','linestyle','none','fontsize',30);
+annotation('textbox',[0.69 0.24 0.1 0.1],'String','H','linestyle','none','fontsize',30);
+
 
 
 print(gcf,[out_folder,'fig2'],'-depsc')
