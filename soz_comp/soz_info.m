@@ -1,4 +1,4 @@
-function [percs,all] = soz_info
+function [percs,all,total_soz_n,all_main,all_soz_chs] = soz_info
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -30,8 +30,12 @@ all_lead_in_soz = [];
 perc_big_in_soz = [];
 perc_lead_in_soz = [];
 
+total_soz_n = [];
+all_main = [];
+all_soz_chs = {};
+
         % loop through pts
-for i = 2:length(pt_listing)
+for i = 1:length(pt_listing)
     
     fname = pt_listing(i).name;
     pt_name = strsplit(fname,'_');
@@ -50,6 +54,8 @@ for i = 2:length(pt_listing)
     
     % Get soz
     soz_chs = get_soz_chs(pt,pt_name);
+    all_soz_chs = [all_soz_chs;soz_chs];
+    total_soz_n = [total_soz_n;length(soz_chs),length(spike(1).chLabels)];
     
     out(i).name = pt_name;
     out(i).in_soz = [];
@@ -89,6 +95,7 @@ for i = 2:length(pt_listing)
     
     main_big = mode(out(i).all(:,1));
     main_lead = mode(out(i).all(:,2));
+    all_main = [all_main;main_lead main_big];
     
     perc_big_in_soz = [perc_big_in_soz;sum(out(i).in_soz(:,1))/length(out(i).in_soz(:,1))];
     perc_lead_in_soz = [perc_lead_in_soz;nansum(out(i).in_soz(:,3))/sum(~isnan(out(i).in_soz(:,3)))];
