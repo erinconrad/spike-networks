@@ -1,3 +1,11 @@
+%{
+This script performs a Monte Carlo simulation to test whether the
+proportion of patients for whom the mode peak IED electrode and lead IED
+electrode are in the set of clinician defined SOZ more than expected by
+chance
+
+%}
+
 clear
 
 %% Parameters

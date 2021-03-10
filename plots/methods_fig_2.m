@@ -38,7 +38,7 @@ spike = spike.spike;
 
 figure
 set(gcf,'position',[1 300 900 750]);
-[ha, pos] = tight_subplot(3, 3, [0.08 0], [0.05 0.05], [0.06 0.02]);
+[ha, pos] = tight_subplot(3, 3, [0.1 0], [0.05 0.05], [0.06 0.02]);
 xgap = 0.005;
 delete(ha(3));
 delete(ha(6));
@@ -138,8 +138,12 @@ text(0.5,1,'Divide EEG signal into time windows','Units','Normalized',...
 %title('Divide EEG signal into time windows')
 set(gca,'fontsize',20)
 xlim([-2 0.1])
+%{
 ha(2).Visible = 'off';
 set(findall(gca, 'type', 'text'), 'visible', 'on')
+%}
+xticks([-2 0])
+xticklabels({'-2 s','0 s'});
 
 %% AUC
 metrics = metrics_sd;
@@ -156,8 +160,8 @@ plot(x_sp,dat_sp,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_not,dat_not,'ko','markersize',10,'linewidth',2)
 xticks([1 2])
-xticklabels({'IED','Not IED'})
-ylabel({'Relative power'});
+xticklabels({'IED','IED-free'})
+ylabel({'Relative power change'});
 xlim([0.5 2.5])
 set(gca,'fontsize',20)
 p_pretty = get_asterisks(pval,1);
@@ -270,7 +274,7 @@ yticklabels([])
 
 endh = plot([mean_rise_spikes mean_rise_spikes],get(gca,'ylim'),'k--','linewidth',2);
 
-legend('IED','Not IED','Mean visual rise time','fontsize',20,'location','northwest')
+legend('IED','IED-free','Mean visual rise time','fontsize',20,'location','northwest')
 
 %% ERS
 ps = cell(3,1);
@@ -289,14 +293,22 @@ plot(x_sp,dat_sp,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_not,dat_not,'ko','markersize',10,'linewidth',2)
 xticks([1 2])
-xticklabels({'IED','Not IED'})
+xticklabels({'IED','IED-free'})
 if f == 1
-    ylabel({'Relative power'});
+    ylabel({'Relative power change'});
 end
-title(metrics.time.freq(f).name)
+new_f_name = metrics.time.freq(f).name;
+if strcmp(new_f_name(1),'s')
+    new_f_name(1) = 'S';
+elseif strcmp(new_f_name(1),'l')
+    new_f_name(1) = 'L';
+elseif strcmp(new_f_name(1),'h')
+    new_f_name(1) = 'H';
+end
+title(new_f_name)
 xlim([0.5 2.5])
 set(gca,'fontsize',20)
-p_pretty = get_asterisks(pval,1);
+p_pretty = get_asterisks(pval,3);
 ps{f} = p_pretty;
 yl = get(gca,'ylim');
 set(gca,'ylim',[yl(1) yl(1) + 1.18*(yl(2)-yl(1))])

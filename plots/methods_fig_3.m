@@ -8,7 +8,8 @@ Panel 2: Show adjacency matrices over time for single spike
 Panel 3: vectorize matrices and compare vectors across times
 %}
 
-whichPt = 7;
+whichPt = 8;
+%whichPt = 7;
 duration = 6;
 whichSpikes = [3 4 7];
 which_times = 1:21;
@@ -56,6 +57,7 @@ set(ha(7),'position',[pos{7}(1) pos{7}(2) pos{7}(3)-xgap pos{7}(4)])
 set(ha(8),'position',[pos{8}(1)+xgap pos{8}(2) pos{8}(3)-xgap pos{8}(4)])
 set(ha(9),'position',[pos{9}(1)+2*xgap pos{9}(2) pos{9}(3)-xgap pos{9}(4)])
 
+%{
 % Single spike with time windows
 axes(ha(1))
 s = whichSpikes(2);
@@ -106,9 +108,10 @@ set(gca,'fontsize',20)
 xlim([-2 0.1])
 ha(1).Visible = 'off';
 set(findall(gca, 'type', 'text'), 'visible', 'on')
+%}
 
 % Adjacency matrices at multiple times
-axes(ha(2))
+axes(ha(1))
 s = whichSpikes(3);
 adj_all_t = meta.spike(s).adj.adj;
 y_offset = 0;
@@ -186,8 +189,14 @@ text(mean([arrow_start_x,arrow_end_x]), mean([arrow_start_y arrow_end_y])+50,...
 
 %title('Calculate network for each time window')
 set(gca,'fontsize',20)
-ha(2).Visible = 'Off';
+ha(1).Visible = 'Off';
 set(findall(gca, 'type', 'text'), 'visible', 'on')
+
+%% show electrode node strength on the brain
+axes(ha(2))
+curr_adj = squeeze(adj_all_t(end,:,:));
+ns = sum(curr_adj,1);
+brain_and_elecs(pt,whichPt,ns)
 
 %% NS big
 ps = cell(3,1);
@@ -206,11 +215,19 @@ plot(x_sp,dat_sp,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_not,dat_not,'ko','markersize',10,'linewidth',2)
 xticks([1 2])
-xticklabels({'IED','Not IED'})
+xticklabels({'IED','IED-free'})
 if f == 1
     ylabel({'Relative node strength','(peak IED electrode)'});
 end
-title(metrics.time.freq(f).name)
+new_f_name = metrics.time.freq(f).name;
+if strcmp(new_f_name(1),'s')
+    new_f_name(1) = 'S';
+elseif strcmp(new_f_name(1),'l')
+    new_f_name(1) = 'L';
+elseif strcmp(new_f_name(1),'h')
+    new_f_name(1) = 'H';
+end
+title(new_f_name)
 xlim([0.5 2.5])
 set(gca,'fontsize',20)
 p_pretty = get_asterisks(pval,3);
@@ -267,7 +284,7 @@ plot(x_sp,dat_sp,'o','markersize',10,'linewidth',2)
 hold on
 plot(x_not,dat_not,'ko','markersize',10,'linewidth',2)
 xticks([1 2])
-xticklabels({'IED','Not IED'})
+xticklabels({'IED','IED-free'})
 if f == 1
     ylabel({'Relative node strength','(electrode average)'});
 end
