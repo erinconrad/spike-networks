@@ -1,4 +1,4 @@
-function ers_spike(overwrite,time_window,not_a_spike,random_elec)
+function ers_spike(overwrite,time_window,not_a_spike)
 
 %% Description
 %{
