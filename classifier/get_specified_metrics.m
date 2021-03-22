@@ -1,4 +1,4 @@
-function [stats,is_spike_soz,is_spike_depth] = get_specified_metrics(windows,pre_spike,met)
+function [stats,is_spike_soz,is_spike_depth] = get_specified_metrics(windows,pre_spike,met,do_rand_ch)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -148,6 +148,7 @@ for i = 1:length(pt_listing)
         is_spike_soz = [];
     end
 
+    %% NS stuff
     for f = 1:nfreq
         if strcmp(met,'ns_big') || strcmp(met,'ns_avg') || strcmp(met,'ns_auto') || strcmp(met,'ge')
 
@@ -155,6 +156,7 @@ for i = 1:length(pt_listing)
             ns = sim.freq(f).ns.data;
             ns_all = sim.freq(f).ns_all.data;
             ns_auto = sim.freq(f).ns_auto.data;
+            ns_rand = sim.freq(f).ns_rand.data;
             ge = sim.freq(f).ge.data;
             
 
@@ -169,8 +171,15 @@ for i = 1:length(pt_listing)
             % spike vs not a spike
             if contains(fname,'not') == 1
                 stats(1).time(1).freq(f).ns_avg.pt(pt_idx).not.data(:,:) = ns_avg;
-                stats(1).time(1).freq(f).ns_big.pt(pt_idx).not.data(:,:) = ns;
-                stats(1).time(1).freq(f).ns_auto.pt(pt_idx).not.data(:,:) = ns_auto;
+                
+                
+                if do_rand_ch==1
+                    stats(1).time(1).freq(f).ns_auto.pt(pt_idx).not.data(:,:) = ns_rand;
+                    stats(1).time(1).freq(f).ns_big.pt(pt_idx).not.data(:,:) = ns_rand;
+                else
+                    stats(1).time(1).freq(f).ns_auto.pt(pt_idx).not.data(:,:) = ns_auto;
+                    stats(1).time(1).freq(f).ns_big.pt(pt_idx).not.data(:,:) = ns;
+                end
                 stats(1).time(1).freq(f).ge.pt(pt_idx).not.data(:,:) = ge;
 
             else
@@ -205,7 +214,7 @@ for i = 1:length(pt_listing)
             stats(1).time(1).freq(f).ge.pt(pt_idx).times = times;
         end
 
-        % Add ERS stuff
+        %% Add ERS stuff
         if contains(met,'ers')
 
             stats(1).time(1).freq(f).(met).pt(pt_idx).index_windows = ers.index_windows;
@@ -222,17 +231,36 @@ for i = 1:length(pt_listing)
                     all_ers(f).other(s,:) = ers.spike(s).ers_others(:,f);
                 end
             end
-            if strcmp(met,'ers')
+            
+            % if not a spike
+            if contains(fname,'not')
                 
-                for s = 1:length(ers.spike)
-                    all_ers(f).data(s,:) = ers.spike(s).ers(:,f);
-                    
+                if do_rand_ch == 1
+                    for s = 1:length(ers.spike)
+                        all_ers(f).data(s,:) = ers.spike(s).ers_rand(:,f);
+                    end
+                else
+                    for s = 1:length(ers.spike)
+                        all_ers(f).data(s,:) = ers.spike(s).ers_auto(:,f);
+                    end
                 end
-            elseif strcmp(met,'ers_auto')
-                for s = 1:length(ers.spike)
-                    all_ers(f).data(s,:) = ers.spike(s).ers_auto(:,f);
+                
+            % spike
+            else
+            
+                if strcmp(met,'ers')
+
+                    for s = 1:length(ers.spike)
+                        all_ers(f).data(s,:) = ers.spike(s).ers(:,f);
+
+                    end
+                elseif strcmp(met,'ers_auto')
+                    for s = 1:length(ers.spike)
+                        all_ers(f).data(s,:) = ers.spike(s).ers_auto(:,f);
+                    end
+
                 end
-           
+            
             end
             
            

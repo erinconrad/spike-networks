@@ -8,10 +8,11 @@ why is df for ns_avg 8
 clear
 
 %% Parameters
-windows = 0.1; % can be 0.1 or 0.2
+windows = 0.2; % can be 0.1 or 0.2
 do_plot = 0;
 
 % Don't change these
+do_rand_ch = 1;
 do_auto = 1; % should be 1
 do_cumulative = 0; % should be zero
 rm_rise = 1; % should be 1
@@ -59,10 +60,10 @@ orig_pt_rise = pt_rise;
 sig_dev = get_sd;
 
 % convert this to be similar to pre_spike
-pre_spike = convert_sd(sig_dev,windows,pre_spike,met);
+pre_spike = convert_sd(sig_dev,windows,pre_spike,met,do_rand_ch);
 
 %% Get network metrics
-[metrics,is_spike_soz,is_spike_depth] = get_specified_metrics(windows,pre_spike,met);
+[metrics,is_spike_soz,is_spike_depth] = get_specified_metrics(windows,pre_spike,met,do_rand_ch);
 
 
 

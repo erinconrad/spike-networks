@@ -1,4 +1,4 @@
-function ers_spike(overwrite,time_window,not_a_spike)
+function ers_spike(overwrite,time_window,not_a_spike,random_elec)
 
 %% Description
 %{
@@ -252,8 +252,15 @@ for whichPt = whichPts
             end
         else % if not a spike, take the average across all channels
             ers.spike(s).biggest_dev = nan;
+            % pick a random electrode
+            nelecs = size(ers_array,4);
+            r_elec = randi(nelecs);
+
+            ers.spike(s).ers_rand = squeeze((ers_array(s,:,:,r_elec))); % random ch
+
             ers.spike(s).ers = squeeze(mean(ers_array(s,:,:,:),4)); % avg across all channels
             ers.spike(s).ers_auto = squeeze(mean(ers_array(s,:,:,:),4)); % avg across all channels
+            
             ers.spike(s).ers_first = [];
             ers.spike(s).ers_others = [];
         end

@@ -54,7 +54,11 @@ for i = 1:length(pt_listing)
     
     % Get soz
     soz_chs = get_soz_chs(pt,pt_name);
+    
+    % identities of soz channels
     all_soz_chs = [all_soz_chs;soz_chs];
+    
+    % number of soz channels and total chs
     total_soz_n = [total_soz_n;length(soz_chs),length(spike(1).chLabels)];
     
     out(i).name = pt_name;

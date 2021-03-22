@@ -110,6 +110,7 @@ for i = 1:length(listing)
     
     dev_windows = zeros(length(spike),n_windows);
     dev_windows_auto = zeros(length(spike),n_windows);
+    dev_windows_rand = zeros(length(spike),n_windows);
     
     dev_windows_first = nan(length(spike),n_windows);
     dev_windows_other = nan(length(spike),n_windows);
@@ -157,6 +158,11 @@ for i = 1:length(listing)
         if not_a_spike == 1
             dev_avg_ch = mean(dev,2);
             dev_avg_ch_auto = mean(dev,2);
+            
+            % pick a random electrode
+            nelecs = size(dev,2);
+            r_elec = randi(nelecs);
+            dev_rand_ch = dev(:,r_elec);
         else
             dev_avg_ch = dev(:,biggest_dev_manual);
             dev_avg_ch_auto = dev(:,biggest_dev);
@@ -196,6 +202,11 @@ for i = 1:length(listing)
             dev_windows_auto(s,t) = mean(dev_avg_ch_auto(max(1,round(index_windows(t,1)))...
                 :min(length(dev_avg_ch_auto),round(index_windows(t,2)))));
             
+            if not_a_spike == 1
+                dev_windows_rand = mean(dev_rand_ch(max(1,round(index_windows(t,1)))...
+                :min(length(dev_rand_ch),round(index_windows(t,2)))));
+            end
+            
             % first vs other channels in sequence
             if not_a_spike == 0 && ~isempty(seq(s).seq)
                 
@@ -232,6 +243,7 @@ for i = 1:length(listing)
     
     % Add to structure
     sig_dev(pt_idx).dev_windows = dev_windows;
+    sig_dev(pt_idx).dev_windows_rand = dev_windows_rand;
     sig_dev(pt_idx).dev_windows_auto = dev_windows_auto;
     if not_a_spike == 0 
         sig_dev(pt_idx).dev_windows_first = dev_windows_first;

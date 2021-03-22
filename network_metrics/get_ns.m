@@ -102,6 +102,7 @@ for i = 1:length(listing)
     ns_all = nan(n_f,n_spikes,n_times,n_ch);
     ns_first = nan(n_f,n_spikes,n_times);
     ns_other = nan(n_f,n_spikes,n_times);
+    ns_rand = nan(n_f,n_spikes,n_times);
     ge = nan(n_f,n_spikes,n_times);
     trans = nan(n_f,n_spikes,n_times);
     involved = nan(n_spikes,n_ch);
@@ -150,6 +151,11 @@ for i = 1:length(listing)
                     ns(f,s,tt) = mean(ns_temp); % average ns if not spike
                     ns_auto(f,s,tt) = mean(ns_temp);
                     
+                    % pick random electrode
+                    n_elecs = length(ns_temp);
+                    rand_elec = randi(n_elecs);
+                    ns_rand(f,s,tt) = ns_temp(rand_elec);
+                    
                 end
                 ns_all(f,s,tt,:) = ns_temp;
                 
@@ -175,6 +181,9 @@ for i = 1:length(listing)
         end
         metrics.freq(f).ns.name = 'node strength biggest channel';
         metrics.freq(f).ns.data = squeeze(ns(f,:,:));
+        
+        metrics.freq(f).ns_rand.name = 'node strength random channel';
+        metrics.freq(f).ns_rand.data = squeeze(ns_rand(f,:,:));
         
         metrics.freq(f).ns_auto.name = 'node strength auto biggest channel';
         metrics.freq(f).ns_auto.data = squeeze(ns_auto(f,:,:));

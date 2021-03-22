@@ -1,4 +1,4 @@
-function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,met)
+function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,met,do_rand_ch)
 
     tcount = 0;
     
@@ -23,13 +23,28 @@ function alt_pre_spike = convert_sd(sig_dev,windows,pre_spike,met)
             % Loop over spike vs not spike
             for sp_id = 1:length(sig_dev(t).is_spike)
                 
-              
-                if strcmp(met,'sd_auto')
-                    % Get power in automatically measured biggest dev
-                    % channel
-                    dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_auto;
+                % if I'm doing not a spike
+                if strcmp(sig_dev(t).is_spike(sp_id).name,'not_spike')
+                    
+                    % picking a random channel
+                    if do_rand_ch == 1
+                        dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_rand;
+                        
+                    else
+                        %average across electrodes
+                        dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_auto;
+                                   
+                    end
+                    
                 else
-                    dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows;
+                    % doing spike
+                    if strcmp(met,'sd_auto')
+                        % Get power in automatically measured biggest dev
+                        % channel
+                        dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows_auto;
+                    else
+                        dev_all = sig_dev(t).is_spike(sp_id).sig_dev(p).dev_windows;
+                    end
                 end
                 alt_pre_spike(p).windows(tcount).cons_windows = sig_dev(t).is_spike(1).times;
                 if sp_id == 1
