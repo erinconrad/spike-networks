@@ -179,12 +179,12 @@ for whichPt = whichPts
             end
         end
         
-        %% Add things to structure
-        power.ers = ers_array;
-        power.abs_power = abs_power_array;
+        
     end
     
-    % Fill struct
+    %% Fill struct
+    power.ers = ers_array;
+    power.abs_power = abs_power_array;
     power.name = name;
     power.time_window = time_window;
     power.index_windows = index_windows;
