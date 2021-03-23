@@ -1,16 +1,16 @@
-function get_metric_data(met,time_window)
+function out = get_metric_data(met,time_window)
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;
 results_folder = [main_folder,'results/'];
-power_folder = [results_folder,'all_powers'];
+power_folder = [results_folder,'all_powers/'];
 
 if contains(met,'ers') || contains(met,'power')
     main_folder = power_folder;
 end
 
-time_name = sprintf('%1.1f/',windows);
+time_name = sprintf('%1.1f/',time_window);
 time_folder = [main_folder,time_name];
 pt_listing = dir([time_folder,'*.mat']);
 
@@ -51,7 +51,7 @@ for p = 1:length(all_names)
     for sp = 1:2
     
         %% Load the appropriate file
-        info = load([time_folder,sp_or_not_listing{i}]);
+        info = load([time_folder,sp_or_not_listing{sp}]);
         
         %% Load up metric info
         switch met
@@ -60,8 +60,9 @@ for p = 1:length(all_names)
             case 'abs_power'
                 index_windows = info.power.index_windows;
                 fs = info.power.fs;
-                data = info.power.abs_power_array;
+                data = info.power.abs_power;
                 nchs = info.power.nchs;
+                times = info.power.time_window;
 
             %% Get ERS
             case 'ers'
@@ -74,7 +75,7 @@ for p = 1:length(all_names)
         
         %% Re-structure
         out.index_windows = index_windows;
-        
+        out.times = times;
         
         % Get array size
         sz = size(data);
@@ -86,8 +87,15 @@ for p = 1:length(all_names)
         
         for f = 1:nfreq
             out.freq(f).pt(p).name = name;
-            out.freq(f).pt(p).sp_or_not(sp).data = data(:,:,
+            
+            if length(sz) == 3
+                out.freq(f).pt(p).sp_or_not(sp).data = data;
+            else
+                out.freq(f).pt(p).sp_or_not(sp).data = data(:,:,:,f);
+            end
         end
         
     end
+end
+
 end
