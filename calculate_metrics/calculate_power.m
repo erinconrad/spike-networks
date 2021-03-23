@@ -180,9 +180,8 @@ for whichPt = whichPts
         end
         
         %% Add things to structure
-        power.spike(s).ers = ers_array;
-        power.spike(s).abs_power = abs_power_array;
-        power.spike(s).index_windows = index_windows;
+        power.ers = ers_array;
+        power.abs_power = abs_power_array;
     end
     
     % Fill struct
