@@ -88,7 +88,7 @@ for whichPt = whichPts
     
     % Initialize arrays
     abs_power_array = nan(n_spikes,n_windows,nchs);
-    ers_array = nan(n_spikes,n_windows,n_f,nchs);
+    ers_array = nan(n_spikes,n_windows,nchs,n_f);
     
     for s = 1:length(spike)
         if isempty(spike(s).time) == 1, continue; end
@@ -156,7 +156,7 @@ for whichPt = whichPts
                 
                 % Get the frequency-specific powers
                 powers = get_power(Xtemp,fs,freq_bands);
-                ers_array(s,t,:,ich) = powers;
+                ers_array(s,t,ich,:) = powers;
             end
         end
         

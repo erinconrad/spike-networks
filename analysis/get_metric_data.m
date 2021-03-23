@@ -61,6 +61,7 @@ for p = 1:length(all_names)
                 index_windows = info.power.index_windows;
                 fs = info.power.fs;
                 data = info.power.abs_power_array;
+                nchs = info.power.nchs;
 
             %% Get ERS
             case 'ers'
@@ -72,16 +73,21 @@ for p = 1:length(all_names)
         end
         
         %% Re-structure
+        out.index_windows = index_windows;
+        
         
         % Get array size
         sz = size(data);
         if length(sz) == 3
-            
+            nfreq = 1;
+        else
+            nfreq = 3;
         end
         
-        out.pt(p).name = name;
-        out.index_windows = index_windows;
-        out.pt(p).
+        for f = 1:nfreq
+            out.freq(f).pt(p).name = name;
+            out.freq(f).pt(p).sp_or_not(sp).data = data(:,:,
+        end
         
     end
 end
