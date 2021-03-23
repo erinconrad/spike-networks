@@ -184,6 +184,7 @@ for whichPt = whichPts
     
     %% Fill struct
     power.ers = ers_array;
+    power.nchs = nchs;
     power.abs_power = abs_power_array;
     power.name = name;
     power.time_window = time_window;

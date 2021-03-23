@@ -27,7 +27,7 @@ end
 
 % Loop through patients
 for p = 1:length(all_names)
-    name = all_names;
+    name = all_names{p};
     
     %initialize spike and not spike listings
     sp_or_not_listing = cell(2,1);
@@ -58,10 +58,9 @@ for p = 1:length(all_names)
 
             %% Get power
             case 'abs_power'
-                curr_pt_name = info.power.name;
-                index_windows = info.power.index_windows
+                index_windows = info.power.index_windows;
                 fs = info.power.fs;
-                metric_struct = 
+                data = info.power.abs_power_array;
 
             %% Get ERS
             case 'ers'
@@ -71,6 +70,18 @@ for p = 1:length(all_names)
 
 
         end
+        
+        %% Re-structure
+        
+        % Get array size
+        sz = size(data);
+        if length(sz) == 3
+            
+        end
+        
+        out.pt(p).name = name;
+        out.index_windows = index_windows;
+        out.pt(p).
         
     end
 end
