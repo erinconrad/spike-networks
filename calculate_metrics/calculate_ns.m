@@ -47,12 +47,7 @@ for i = 1:length(listing)
         if contains(filename,'not'), continue; end
     end
     
-    if overwrite == 0
-        if exist([metrics_folder,name,not_spike_text,'_ns.mat'],'file') ~= 0
-            fprintf('Already did %s, skipping...\n',name);
-            continue;
-        end
-    end
+   
     
     fprintf('\nDoing %s',name);
     
