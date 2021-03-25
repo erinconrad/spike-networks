@@ -59,13 +59,14 @@ for p = 1:length(all_names)
             %% Get power
             case 'abs_power'
                 index_windows = info.power.index_windows;
-                fs = info.power.fs;
                 data = info.power.abs_power;
-                nchs = info.power.nchs;
                 times = info.power.time_window;
 
             %% Get ERS
             case 'ers'
+                index_windows = info.power.index_windows;
+                data = info.power.ers;
+                times = info.power.time_window;
 
             %% Get NS
             case 'ns'
