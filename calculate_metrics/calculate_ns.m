@@ -114,7 +114,7 @@ for i = 1:length(listing)
     metrics.index_windows = meta.spike(1).index_windows;
     metrics.fs = meta.fs;
     
-    save([metrics_folder,name,not_spike_text,'_ns.mat'],'metrics');
+    save([out_folder,name,not_spike_text,'_ns.mat'],'metrics');
     
 end
 
