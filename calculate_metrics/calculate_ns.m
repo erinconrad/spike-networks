@@ -22,7 +22,7 @@ seq_folder = [results_folder,'seq_data/'];
 
 % Adj mat folder
 adj_folder = [results_folder,'adj_mat/manual/adj_coherence/',time_text];
-out_folder = [results_folder,'metrics/manual/coherence/',time_text];
+out_folder = [results_folder,'ns/',time_text];
 
 if exist(out_folder,'dir') == 0
     mkdir(out_folder);
@@ -69,7 +69,7 @@ for i = 1:length(listing)
     n_ch = size(meta.spike(1).adj(1).adj,2);
     
     % Initialize
-    ns = nan(n_f,n_spikes,n_times,n_ch);
+    ns = nan(n_spikes,n_times,n_ch,n_f);
 
     % Initialize spike count
     s_count = 0;
@@ -89,7 +89,7 @@ for i = 1:length(listing)
                 %% Calculate metrics  
                 % node strength
                 ns_temp = strengths_und(adj);  
-                ns(f,s,tt,:) = ns_temp;
+                ns(s,tt,:,f) = ns_temp;
                  
             end
             
@@ -98,21 +98,10 @@ for i = 1:length(listing)
     end
     
         
-    % Fill structure
-    for f = 1:n_f
-        if isfield(meta.spike(1).adj(f),'name') == 1
-            metrics.freq(f).name = meta.spike(1).adj(f).name;
-        else
-            metrics.freq(f).name = 'correlation';
-        end
-        metrics.freq(f).ns.name = 'node strength';
-        metrics.freq(f).ns.data = squeeze(ns(f,:,:,:));
-        
-        
-
-    end
+  
     metrics.index_windows = meta.spike(1).index_windows;
     metrics.fs = meta.fs;
+    metrics.data = ns;
     
     save([out_folder,name,not_spike_text,'_ns.mat'],'metrics');
     

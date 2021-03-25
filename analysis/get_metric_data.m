@@ -70,7 +70,8 @@ for p = 1:length(all_names)
 
             %% Get NS
             case 'ns'
-
+                index_windows = info.metrics.index_windows
+                data = info.metrics.ns;
 
         end
         
