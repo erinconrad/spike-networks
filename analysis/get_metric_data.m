@@ -5,9 +5,12 @@ locations = spike_network_files;
 main_folder = locations.main_folder;
 results_folder = [main_folder,'results/'];
 power_folder = [results_folder,'all_powers/'];
+ns_folder = [results_folder,'ns/'];
 
 if contains(met,'ers') || contains(met,'power')
     main_folder = power_folder;
+elseif contains(met,'ns')
+    main_folder = ns_folder;
 end
 
 time_name = sprintf('%1.1f/',time_window);
@@ -70,9 +73,19 @@ for p = 1:length(all_names)
 
             %% Get NS
             case 'ns'
-                index_windows = info.metrics.index_windows
-                data = info.metrics.ns;
-
+                index_windows = info.metrics.index_windows;
+                data = info.metrics.data;
+                
+                % Fix to get times (since I never stored them)
+                fs = info.metrics.fs;
+                index_diff = index_windows(1,2) - index_windows(1,1); 
+                time_diff = round(index_diff*1e1/fs)/(1e1);
+                first_time = round(index_windows(1,1)*1e1/fs)/(1e1);
+                last_time = round(index_windows(end,1)*1e1/fs)/(1e1);
+                old_times = first_time:time_diff:last_time;
+                mid_time = 3; % middle of file is 3 seconds in
+                times = old_times-mid_time;
+                
         end
         
         %% Re-structure

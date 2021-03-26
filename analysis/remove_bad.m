@@ -1,9 +1,10 @@
-function [clean,clean_spike_power,clean_pre] = ...
-    remove_bad(bad,orig,spike_power,pre_spike)
+function [clean,clean_spike_power,clean_pre,clean_timing] = ...
+    remove_bad(bad,orig,spike_power,pre_spike,timing)
 
 clean = orig;
 clean_spike_power = spike_power;
 clean_pre = pre_spike;
+clean_timing = timing;
 
 nfreq = length(orig.freq);
 np = length(orig.freq(1).pt);
@@ -31,6 +32,12 @@ end
 for p = 1:np
     bad_spikes = bad.pt(p).sp_or_not(1).bad;
     clean_pre(p).before_rise(bad_spikes,:) = [];
+end
+
+%% Clean timing
+for p = 1:np
+    bad_spikes = bad.pt(p).sp_or_not(1).bad;
+    clean_timing(p).times(bad_spikes,:) = [];
 end
 
 end
