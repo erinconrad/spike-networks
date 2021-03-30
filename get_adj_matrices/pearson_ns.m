@@ -24,6 +24,9 @@ results_folder = [main_folder,'results/adj_mat/manual/'];
 data_folder = [main_folder,'data/'];
 script_folder = locations.script_folder;
 addpath(genpath(script_folder));
+bct_folder = locations.BCT;
+addpath(genpath(bct_folder));
+
 pt_file = [data_folder,'spike_structures/pt.mat'];
 
 pt = load(pt_file); % will create a structure called "pt"
