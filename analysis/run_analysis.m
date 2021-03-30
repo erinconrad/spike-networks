@@ -39,6 +39,12 @@ for m = 1:length(metrics)
     all_metrics(m).pre = clean_pre;
     all_metrics(m).timing = clean_timing;
     
+    % Get names
+    all_names = {};
+    for i = 1:length(orig.freq(1).pt)
+        all_names = [all_names;orig.freq(1).pt(i).name];
+    end
+    
 
 end
 
@@ -54,7 +60,15 @@ This checks:
 %}
 data = all_metrics(1).data.freq(1);
 npts = length(data.pt);
-rise_pts = count_sig_power_rise(data,all_metrics(1).spike,all_metrics(1).pre,clinical);
+[rise_pts,change] = count_sig_power_rise(data,all_metrics(1).spike,all_metrics(1).pre,clinical);
+
+%% Visualize highest pre-rise spikes
+if 0
+p = 14;
+[~,I] = sort(change{p},'descend');
+show_specified_spike(p,I(1:10),all_names,bad)
+end
+
 
 %% Does something predict whether individual spikes have a pre-spike power rise?
 %{
@@ -64,7 +78,7 @@ rise?
 - More specifically, if the spike is in the SOZ, does that predict a rise?- NEED TO ADD *********
 - Does spike timing predict pre-spike rise?
 %}
-rel_change = analyze_spikes_with_rise(data,all_metrics(1).spike,all_metrics(1).pre,all_metrics(1).timing,rise_pts);
+rel_change = analyze_spikes_with_rise(data,all_metrics(1).spike,all_metrics(1).pre,all_metrics(1).timing,1:npts);
 
 %% For spikes with a pre-spike rise, test additional features
 %{
@@ -76,7 +90,7 @@ This is where I test, for spikes with a pre-spike rise:
 
 %}
 
-detailed_sp_analyses(rel_change,1:npts,all_metrics(1).spike,all_metrics(1).pre,...
+detailed_sp_analyses(rise_pts,all_metrics(1).spike,all_metrics(1).pre,...
     all_metrics(1).data,all_metrics(2).data,all_metrics(3).data);
 
 %{

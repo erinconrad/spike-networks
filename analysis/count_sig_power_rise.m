@@ -1,4 +1,4 @@
-function rise_pts = count_sig_power_rise(main,spike,pre,clinical)
+function [rise_pts,all_change] = count_sig_power_rise(main,spike,pre,clinical)
 
 alpha = 0.05;
 np = length(spike);
