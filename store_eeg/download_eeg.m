@@ -26,6 +26,7 @@ n = 0;
             channelLabels = session.data.channelLabels;
         else
             channelLabels = session.data.channelLabels;
+            fs = session.data.sampleRate;
             if isempty(chs) == 1
                 values = session.data.getvalues(indices,':');
             else
@@ -52,6 +53,8 @@ if just_chs == 1
     data.fs = fs;
 else
     data.values = values;
+    data.fs = fs;
+    data.chLabels = channelLabels;
 end
 
 

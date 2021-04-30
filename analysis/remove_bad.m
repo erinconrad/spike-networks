@@ -34,10 +34,11 @@ for p = 1:np
     clean_pre(p).before_rise(bad_spikes,:) = [];
 end
 
-%% Clean timing
+%% Clean timing including sequences
 for p = 1:np
     bad_spikes = bad.pt(p).sp_or_not(1).bad;
     clean_timing(p).times(bad_spikes,:) = [];
+    clean_timing(p).seq(bad_spikes) = [];
 end
 
 end

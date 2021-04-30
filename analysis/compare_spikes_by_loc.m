@@ -1,7 +1,4 @@
-function all_rel_change = analyze_spikes_with_rise(main,spike,pre,timing,pts)
-
-change_thresh = 5;
-
+function compare_spikes_by_loc(main,spike,pre,timing,pts)
 
 %% Locations
 locations = spike_network_files;
@@ -23,11 +20,8 @@ for i = 1:npts
     %% Get max spike power electrode
     sp_power = spike(p).spike_powers;
     [~,max_ch] = max(sp_power,[],2);
-
-    %% Get times
-    sp_times = timing(p).times;
     
-    % Get electrode locs
+    %% Get electrode locs
     locs = [];
     name = main.pt(p).name;
     for j = 1:length(pt)
@@ -35,7 +29,8 @@ for i = 1:npts
             locs = pt(j).new_elecs.locs;
         end
     end
-
+    
+    %% initialize arrays
     % Get sizes of things
     sp = 1;
     data = main.pt(p).sp_or_not(sp).data;
@@ -60,18 +55,12 @@ for i = 1:npts
     all_change{i} = change;
     all_rel_change{i} = (last-first)./abs(first);
     
-    %% Cluster spikes by location
-    
-    % Get locations of the max ch for each spike
-    spike_locs = locs(max_ch,:);
-    
-    
-    %% Does spike electrode determine pre-spike rise? (Basic categorical test)
-    prct_spike = 1;
-    
+    %
+    %% Only include most common spikes
     % Get the n channels corresponding to 80% of all spikes for that
     % patient (to ignore the one-off channels that will reduce my power)
     [C,ia,ic] = unique(max_ch); % get unique values and occurrences
+    prct_spike = 0.7;
     num_occurrences = [C, accumarray(ic, 1)];
     num_sorted = sortrows(num_occurrences,2,'descend');
     perc_captured = cumsum(num_sorted(:,2))/length(change);
@@ -83,6 +72,55 @@ for i = 1:npts
     end
     chs_above_thresh = num_sorted(1:first_above_thresh,1);
     bin_sp = ismember(max_ch,chs_above_thresh);
+    %}
+
+    %% Cluster by location and compare change between clusters
+    %{
+    eva = evalclusters(locs(max_ch,:),'kmeans','CalinskiHarabasz','KList',1:length(unique(max_ch)));
+    k = eva.OptimalK;
+    idx = kmeans(locs(max_ch,:),3);
+    %}
+    
+    %
+    sumds = nan(length(unique(max_ch)),1);
+    for k = 1:length(unique(max_ch))
+        [~,~,sumd] = kmeans(locs(max_ch,:),k);
+        sumds(k) = sum(sumd);
+    end
+    if 1
+        figure
+        plot(sumds);
+        fprintf('\nSelect the cluster number\n');
+        [x,~] = ginput;
+        close(gcf)
+    end
+    k = round(x);
+    idx = kmeans(locs(max_ch,:),k);
+    %}
+    
+    if 1
+    figure
+    set(gcf,'position',[71 400 1370 398]);
+    subplot(1,2,1)
+    scatter3(locs(:,1),locs(:,2),locs(:,3),100,'o')
+    hold on
+    scatter3(locs(max_ch,1),locs(max_ch,2),locs(max_ch,3),100,idx,'o','filled')
+    
+    % anova, where the group is the cluster index
+    [pval,tbl] = anova1(change,idx,'off');
+    subplot(1,2,2)
+    scatter(idx,change)
+    title(sprintf('anova p-value: %1.3f',pval))
+    pause
+    close(gcf)
+    end
+    
+    %% Compare change between clusters
+    
+    
+    %
+    % Categorical way, ignoring location
+    
     
     if 0
     figure
@@ -90,59 +128,16 @@ for i = 1:npts
     plot(max_ch(bin_sp),change(bin_sp),'o')
     hold on
     plot(xlim,[0 0],'k--');
-    title(sprintf('One way anova p value %1.3f',pval));
+    title(sprintf('Unique channels: %d\nOne way anova p value %1.3f',...
+        length(unique(max_ch(bin_sp))),pval));
     % one way anova
     
     pause
     close(gcf)
     end
-    
-    %% Does spike electrode location determine pre-spike rise? 
-    if 0
-        mean_change = nan(size(locs,1),1);
-        for ich = 1:size(locs,1)
-            spikes_on_ch_bin = max_ch == ich;
-            change_on_ch = change(spikes_on_ch_bin);
-            mean_change(ich) = mean(change_on_ch);
-        end
-        wij = getwij(locs,20); % adjust d
-        MI = moranStats(mean_change',wij);
-        
-        figure
-
-        for ich = 1:size(locs,1)
-            
-            scatter3(locs(ich,1),locs(ich,2),locs(ich,3),100,...
-                mean_change(ich),'filled');
-            hold on
-        end
-        scatter3(locs(:,1),locs(:,2),locs(:,3),100,'k');
-        colorbar
-        title(sprintf('Moran index: %1.2f, p = %1.3f',MI.I,MI.p));
-        pause
-        close(gcf)
-    end
-    
-    %% Do spikes with pre-spike changes tend to occur at different times
-    %{
-    Seems like no, more or less randomly distributed
     %}
-    if 0
-        % dumb way
-        [r,pval] = corr(sp_times,change);
-        if isnan(r), error('what'); end
-        plot(sp_times,change,'o')
-        title(sprintf('Pearson corr r = %1.2f, p = %1.3f',r,pval))
-        pause
-    end
-
+    
 end
-
-
-
-
-
-
 
 
 end

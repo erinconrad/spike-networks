@@ -1,4 +1,4 @@
-function out = identify_spike_times(pt,cluster)
+function out = auto_spike_times(pt,cluster)
 
 %{
 - this function will take the pt and cluster structures generated as part

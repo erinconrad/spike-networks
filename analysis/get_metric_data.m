@@ -6,11 +6,14 @@ main_folder = locations.main_folder;
 results_folder = [main_folder,'results/'];
 power_folder = [results_folder,'all_powers/'];
 ns_folder = [results_folder,'ns/'];
+pearson_folder = [results_folder,'simple_ns/'];
 
 if contains(met,'ers') || contains(met,'power')
     main_folder = power_folder;
-elseif contains(met,'ns')
+elseif strcmp(met,'ns')
     main_folder = ns_folder;
+elseif strcmp(met,'pearson_ns')
+    main_folder = pearson_folder;
 end
 
 time_name = sprintf('%1.1f/',time_window);
@@ -37,7 +40,9 @@ for p = 1:length(all_names)
     
     %% Find spike and not spike listings
     pt_listing = dir([time_folder,'*',name,'*']);
-    if length(pt_listing) ~= 2, error('what'); end
+    if length(pt_listing) ~= 2
+        error('what'); 
+    end
     
     if contains(pt_listing(1).name,'not')
         % Assign the first one to the not a spike listing (the 2nd)
@@ -52,9 +57,10 @@ for p = 1:length(all_names)
     
     % Loop through spike and not spike
     for sp = 1:2
-    
-        %% Load the appropriate file
+        
+        %% Load the appropriate file        
         info = load([time_folder,sp_or_not_listing{sp}]);
+        
         
         %% Load up metric info
         switch met
@@ -85,6 +91,12 @@ for p = 1:length(all_names)
                 old_times = first_time:time_diff:last_time;
                 mid_time = 3; % middle of file is 3 seconds in
                 times = old_times-mid_time;
+                
+            %% Get Pearson NS
+            case 'pearson_ns'
+                data = info.meta.data;
+                index_windows = info.meta.index_windows;
+                times = info.meta.time_window;
                 
         end
         

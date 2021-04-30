@@ -172,7 +172,7 @@ for i = 1:length(listing)
     end
     
     % Save the file
-    save([seq_folder,name,'_seq.mat'],'seq');
+    %save([seq_folder,name,'_seq.mat'],'seq');
     
 end
 

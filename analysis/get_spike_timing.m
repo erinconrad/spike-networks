@@ -1,10 +1,13 @@
 function out = get_spike_timing
 
+% Also get sequences
+
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
 main_folder = locations.main_folder;
 results_folder = [main_folder,'results/'];
 eeg_folder = [results_folder,'eeg_data/'];
+seq_folder = [results_folder,'seq_data/'];
 
 pt_listing = dir([eeg_folder,'*.mat']);
 %% Get patient names
@@ -22,7 +25,7 @@ end
 for p = 1:length(all_names)
     name = all_names{p};
     
-    % Load file
+    % Load timing file
     info = load([eeg_folder,name,'_eeg.mat']);
     
     n_spikes = length(info.spike);
@@ -34,6 +37,11 @@ for p = 1:length(all_names)
     
     out(p).name = name;
     out(p).times = times;
+    
+    % Load sequence file
+    seq = load([seq_folder,name,'_seq.mat']);
+    seq = seq.seq;
+    out(p).seq = seq;
 end
 
 

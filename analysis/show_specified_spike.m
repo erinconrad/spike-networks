@@ -6,7 +6,7 @@ not spike data on my laptop)
 %}
 
 figure
-set(gcf,'position',[400  800  500 1000])
+set(gcf,'position',[400  700  600 1000])
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
