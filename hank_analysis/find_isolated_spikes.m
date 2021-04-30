@@ -8,7 +8,7 @@ hank_data_folder = locations.hank;
 %% Load hank data
 ev = load([hank_data_folder,'temporalGeneral.mat']);
 dat = load([hank_data_folder,'allExpThElecData.mat']);
-secs = load([hank_data_folder,'allExpTimingSec.mat']);
+%secs = load([hank_data_folder,'allExpTimingSec.mat']);
 
 npts = length(ev.evStart);
 
