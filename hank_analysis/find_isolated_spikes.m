@@ -1,4 +1,4 @@
-
+fs = 2000;
 
 %% Get file locations, load spike times and pt structure
 locations = spike_network_files;
@@ -9,6 +9,7 @@ hank_data_folder = locations.hank;
 ev = load([hank_data_folder,'temporalGeneral.mat']);
 dat = load([hank_data_folder,'allExpThElecData.mat']);
 %secs = load([hank_data_folder,'allExpTimingSec.mat']);
+
 
 npts = length(ev.evStart);
 
